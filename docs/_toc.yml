@@ -6,6 +6,5 @@ root: intro
 chapters:
 - file: notebooks/1_data
 - file: notebooks/2_Methods
-  sections:
 - file: notebooks/2a_Fit_Continuous_Distributions
 

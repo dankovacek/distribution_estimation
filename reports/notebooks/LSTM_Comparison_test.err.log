@@ -1,0 +1,177 @@
+Traceback (most recent call last):
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_core/utils/__init__.py", line 154, in wrapped
+    asyncio.get_running_loop()
+RuntimeError: no running event loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 1319, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_core/utils/__init__.py", line 158, in wrapped
+    return loop.run_until_complete(inner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+# retrieve LSTM ensemble predictions
+# filter for the common stations
+common_stations = list(set(station_ids) & set(lstm_result_stns))
+print(f'There are {len(common_stations)} monitored basins with LSTM ensemble results.')
+attr_df = attr_df[attr_df['official_id'].isin(common_stations)]
+
+# plots = []
+process_fdcs = True
+if process_fdcs:
+    for stn in common_stations:
+        og_df = get_original_timeseries(stn, ds)
+        # print(og_df[og_df.index >= '1982-06-01'].head())
+        lstm_ensemble_df = filter_by_complete_years(stn, lstm_result_base_folder)
+
+        if lstm_ensemble_df.empty:
+            print(f'No complete years found for {stn}. Skipping.')
+            continue
+        og_df = og_df[og_df.index.isin(lstm_ensemble_df.index)]
+        mdf, pmf_dfs = process_FDCs(lstm_ensemble_df, stn, og_df)
+
+        dates = list(pmf_dfs.keys())
+        pdf_plots, fdc_plots, metric_tables = [], [], []
+        ts_plot = plot_runoff_timeseries(stn, lstm_ensemble_df, dates[-1])
+        for date in dates:
+            metric_table = format_metrics_table(mdf, stn, date)
+            metric_tables.append(metric_table)
+            pdf_plot = plot_observed_and_simulated_pdf(stn, pmf_dfs, og_df, date, pdf_plots=pdf_plots)
+            pdf_plots.append(pdf_plot)
+            fdc_plot = plot_observed_and_simulated_fdc(stn, lstm_ensemble_df, og_df, date, fdc_plots=fdc_plots)
+            fdc_plots.append(fdc_plot)
+
+        layout = column(
+            row([ts_plot, fdc_plots[1]]), 
+            row(pdf_plots[0], metric_tables[0]), 
+            row(pdf_plots[1], metric_tables[1]), 
+            )
+        # save the plot to an HTML file
+        # show(layout)
+        output_fname = BASE_DIR / 'data' / 'lstm_plots' / f'{stn}_fdc.html'
+        output_file(output_fname, title=f'{stn} FDCs')
+        save(layout)
+        print(f'    Saved plot for {stn} to {output_fname}')
+------------------
+
+----- stdout -----
+There are 723 monitored basins with LSTM ensemble results.
+----- stdout -----
+    Found 4 complete years for 15109048: [1999, 2000, 2002, 2003]
+----- stdout -----
+    Processing FDCs for 15109048
+------------------
+
+[31m---------------------------------------------------------------------------[39m
+[31mOSError[39m                                   Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[16][39m[32m, line 19[39m
+[32m     17[39m     [38;5;28;01mcontinue[39;00m
+[32m     18[39m og_df = og_df[og_df.index.isin(lstm_ensemble_df.index)]
+[32m---> [39m[32m19[39m mdf, pmf_dfs = [43mprocess_FDCs[49m[43m([49m[43mlstm_ensemble_df[49m[43m,[49m[43m [49m[43mstn[49m[43m,[49m[43m [49m[43mog_df[49m[43m)[49m
+[32m     21[39m dates = [38;5;28mlist[39m(pmf_dfs.keys())
+[32m     22[39m pdf_plots, fdc_plots, metric_tables = [], [], []
+
+[36mCell[39m[36m [39m[32mIn[12][39m[32m, line 46[39m, in [36mprocess_FDCs[39m[34m(df, stn, og_df)[39m
+[32m     44[39m pmfs.index.name = [33m'[39m[33mlog_uar[39m[33m'[39m  [38;5;66;03m# set the index name for clarity[39;00m
+[32m     45[39m [38;5;66;03m# save the PMFs to a CSV file[39;00m
+[32m---> [39m[32m46[39m [43mpmfs[49m[43m.[49m[43mto_csv[49m[43m([49m[43mpmf_fpath[49m[43m)[49m
+[32m     47[39m pmf_dfs[date] = pmfs
+[32m     49[39m [38;5;66;03m# evaluate metrics[39;00m
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/pandas/util/_decorators.py:333[39m, in [36mdeprecate_nonkeyword_arguments.<locals>.decorate.<locals>.wrapper[39m[34m(*args, **kwargs)[39m
+[32m    327[39m [38;5;28;01mif[39;00m [38;5;28mlen[39m(args) > num_allow_args:
+[32m    328[39m     warnings.warn(
+[32m    329[39m         msg.format(arguments=_format_argument_list(allow_args)),
+[32m    330[39m         [38;5;167;01mFutureWarning[39;00m,
+[32m    331[39m         stacklevel=find_stack_level(),
+[32m    332[39m     )
+[32m--> [39m[32m333[39m [38;5;28;01mreturn[39;00m [43mfunc[49m[43m([49m[43m*[49m[43margs[49m[43m,[49m[43m [49m[43m*[49m[43m*[49m[43mkwargs[49m[43m)[49m
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/pandas/core/generic.py:3986[39m, in [36mNDFrame.to_csv[39m[34m(self, path_or_buf, sep, na_rep, float_format, columns, header, index, index_label, mode, encoding, compression, quoting, quotechar, lineterminator, chunksize, date_format, doublequote, escapechar, decimal, errors, storage_options)[39m
+[32m   3975[39m df = [38;5;28mself[39m [38;5;28;01mif[39;00m [38;5;28misinstance[39m([38;5;28mself[39m, ABCDataFrame) [38;5;28;01melse[39;00m [38;5;28mself[39m.to_frame()
+[32m   3977[39m formatter = DataFrameFormatter(
+[32m   3978[39m     frame=df,
+[32m   3979[39m     header=header,
+[32m   (...)[39m[32m   3983[39m     decimal=decimal,
+[32m   3984[39m )
+[32m-> [39m[32m3986[39m [38;5;28;01mreturn[39;00m [43mDataFrameRenderer[49m[43m([49m[43mformatter[49m[43m)[49m[43m.[49m[43mto_csv[49m[43m([49m
+[32m   3987[39m [43m    [49m[43mpath_or_buf[49m[43m,[49m
+[32m   3988[39m [43m    [49m[43mlineterminator[49m[43m=[49m[43mlineterminator[49m[43m,[49m
+[32m   3989[39m [43m    [49m[43msep[49m[43m=[49m[43msep[49m[43m,[49m
+[32m   3990[39m [43m    [49m[43mencoding[49m[43m=[49m[43mencoding[49m[43m,[49m
+[32m   3991[39m [43m    [49m[43merrors[49m[43m=[49m[43merrors[49m[43m,[49m
+[32m   3992[39m [43m    [49m[43mcompression[49m[43m=[49m[43mcompression[49m[43m,[49m
+[32m   3993[39m [43m    [49m[43mquoting[49m[43m=[49m[43mquoting[49m[43m,[49m
+[32m   3994[39m [43m    [49m[43mcolumns[49m[43m=[49m[43mcolumns[49m[43m,[49m
+[32m   3995[39m [43m    [49m[43mindex_label[49m[43m=[49m[43mindex_label[49m[43m,[49m
+[32m   3996[39m [43m    [49m[43mmode[49m[43m=[49m[43mmode[49m[43m,[49m
+[32m   3997[39m [43m    [49m[43mchunksize[49m[43m=[49m[43mchunksize[49m[43m,[49m
+[32m   3998[39m [43m    [49m[43mquotechar[49m[43m=[49m[43mquotechar[49m[43m,[49m
+[32m   3999[39m [43m    [49m[43mdate_format[49m[43m=[49m[43mdate_format[49m[43m,[49m
+[32m   4000[39m [43m    [49m[43mdoublequote[49m[43m=[49m[43mdoublequote[49m[43m,[49m
+[32m   4001[39m [43m    [49m[43mescapechar[49m[43m=[49m[43mescapechar[49m[43m,[49m
+[32m   4002[39m [43m    [49m[43mstorage_options[49m[43m=[49m[43mstorage_options[49m[43m,[49m
+[32m   4003[39m [43m[49m[43m)[49m
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/pandas/io/formats/format.py:1014[39m, in [36mDataFrameRenderer.to_csv[39m[34m(self, path_or_buf, encoding, sep, columns, index_label, mode, compression, quoting, quotechar, lineterminator, chunksize, date_format, doublequote, escapechar, errors, storage_options)[39m
+[32m    993[39m     created_buffer = [38;5;28;01mFalse[39;00m
+[32m    995[39m csv_formatter = CSVFormatter(
+[32m    996[39m     path_or_buf=path_or_buf,
+[32m    997[39m     lineterminator=lineterminator,
+[32m   (...)[39m[32m   1012[39m     formatter=[38;5;28mself[39m.fmt,
+[32m   1013[39m )
+[32m-> [39m[32m1014[39m [43mcsv_formatter[49m[43m.[49m[43msave[49m[43m([49m[43m)[49m
+[32m   1016[39m [38;5;28;01mif[39;00m created_buffer:
+[32m   1017[39m     [38;5;28;01massert[39;00m [38;5;28misinstance[39m(path_or_buf, StringIO)
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/pandas/io/formats/csvs.py:251[39m, in [36mCSVFormatter.save[39m[34m(self)[39m
+[32m    247[39m [38;5;250m[39m[33;03m"""[39;00m
+[32m    248[39m [33;03mCreate the writer & save.[39;00m
+[32m    249[39m [33;03m"""[39;00m
+[32m    250[39m [38;5;66;03m# apply compression and byte/text conversion[39;00m
+[32m--> [39m[32m251[39m [38;5;28;01mwith[39;00m [43mget_handle[49m[43m([49m
+[32m    252[39m [43m    [49m[38;5;28;43mself[39;49m[43m.[49m[43mfilepath_or_buffer[49m[43m,[49m
+[32m    253[39m [43m    [49m[38;5;28;43mself[39;49m[43m.[49m[43mmode[49m[43m,[49m
+[32m    254[39m [43m    [49m[43mencoding[49m[43m=[49m[38;5;28;43mself[39;49m[43m.[49m[43mencoding[49m[43m,[49m
+[32m    255[39m [43m    [49m[43merrors[49m[43m=[49m[38;5;28;43mself[39;49m[43m.[49m[43merrors[49m[43m,[49m
+[32m    256[39m [43m    [49m[43mcompression[49m[43m=[49m[38;5;28;43mself[39;49m[43m.[49m[43mcompression[49m[43m,[49m
+[32m    257[39m [43m    [49m[43mstorage_options[49m[43m=[49m[38;5;28;43mself[39;49m[43m.[49m[43mstorage_options[49m[43m,[49m
+[32m    258[39m [43m[49m[43m)[49m [38;5;28;01mas[39;00m handles:
+[32m    259[39m     [38;5;66;03m# Note: self.encoding is irrelevant here[39;00m
+[32m    260[39m     [38;5;28mself[39m.writer = csvlib.writer(
+[32m    261[39m         handles.handle,
+[32m    262[39m         lineterminator=[38;5;28mself[39m.lineterminator,
+[32m   (...)[39m[32m    267[39m         quotechar=[38;5;28mself[39m.quotechar,
+[32m    268[39m     )
+[32m    270[39m     [38;5;28mself[39m._save()
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/pandas/io/common.py:749[39m, in [36mget_handle[39m[34m(path_or_buf, mode, encoding, compression, memory_map, is_text, errors, storage_options)[39m
+[32m    747[39m [38;5;66;03m# Only for write methods[39;00m
+[32m    748[39m [38;5;28;01mif[39;00m [33m"[39m[33mr[39m[33m"[39m [38;5;129;01mnot[39;00m [38;5;129;01min[39;00m mode [38;5;129;01mand[39;00m is_path:
+[32m--> [39m[32m749[39m     [43mcheck_parent_directory[49m[43m([49m[38;5;28;43mstr[39;49m[43m([49m[43mhandle[49m[43m)[49m[43m)[49m
+[32m    751[39m [38;5;28;01mif[39;00m compression:
+[32m    752[39m     [38;5;28;01mif[39;00m compression != [33m"[39m[33mzstd[39m[33m"[39m:
+[32m    753[39m         [38;5;66;03m# compression libraries do not like an explicit text-mode[39;00m
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/pandas/io/common.py:616[39m, in [36mcheck_parent_directory[39m[34m(path)[39m
+[32m    614[39m parent = Path(path).parent
+[32m    615[39m [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m parent.is_dir():
+[32m--> [39m[32m616[39m     [38;5;28;01mraise[39;00m [38;5;167;01mOSError[39;00m([33mrf[39m[33m"[39m[33mCannot save file into a non-existent directory: [39m[33m'[39m[38;5;132;01m{[39;00mparent[38;5;132;01m}[39;00m[33m'[39m[33m"[39m)
+
+[31mOSError[39m: Cannot save file into a non-existent directory: 'data/lstm_pmfs'
+

@@ -28,8 +28,8 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
@@ -185,7 +185,10 @@
         <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="notebooks/1_data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/2_Methods.html">Methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/2a_Fit_Continuous_Distributions.html">Fit Continuous Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/3_Predict_Runoff_Statistics.html">Predict Runoff Statistics from Catchment Attributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/5_FDC_Estimation.html">Non-Parametric Simulation</a></li>
+
+
 </ul>
 
     </div>
@@ -397,12 +400,33 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h1>
-<p>This site contains supporting information for a paper in progress on predicting f-divergence measures from catchment attributes.  Catchment attributes are widely used in hydrological modelling and other environmental applications because of their associations with the hydrological response of catchments.  The f-divergence measures are a family of statistical measures that quantify the difference between two probability distributions.</p>
-<p>Hydrological signatures are minimal representations of process information contained in streamflow observations <span id="id1">[]</span>. There is a large body of literature defining and describing the use of hydrological signatures in various fields of hydrology, see “<em>A review of hydrological signatures and their applications</em>” <span id="id2">[]</span>. According to  f-divergence measures have not been described in the context of hydrological signatures.  The aim of this work is to investigate the predictability of various f-divergence measures from catchment attributes and provide context for interpreting the impacts of key assumptions.</p>
+<p>The duration curve represents the proportion of time an observed variable exceeds some value.  In hydrology, the flow duration curve (FDC) is used in applications related to water resource planning as it represents a long-term expectation of water availability at some location.  Predicting long-term water resource availability at ungauged locations is an open problem in hydrology.  In this notebook, we present several approaches to estimating FDCs at ungauged locations.  Using a large sample of monitored locations around British Columbia, Canada, we test predicting the FDC for each location using a range of input information and methods, and test the accuracy of the prediction using the observed data.</p>
+<p>This site contains the code and additional supporting information for a computational experiment exploring the estimation of probability distributions (flow duration curves) for ungauged locations.  The three methods tested are as follows:</p>
+<ol class="arabic simple">
+<li><p><strong>Parametric Probability Distribution</strong>: use XGboost to predict sufficient statistics of the log-normal (LN) distribution using catchment attributes.  This is done in two different ways, first by predicting mean and standard deviation of streamflow (per unit area) and estimating the LN location and scale by method of moments (MoM), and second by predicting the LN location and scale directly.</p></li>
+<li><p><strong>k-Nearest Neighbours</strong>: estimate unit area runoff at an ungauged location using daily streamflow from an ensemble of nearest neighbours.  Here we test the ensemble size <span class="math notranslate nohighlight">\(k\)</span>, the criteria used for selecting the ensemble, and the weights or proportions assigned to ensemble members reflecting their strength of influence.</p></li>
+<li><p><strong>Neural Network</strong>: train a neural network model (LSTM) to predict daily streamflow from daily meteorological time series inputs (precipitation, temperature, shortwave radiation, vapour pressure, snow water equivalent).</p></li>
+</ol>
+<figure class="align-center" id="method-flowchart">
+<a class="reference internal image-reference" href="../images/method_flowchart.jpeg"><img alt="Flowchart describing the methodology of the experiment." src="../images/method_flowchart.jpeg" style="width: 500px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">The full experimental workflow from data preprocessing for three different model inputs that are each used to generate an estimated flow distribution, and the subsequent large-sample analysis.</span><a class="headerlink" href="#method-flowchart" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>The experiments are organized in the following chapters (notebooks), corresponding to the workflow described in the figure above:</p>
+<ol class="arabic simple">
+<li><p><strong>Data</strong>: introduce the input data and describe where to get additional data from outside sources.</p></li>
+<li><p><strong>Methods</strong>: introduce the various methods for estimating flow duration curves, define partitions for 5-fold CV and compare the target variable distribution over validation folds.</p></li>
+<li><p><strong>Predict Runoff Statistics</strong>: The hydrological signature prediction is done first to generate the predicted sufficient statistics of the log-normal distribution for the sample of catchments.</p></li>
+<li><p><strong>Computation of reference distributions</strong>: to evaluate the accuracy of estimated FDCs, we first compute a reference distribution on the observed data.  This is done by kernel density estimation (KDE).  The pre-processing of reference distribution makes the nearest neighbours experiment much more efficient in avoiding duplicate computations.</p></li>
+<li><p><strong>FDC Estimation Validation</strong>: here we iterate through all catchments in the sample and bring together the FDC estimates of the different approaches.</p></li>
+<li><p><strong>Results Explorer</strong>: The results are compiled to compare FDC estimation methods over the large sample.</p></li>
+</ol>
 <section id="computational-notes">
 <h2>Computational Notes<a class="headerlink" href="#computational-notes" title="Link to this heading">#</a></h2>
-<p>The machine learning technique used to predict the various f-divergence measures from catchment attributes is gradient boosting, and the widely used XGBoost library is used for its implementation<span id="id3">[]</span>.  (notes about xgboost).  The XGBoost library facilitates parallel CPU and GPU training, making it feasible to run a large number of models to test sensitivity to key assumptions.  For the data structures tested, training on GPU doesn’t provide notable efficiency gains over CPU.  The first two models predicting single-site target variables (mean annual runoff and entropy) from attributes takes roughly an hour to process, while the much larger catchment pair datasets used to train the f-divergence prediction models take longer, with the KL divergence set taking about 15 hours due to the combination of bitrates and priors tested. These processing times correspond to an Intel Xeon E5-2690 v4 &#64; 2.60GHz CPU.</p>
-<p>The catchment attribute validation / reprocessing is a memory intensive step in the data preparation.  Processing the various raster files for the largest catchments is the critical step in memory consumption, and this dataset was processed on a machine with 128GB DDR4 RAM.  The computation-intensive pre-processing steps can be bypassed by downloading the pre-processed data files from the repository linked at the beginning of the Data section.</p>
+<p>The prediction of hydrological signatures is done here with the widely used XGBoost library is used for its implementation<span id="id1">[<a class="reference internal" href="#id7" title="Tianqi Chen and Carlos Guestrin. Xgboost: a scalable tree boosting system. In Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining, 785–794. 2016.">Chen and Guestrin, 2016</a>]</span>.  (notes about xgboost).  The XGBoost library facilitates parallel CPU and GPU training, making it feasible to run a large number of models to test sensitivity to key assumptions.  The neural network estimation component is done using the <a class="reference external" href="https://github.com/neuralhydrology/neuralhydrology">Neural Hydrology</a> library from <span id="id2">[<a class="reference internal" href="#id6" title="Frederik Kratzert, Martin Gauch, Grey Nearing, and Daniel Klotz. Neuralhydrology — a python library for deep learning research in hydrology. Journal of Open Source Software, 7(71):4050, 2022. URL: https://doi.org/10.21105/joss.04050, doi:10.21105/joss.04050.">Kratzert <em>et al.</em>, 2022</a>]</span>.</p>
+<p>The computation-intensive pre-processing steps can be bypassed by downloading the pre-processed data files as described in each experiment notebook.</p>
 </section>
 <section id="contents-of-this-book">
 <h2>Contents of this book<a class="headerlink" href="#contents-of-this-book" title="Link to this heading">#</a></h2>
@@ -410,13 +434,28 @@ document.write(`
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/1_data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/2_Methods.html">Methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/2a_Fit_Continuous_Distributions.html">Fit Continuous Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/3_Predict_Runoff_Statistics.html">Predict Runoff Statistics from Catchment Attributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/5_FDC_Estimation.html">Non-Parametric Simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/5_FDC_Estimation.html#notes-on-k-nearest-neighbours">Notes on k-nearest neighbours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/5_FDC_Estimation.html#define-a-universal-parametric-prior">Define a universal parametric prior</a></li>
 </ul>
 </div>
 </section>
 <section id="citations">
 <h2>Citations<a class="headerlink" href="#citations" title="Link to this heading">#</a></h2>
-<span class="target" id="id4"></span></section>
+<div class="docutils container" id="id3">
+<div role="list" class="citation-list">
+<div class="citation" id="id7" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">CG16</a><span class="fn-bracket">]</span></span>
+<p>Tianqi Chen and Carlos Guestrin. Xgboost: a scalable tree boosting system. In <em>Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining</em>, 785–794. 2016.</p>
+</div>
+<div class="citation" id="id6" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">KGNK22</a><span class="fn-bracket">]</span></span>
+<p>Frederik Kratzert, Martin Gauch, Grey Nearing, and Daniel Klotz. Neuralhydrology — a python library for deep learning research in hydrology. <em>Journal of Open Source Software</em>, 7(71):4050, 2022. URL: <a class="reference external" href="https://doi.org/10.21105/joss.04050">https://doi.org/10.21105/joss.04050</a>, <a class="reference external" href="https://doi.org/10.21105/joss.04050">doi:10.21105/joss.04050</a>.</p>
+</div>
+</div>
+</div>
+</section>
 </section>
 
     <script type="text/x-thebe-config">

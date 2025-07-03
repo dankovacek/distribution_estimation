@@ -1,0 +1,1229 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>&lt;no title&gt; &#8212; Streamflow distribution estimation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/ss/2a_KDE_smoothing_test';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="Streamflow distribution estimation - Home"/>
+    <script>document.write(`<img src="../../_static/logo.png" class="logo__image only-dark" alt="Streamflow distribution estimation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../1_data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../2_Methods.html">Methods</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/dankovacek/divergence_estimation" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/dankovacek/divergence_estimation/issues/new?title=Issue%20on%20page%20%2Fnotebooks/ss/2a_KDE_smoothing_test.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/notebooks/ss/2a_KDE_smoothing_test.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1><no title></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="simple visible nav section-nav flex-column">
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xyzservices.providers</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xyz</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">figure</span><span class="p">,</span> <span class="n">show</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.layouts</span><span class="w"> </span><span class="kn">import</span> <span class="n">gridplot</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">factor_cmap</span><span class="p">,</span> <span class="n">linear_cmap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColumnDataSource</span><span class="p">,</span> <span class="n">LinearAxis</span><span class="p">,</span> <span class="n">Range1d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">output_notebook</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.palettes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sunset10</span><span class="p">,</span> <span class="n">Vibrant7</span><span class="p">,</span> <span class="n">Category20</span><span class="p">,</span> <span class="n">Bokeh6</span><span class="p">,</span> <span class="n">Bokeh7</span><span class="p">,</span> <span class="n">Bokeh8</span><span class="p">,</span> <span class="n">Greys256</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xgb</span>
+<span class="n">xgb</span><span class="o">.</span><span class="n">config_context</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgglomerativeClustering</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">root_mean_squared_error</span><span class="p">,</span>
+    <span class="n">mean_absolute_error</span><span class="p">,</span>
+    <span class="n">roc_auc_score</span><span class="p">,</span>
+    <span class="n">roc_curve</span><span class="p">,</span> <span class="n">auc</span><span class="p">,</span>
+    <span class="n">accuracy_score</span><span class="p">,</span>
+    <span class="n">confusion_matrix</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">linregress</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">lognorm</span><span class="p">,</span> <span class="n">norm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">kl_div</span>
+
+
+<span class="c1"># import jax</span>
+<span class="c1"># import jax.numpy as jnp</span>
+<span class="c1"># from jax.scipy.stats import gaussian_kde as jkde</span>
+<span class="c1"># from jax import config as jax_config</span>
+<span class="c1"># jax_config.update(&quot;jax_enable_x64&quot;, False)</span>
+
+<span class="c1"># from jax import jit</span>
+<span class="c1"># from jax import vmap</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">KDEpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">FFTKDE</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">data_processing_functions</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dpf</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+
+<span class="c1"># from sklearn.model_selection import StratifiedKFold</span>
+<span class="n">output_notebook</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">45</span>
+<span class="g g-Whitespace">     </span><span class="mi">33</span> <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">kl_div</span>
+<span class="g g-Whitespace">     </span><span class="mi">36</span> <span class="c1"># import jax</span>
+<span class="g g-Whitespace">     </span><span class="mi">37</span> <span class="c1"># import jax.numpy as jnp</span>
+<span class="g g-Whitespace">     </span><span class="mi">38</span> <span class="c1"># from jax.scipy.stats import gaussian_kde as jkde</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>     <span class="mi">42</span> <span class="c1"># from jax import jit</span>
+<span class="g g-Whitespace">     </span><span class="mi">43</span> <span class="c1"># from jax import vmap</span>
+<span class="ne">---&gt; </span><span class="mi">45</span> <span class="kn">from</span><span class="w"> </span><span class="nn">KDEpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">FFTKDE</span>
+<span class="g g-Whitespace">     </span><span class="mi">47</span> <span class="kn">import</span><span class="w"> </span><span class="nn">data_processing_functions</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dpf</span>
+<span class="g g-Whitespace">     </span><span class="mi">49</span> <span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mp</span>
+
+<span class="ne">ModuleNotFoundError</span>: No module named &#39;KDEpy&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">BASE_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># load the catchment characteristics</span>
+<span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;BCUB_watershed_attributes_updated_20250227.csv&#39;</span>
+<span class="n">attr_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+<span class="n">attr_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">attr_df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+<span class="n">attr_df</span><span class="p">[</span><span class="s1">&#39;tmean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">attr_df</span><span class="p">[</span><span class="s1">&#39;tmin&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">attr_df</span><span class="p">[</span><span class="s1">&#39;tmax&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="mf">2.0</span>
+<span class="n">station_ids</span> <span class="o">=</span> <span class="n">attr_df</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;There are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">station_ids</span><span class="p">)</span><span class="si">}</span><span class="s1"> monitored basins in the attribute set.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>There are 1308 monitored basins in the attribute set.
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># load the lognormal fit parameter results</span>
+<span class="n">ln_fit_fname</span> <span class="o">=</span> <span class="s1">&#39;LN_fit_method_comparison_20250128.csv&#39;</span>
+<span class="n">ln_fit_fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;results&#39;</span><span class="p">,</span> <span class="n">ln_fit_fname</span><span class="p">)</span>
+<span class="n">ln_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ln_fit_fpath</span><span class="p">)</span>
+
+<span class="n">ln_df</span> <span class="o">=</span> <span class="n">ln_df</span><span class="p">[</span><span class="n">ln_df</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">attr_df</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)]</span>
+<span class="n">ln_df</span><span class="p">[</span><span class="s1">&#39;mean_runoff_mm_day&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ln_df</span><span class="p">[</span><span class="s1">&#39;mean_uar&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">3.6</span> <span class="o">/</span> <span class="mi">1000</span>
+<span class="n">ln_df</span><span class="p">[</span><span class="s1">&#39;sd_runoff_mm_day&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ln_df</span><span class="p">[</span><span class="s1">&#39;sd_uar&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">3.6</span> <span class="o">/</span> <span class="mi">1000</span>
+<span class="n">ln_df</span><span class="o">.</span><span class="n">columns</span>
+
+<span class="n">target_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ln_df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attr_df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="n">target_columns</span><span class="p">:</span>
+    <span class="c1"># create a dict of the</span>
+    <span class="n">target_dict</span> <span class="o">=</span> <span class="n">ln_df</span><span class="p">[[</span><span class="s1">&#39;official_id&#39;</span><span class="p">,</span> <span class="n">tc</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;official_id&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="n">tc</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">tc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attr_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">attr_df</span><span class="p">[</span><span class="n">tc</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr_df</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">target_dict</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
+<span class="c1"># create a dict of &#39;official_id&#39;: &#39;drainage area&#39;</span>
+<span class="n">da_dict</span> <span class="o">=</span> <span class="n">attr_df</span><span class="p">[[</span><span class="s1">&#39;official_id&#39;</span><span class="p">,</span> <span class="s1">&#39;drainage_area_km2&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;official_id&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s1">&#39;drainage_area_km2&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ln_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>official_id</th>
+      <th>record_length_yrs</th>
+      <th>mean_uar</th>
+      <th>sd_uar</th>
+      <th>mean_logx</th>
+      <th>sd_logx</th>
+      <th>LN_MMO_sd_hat</th>
+      <th>LN_MMO_mu_hat</th>
+      <th>scipy.norm mu_hat</th>
+      <th>scipy.norm sd_hat</th>
+      <th>scipy.lognorm mu_hat</th>
+      <th>scipy.lognorm sd_hat</th>
+      <th>DKL(AKDE||LN Func</th>
+      <th>DKL(AKDE||Scipy Norm</th>
+      <th>DKL(AKDE||Scipy LN</th>
+      <th>DKL(AKDE||KDE</th>
+      <th>mean_runoff_mm_day</th>
+      <th>sd_runoff_mm_day</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>08BB005</td>
+      <td>29.238356</td>
+      <td>23.291309</td>
+      <td>23.432722</td>
+      <td>2.542487</td>
+      <td>1.176584</td>
+      <td>0.699219</td>
+      <td>2.798471</td>
+      <td>2.542487</td>
+      <td>1.176584</td>
+      <td>2.542487</td>
+      <td>1.176584</td>
+      <td>0.617094</td>
+      <td>0.333133</td>
+      <td>0.333133</td>
+      <td>0.001319</td>
+      <td>0.083849</td>
+      <td>0.084358</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>15031000</td>
+      <td>10.002740</td>
+      <td>1375.179864</td>
+      <td>1846.653356</td>
+      <td>5.834176</td>
+      <td>2.241452</td>
+      <td>1.030773</td>
+      <td>6.710953</td>
+      <td>5.834176</td>
+      <td>2.241452</td>
+      <td>5.834176</td>
+      <td>2.241452</td>
+      <td>1.954496</td>
+      <td>0.487795</td>
+      <td>0.487795</td>
+      <td>0.070881</td>
+      <td>4.950648</td>
+      <td>6.647952</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>15039900</td>
+      <td>16.268493</td>
+      <td>766.120211</td>
+      <td>811.452431</td>
+      <td>5.967802</td>
+      <td>1.254919</td>
+      <td>0.752285</td>
+      <td>6.265196</td>
+      <td>5.967802</td>
+      <td>1.254919</td>
+      <td>5.967802</td>
+      <td>1.254919</td>
+      <td>0.623047</td>
+      <td>0.285162</td>
+      <td>0.285162</td>
+      <td>0.000852</td>
+      <td>2.758033</td>
+      <td>2.921229</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>15040000</td>
+      <td>20.106849</td>
+      <td>99.955452</td>
+      <td>98.630142</td>
+      <td>4.008159</td>
+      <td>1.182995</td>
+      <td>0.679889</td>
+      <td>4.264780</td>
+      <td>4.008159</td>
+      <td>1.182995</td>
+      <td>4.008159</td>
+      <td>1.182995</td>
+      <td>0.668964</td>
+      <td>0.354124</td>
+      <td>0.354124</td>
+      <td>0.001314</td>
+      <td>0.359840</td>
+      <td>0.355069</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>15041200</td>
+      <td>31.465753</td>
+      <td>22.912254</td>
+      <td>23.171799</td>
+      <td>2.532035</td>
+      <td>1.165159</td>
+      <td>0.704475</td>
+      <td>2.779435</td>
+      <td>2.532035</td>
+      <td>1.165159</td>
+      <td>2.532035</td>
+      <td>1.165159</td>
+      <td>0.577014</td>
+      <td>0.316482</td>
+      <td>0.316482</td>
+      <td>0.001911</td>
+      <td>0.082484</td>
+      <td>0.083418</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># open an example pairwise results file</span>
+<span class="n">input_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">BASE_DIR</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;processed_divergence_inputs&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">pairs_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">input_folder</span><span class="p">)</span>
+<span class="n">rev_date</span> <span class="o">=</span> <span class="s1">&#39;20250119&#39;</span>
+<span class="n">n_rows</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="c1"># parametric_df = pd.read_csv(os.path.join(input_folder, f&#39;MEMBAKDE_results_{rev_date}.csv&#39;), nrows=n_rows)</span>
+<span class="c1"># parametric_df.head()</span>
+<span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;Results_estimated_vs_observed_LN_fits_20250118.csv&#39;</span>
+<span class="n">bootstrap_result_fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;parametric_fits&#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+<span class="n">param_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">bootstrap_result_fpath</span><span class="p">)</span>
+<span class="n">param_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;Unnamed: 0&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">param_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>official_id</th>
+      <th>obs_mean_mm_day</th>
+      <th>obs_std</th>
+      <th>pred_mean_mm_day</th>
+      <th>pred_sigma</th>
+      <th>KL_KDE_AKDE_2.5</th>
+      <th>KL_KDE_AKDE_50</th>
+      <th>KL_KDE_AKDE_97.5</th>
+      <th>KL_AKDE_LNobs_2.5</th>
+      <th>KL_AKDE_LNobs_50</th>
+      <th>KL_AKDE_LNobs_97.5</th>
+      <th>KL_AKDE_LNest_2.5</th>
+      <th>KL_AKDE_LNest_50</th>
+      <th>KL_AKDE_LNest_97.5</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>05AA023</td>
+      <td>0.763394</td>
+      <td>1.286813</td>
+      <td>0.821331</td>
+      <td>1.201441</td>
+      <td>0.004435</td>
+      <td>0.006690</td>
+      <td>0.011342</td>
+      <td>1.026485</td>
+      <td>1.044057</td>
+      <td>1.065971</td>
+      <td>0.700195</td>
+      <td>0.715953</td>
+      <td>0.735906</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>05AA035</td>
+      <td>0.772076</td>
+      <td>1.449857</td>
+      <td>0.662123</td>
+      <td>1.017802</td>
+      <td>0.021181</td>
+      <td>0.029060</td>
+      <td>0.043829</td>
+      <td>0.687753</td>
+      <td>0.749125</td>
+      <td>0.806108</td>
+      <td>0.678864</td>
+      <td>0.744101</td>
+      <td>0.802399</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>05AD033</td>
+      <td>4.073865</td>
+      <td>5.079821</td>
+      <td>3.869882</td>
+      <td>4.717802</td>
+      <td>0.039788</td>
+      <td>0.053163</td>
+      <td>0.073777</td>
+      <td>0.698456</td>
+      <td>0.783050</td>
+      <td>0.865009</td>
+      <td>0.741019</td>
+      <td>0.827571</td>
+      <td>0.912939</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>05BF017</td>
+      <td>1.162493</td>
+      <td>1.957323</td>
+      <td>1.481970</td>
+      <td>1.963457</td>
+      <td>2.081178</td>
+      <td>2.130511</td>
+      <td>2.189047</td>
+      <td>0.864798</td>
+      <td>0.900978</td>
+      <td>0.940367</td>
+      <td>0.476573</td>
+      <td>0.506467</td>
+      <td>0.536577</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>05BJ010</td>
+      <td>0.821697</td>
+      <td>1.169613</td>
+      <td>0.695347</td>
+      <td>1.056124</td>
+      <td>0.011753</td>
+      <td>0.021304</td>
+      <td>0.038843</td>
+      <td>1.333488</td>
+      <td>1.355958</td>
+      <td>1.382492</td>
+      <td>1.697818</td>
+      <td>1.721834</td>
+      <td>1.752463</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the ranges and associated errors</span>
+<span class="n">error_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">1e2</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">,</span> <span class="mf">1e4</span><span class="p">,</span> <span class="mf">1e5</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">,</span> <span class="mf">1e7</span><span class="p">])</span>  <span class="c1"># Magnitude points in L/s/km^2</span>
+<span class="n">error_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.075</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">])</span>    <span class="c1"># Associated errors (as proportions)</span>
+
+<span class="n">efig</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Estimated Measurement Error Model&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">x_axis_type</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">efig</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">error_points</span><span class="p">,</span> <span class="n">error_values</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;Measurement Error Model&#39;</span><span class="p">)</span>
+<span class="n">efig</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$$\text{Flow } m^3/s$$&#39;</span>
+<span class="n">efig</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$\text{Error } [\text</span><span class="si">{x}</span><span class="s1">100\%]$&#39;</span>
+<span class="n">efig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">background_fill_alpha</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">efig</span> <span class="o">=</span> <span class="n">dpf</span><span class="o">.</span><span class="n">format_fig_fonts</span><span class="p">(</span><span class="n">efig</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+
+<span class="n">layout</span> <span class="o">=</span> <span class="n">gridplot</span><span class="p">([</span><span class="n">efig</span><span class="p">],</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">350</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+  <div id="d38941cc-8d15-4516-828f-fc0428160b1c" data-root-id="p1282" style="display: contents;"></div>
+</div><script type="application/javascript">(function(root) {
+  function embed_document(root) {
+  const docs_json = {"3c11781c-92b7-47ec-be09-fd0ea0a54c52":{"version":"3.7.2","title":"Bokeh Application","roots":[{"type":"object","name":"GridPlot","id":"p1282","attributes":{"rows":null,"cols":null,"toolbar":{"type":"object","name":"Toolbar","id":"p1281","attributes":{"tools":[{"type":"object","name":"ToolProxy","id":"p1275","attributes":{"tools":[{"type":"object","name":"PanTool","id":"p1251"}]}},{"type":"object","name":"ToolProxy","id":"p1276","attributes":{"tools":[{"type":"object","name":"WheelZoomTool","id":"p1252","attributes":{"renderers":"auto"}}]}},{"type":"object","name":"ToolProxy","id":"p1277","attributes":{"tools":[{"type":"object","name":"BoxZoomTool","id":"p1253","attributes":{"dimensions":"both","overlay":{"type":"object","name":"BoxAnnotation","id":"p1254","attributes":{"syncable":false,"line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5,"level":"overlay","visible":false,"left":{"type":"number","value":"nan"},"right":{"type":"number","value":"nan"},"top":{"type":"number","value":"nan"},"bottom":{"type":"number","value":"nan"},"left_units":"canvas","right_units":"canvas","top_units":"canvas","bottom_units":"canvas","handles":{"type":"object","name":"BoxInteractionHandles","id":"p1260","attributes":{"all":{"type":"object","name":"AreaVisuals","id":"p1259","attributes":{"fill_color":"white","hover_fill_color":"lightgray"}}}}}}}}]}},{"type":"object","name":"SaveTool","id":"p1278"},{"type":"object","name":"ToolProxy","id":"p1279","attributes":{"tools":[{"type":"object","name":"ResetTool","id":"p1262"}]}},{"type":"object","name":"ToolProxy","id":"p1280","attributes":{"tools":[{"type":"object","name":"HelpTool","id":"p1263"}]}}]}},"children":[[{"type":"object","name":"Figure","id":"p1229","attributes":{"width":500,"height":350,"x_range":{"type":"object","name":"DataRange1d","id":"p1230"},"y_range":{"type":"object","name":"DataRange1d","id":"p1231"},"x_scale":{"type":"object","name":"LogScale","id":"p1239"},"y_scale":{"type":"object","name":"LinearScale","id":"p1240"},"title":{"type":"object","name":"Title","id":"p1232","attributes":{"text":"Estimated Measurement Error Model"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1270","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1264","attributes":{"selected":{"type":"object","name":"Selection","id":"p1265","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1266"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"exSuR+F6hD+amZmZmZm5PwAAAAAAAPA/AAAAAAAAJEAAAAAAAABZQAAAAAAAQI9AAAAAAACIw0AAAAAAAGr4QAAAAACAhC5BAAAAANASY0E="},"shape":[10],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"AAAAAAAA8D8AAAAAAADgPwAAAAAAANA/mpmZmZmZuT+amZmZmZmpP5qZmZmZmak/MzMzMzMzsz+amZmZmZm5PzMzMzMzM8M/mpmZmZmZyT8="},"shape":[10],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1271","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1272"}}},"glyph":{"type":"object","name":"Line","id":"p1267","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"red","line_width":2}},"nonselection_glyph":{"type":"object","name":"Line","id":"p1268","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"red","line_alpha":0.1,"line_width":2}},"muted_glyph":{"type":"object","name":"Line","id":"p1269","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"red","line_alpha":0.2,"line_width":2}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1238","attributes":{"tools":[{"id":"p1251"},{"id":"p1252"},{"id":"p1253"},{"type":"object","name":"SaveTool","id":"p1261"},{"id":"p1262"},{"id":"p1263"}]}},"toolbar_location":null,"left":[{"type":"object","name":"LinearAxis","id":"p1246","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1247","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1248"},"axis_label":"$\\text{Error } [\\text{x}100\\%]$","axis_label_text_font":"Bitstream Charter","axis_label_text_font_size":"14pt","major_label_policy":{"type":"object","name":"AllLabels","id":"p1249"},"major_label_text_font":"Bitstream Charter","major_label_text_font_size":"12pt"}}],"below":[{"type":"object","name":"LogAxis","id":"p1241","attributes":{"ticker":{"type":"object","name":"LogTicker","id":"p1242","attributes":{"num_minor_ticks":10,"mantissas":[1,5]}},"formatter":{"type":"object","name":"LogTickFormatter","id":"p1243"},"axis_label":"$$\\text{Flow } m^3/s$$","axis_label_text_font":"Bitstream Charter","axis_label_text_font_size":"14pt","major_label_policy":{"type":"object","name":"AllLabels","id":"p1244"},"major_label_text_font":"Bitstream Charter","major_label_text_font_size":"12pt"}}],"center":[{"type":"object","name":"Grid","id":"p1245","attributes":{"axis":{"id":"p1241"}}},{"type":"object","name":"Grid","id":"p1250","attributes":{"dimension":1,"axis":{"id":"p1246"}}},{"type":"object","name":"Legend","id":"p1273","attributes":{"background_fill_alpha":0.5,"label_text_font":"Bitstream Charter","label_text_font_size":"12pt","items":[{"type":"object","name":"LegendItem","id":"p1274","attributes":{"label":{"type":"value","value":"Measurement Error Model"},"renderers":[{"id":"p1270"}]}}]}}]}},0,0]]}}]}};
+  const render_items = [{"docid":"3c11781c-92b7-47ec-be09-fd0ea0a54c52","roots":{"p1282":"d38941cc-8d15-4516-828f-fc0428160b1c"},"root_ids":["p1282"]}];
+  void root.Bokeh.embed.embed_items_notebook(docs_json, render_items);
+  }
+  if (root.Bokeh !== undefined) {
+    embed_document(root);
+  } else {
+    let attempts = 0;
+    const timer = setInterval(function(root) {
+      if (root.Bokeh !== undefined) {
+        clearInterval(timer);
+        embed_document(root);
+      } else {
+        attempts++;
+        if (attempts > 100) {
+          clearInterval(timer);
+          console.log("Bokeh: ERROR: Unable to run BokehJS code because BokehJS library is missing");
+        }
+      }
+    }, 10, root)
+  }
+})(window);</script></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">local_bandwidth_func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Use np.interp to pick a bandwidth based on x.</span>
+<span class="sd">    For x &lt; error_points[0], it will extrapolate to error_values[0].</span>
+<span class="sd">    For x &gt; error_points[-1], it will extrapolate to error_values[-1].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">error_points</span><span class="p">,</span> <span class="n">error_values</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">single_kde_fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">log_grid</span><span class="p">):</span>
+    <span class="n">kde_pdf</span> <span class="o">=</span> <span class="n">FFTKDE</span><span class="p">(</span><span class="n">bw</span><span class="o">=</span><span class="s1">&#39;ISJ&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">))</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">log_grid</span><span class="p">)</span>
+    <span class="n">pdf_check</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">kde_pdf</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">log_grid</span><span class="p">)</span>
+    <span class="c1"># check that the numerical integration over the KDE pdf is close to 1</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">pdf_check</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">),</span> <span class="n">pdf_check</span>
+    <span class="n">kde_cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">kde_pdf</span><span class="p">)</span>
+    <span class="n">kde_cdf</span> <span class="o">/=</span> <span class="n">kde_cdf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">kde_pmf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">kde_cdf</span><span class="p">,</span> <span class="n">prepend</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">kde_pmf</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">0.001</span>
+    <span class="k">return</span> <span class="n">kde_pmf</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_lognorm_pmf</span><span class="p">(</span><span class="n">log_x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">integral_tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+    <span class="c1"># Lognormal parameters</span>
+    <span class="n">norm_pdf</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">log_x</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+    <span class="n">norm_check</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">norm_pdf</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">log_x</span><span class="p">)</span>
+    <span class="n">lin_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_x</span><span class="p">)</span>
+    <span class="n">norm_lin_check</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">norm_pdf</span> <span class="o">/</span> <span class="n">lin_grid</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">lin_grid</span><span class="p">)</span> 
+    <span class="n">nc1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">norm_check</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">integral_tol</span><span class="p">)</span><span class="c1">#, norm_check</span>
+    <span class="n">nc2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">norm_lin_check</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">integral_tol</span><span class="p">)</span><span class="c1">#, norm_lin_check</span>
+    <span class="c1"># print(f&#39;Norm integral: {norm_check:.4f}&#39;)</span>
+    
+    <span class="n">norm_cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">norm_pdf</span><span class="p">)</span>
+    <span class="n">norm_cdf</span> <span class="o">/=</span> <span class="n">norm_cdf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">norm_pmf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">norm_cdf</span><span class="p">,</span> <span class="n">prepend</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">norm_pmf</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_distributions</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">log_grid</span><span class="p">,</span> <span class="n">kde_pmf</span><span class="p">,</span> <span class="n">skde</span><span class="p">,</span> <span class="n">gkde</span><span class="p">,</span> <span class="n">fkde</span><span class="p">,</span> <span class="n">ln_pmf</span><span class="p">):</span>
+
+    <span class="c1"># hist, log_edges = np.histogram(np.log(data), bins=log_grid, density=True)</span>
+    <span class="n">hist</span><span class="p">,</span> <span class="n">log_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">hist_cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+    <span class="n">hist_cdf</span> <span class="o">/=</span> <span class="n">hist_cdf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">hist_pmf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">hist_cdf</span><span class="p">,</span> <span class="n">prepend</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># edges = np.exp(log_edges)</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_edges</span><span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">x_axis_type</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+    <span class="n">equiv_years</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">/</span> <span class="mf">365.0</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">bottom</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">legend_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Data (N=</span><span class="si">{</span><span class="n">equiv_years</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1"> years)&#39;</span><span class="p">,</span>
+             <span class="n">top</span><span class="o">=</span><span class="n">hist_pmf</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;lightgreen&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+    
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_grid</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">kde_pmf</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;dodgerblue&#39;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;KDE&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ln_pmf</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">line_dash</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;LN MLE&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">skde</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;darkblue&#39;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">line_dash</span><span class="o">=</span><span class="s1">&#39;dotted&#39;</span><span class="p">,</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;EpaKDE&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">gkde</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">line_dash</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;GKDE&#39;</span><span class="p">)</span>
+    <span class="c1"># fig.line(x, fkde, color=&#39;grey&#39;, line_width=3, line_dash=&#39;dotted&#39;, legend_label=&#39;FFTKDE&#39;)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$$\text{Runoff } [L s^{-1} \text</span><span class="si">{km}</span><span class="s1">^{-2}]$$&#39;</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$$\text</span><span class="si">{Pr}</span><span class="s1">(X)$$&#39;</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">click_policy</span> <span class="o">=</span> <span class="s1">&#39;hide&#39;</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">dpf</span><span class="o">.</span><span class="n">format_fig_fonts</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+    <span class="n">show</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">deconvolution_kde_fft_gaussian_local</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">x_grid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    
+    <span class="n">logdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># Log-transform data</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">local_bandwidth_function</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># Compute adaptive bandwidth</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">h</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Bandwidth values must be positive.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Normalize data by local bandwidth (rescaling step)</span>
+    <span class="n">scaled_data</span> <span class="o">=</span> <span class="n">logdata</span> <span class="o">/</span> <span class="n">h</span>
+    <span class="n">scaled_x_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x_grid</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>  <span class="c1"># Broadcast over data</span>
+
+    <span class="c1"># Apply FFT-based KDE</span>
+    <span class="n">kde</span> <span class="o">=</span> <span class="n">FFTKDE</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span> <span class="n">bw</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">scaled_data</span><span class="p">)</span>  <span class="c1"># Use unit bandwidth</span>
+    <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">kde</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">scaled_x_grid</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+
+    <span class="c1"># Normalize and convert PDF to PMF</span>
+    <span class="n">cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">pdf_values</span><span class="p">)</span>
+    <span class="n">cdf</span> <span class="o">/=</span> <span class="n">cdf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Normalize</span>
+    <span class="n">pmf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">cdf</span><span class="p">,</span> <span class="n">prepend</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pmf</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">local_bandwidth_function</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">error_points</span><span class="p">,</span> <span class="n">error_values</span><span class="p">)</span>
+    
+
+<span class="k">def</span><span class="w"> </span><span class="nf">epanechnikov_cdf_array</span><span class="p">(</span><span class="n">u</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vectorized Epanechnikov CDF for an array u.</span>
+<span class="sd">    Returns values in [0, 1].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Prepare an output array of the same shape</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    
+    <span class="c1"># The polynomial part</span>
+    <span class="c1"># CDF = 0.5 + 0.75*u - 0.25*(u^3) for -1 &lt;= u &lt;= 1</span>
+    <span class="n">out</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.75</span><span class="o">*</span><span class="n">u</span> <span class="o">-</span> <span class="mf">0.25</span><span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+    
+    <span class="c1"># Now clamp for u &lt;= -1</span>
+    <span class="n">out</span><span class="p">[</span><span class="n">u</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    
+    <span class="c1"># And clamp for u &gt;= 1</span>
+    <span class="n">out</span><span class="p">[</span><span class="n">u</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">]</span>  <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="k">return</span> <span class="n">out</span>
+    
+
+<span class="k">def</span><span class="w"> </span><span class="nf">intervals_for_unique_values_adjacent</span><span class="p">(</span><span class="n">u</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a sorted array of unique values &#39;u&#39;, define intervals as follows:</span>
+<span class="sd">      - For u[0], the interval is [max(1e-4, 0.9*u[0]), u[1]]</span>
+<span class="sd">      - For 0 &lt; i &lt; n-1, the interval is [u[i-1], u[i+1]]</span>
+<span class="sd">      - For u[n-1], the interval is [u[n-2], 1.1*u[n-1]]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict :</span>
+<span class="sd">       { u[i] : (left_edge, right_edge) }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">size</span>
+    <span class="c1"># u = np.asarray(u)</span>
+    <span class="n">left_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span>
+        <span class="nb">max</span><span class="p">(</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mf">0.099</span><span class="o">*</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>        <span class="c1"># fill positions 1..(n-2)</span>
+        <span class="n">u</span><span class="p">[</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>         <span class="c1"># last position</span>
+    <span class="p">]</span>
+
+    <span class="n">right_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span>
+        <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span>
+        <span class="mf">1.2501</span><span class="o">*</span><span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="n">left_edges</span><span class="p">,</span> <span class="n">right_edges</span><span class="p">)))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">deconvolution_kde_epanechnikov_local</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">x_grid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+    <span class="n">logdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">intervals_dict</span> <span class="o">=</span> <span class="n">intervals_for_unique_values_adjacent</span><span class="p">(</span><span class="n">unique</span><span class="p">)</span>
+
+    <span class="n">x_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x_grid</span><span class="p">)</span>
+    <span class="c1"># Extract interval boundaries for all unique values</span>
+    <span class="n">unique_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">intervals_dict</span><span class="p">[</span><span class="n">val</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>  <span class="c1"># Left boundary for each data point</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">intervals_dict</span><span class="p">[</span><span class="n">val</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>  <span class="c1"># Right boundary for each data point</span>
+
+    <span class="c1"># Log-transformed interval boundaries</span>
+    <span class="n">log_L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+    <span class="n">log_R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+
+    <span class="c1"># Compute log-widths (check for invalid cases where L &gt;= R)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">log_R</span> <span class="o">-</span> <span class="n">log_L</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">w</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">invalid_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">w</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid intervals detected at indices: </span><span class="si">{</span><span class="n">invalid_idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Vectorized bandwidth calculation</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">local_bandwidth_function</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">h</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">invalid_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">h</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bandwidth must be positive at indices: </span><span class="si">{</span><span class="n">invalid_idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Compute matrix of Epanechnikov CDF values (broadcasting over x_grid)</span>
+    <span class="n">u_left</span>  <span class="o">=</span> <span class="p">(</span><span class="n">x_grid</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">log_L</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])</span> <span class="o">/</span> <span class="n">h</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">cdf_left</span>  <span class="o">=</span> <span class="n">epanechnikov_cdf_array</span><span class="p">(</span><span class="n">u_left</span><span class="p">)</span>
+    
+    <span class="n">u_right</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_grid</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">log_R</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])</span> <span class="o">/</span> <span class="n">h</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">cdf_right</span> <span class="o">=</span> <span class="n">epanechnikov_cdf_array</span><span class="p">(</span><span class="n">u_right</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    </span><span class="si">{</span><span class="n">t2</span><span class="o">-</span><span class="n">t1</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">s for epanechnikof cdf_vec&#39;</span><span class="p">)</span>
+    <span class="c1"># Compute kernel integral contributions and sum over all observations</span>
+    <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">cdf_left</span> <span class="o">-</span> <span class="n">cdf_right</span><span class="p">)</span> <span class="o">/</span> <span class="n">w</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">pdf_values</span><span class="p">)</span>
+    <span class="n">cdf</span> <span class="o">/=</span> <span class="n">cdf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">pmf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">cdf</span><span class="p">,</span> <span class="n">prepend</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pmf</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_bootstrap_samples</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">k_nearest</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">to_check</span> <span class="o">=</span> <span class="p">[</span>
+<span class="s1">&#39;05AD003&#39;</span><span class="p">,</span><span class="s1">&#39;05AD031&#39;</span><span class="p">,</span> <span class="s1">&#39;05AB022&#39;</span><span class="p">,</span> <span class="s1">&#39;05AB030&#39;</span><span class="p">,</span> <span class="s1">&#39;05AD031&#39;</span><span class="p">,</span> <span class="s1">&#39;12091050&#39;</span>
+<span class="p">]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">attr_df</span><span class="p">[</span><span class="n">attr_df</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">to_check</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+<span class="c1"># for i, row in attr_df.iterrows():</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">target_stn</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;drainage_area_km2&#39;</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">target_stn</span><span class="p">)</span>
+    <span class="c1"># import streamflow data</span>
+    <span class="n">stn_df</span> <span class="o">=</span> <span class="n">dpf</span><span class="o">.</span><span class="n">get_timeseries_data</span><span class="p">(</span><span class="n">target_stn</span><span class="p">)</span>
+    <span class="n">stn_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">target_stn</span><span class="si">}</span><span class="s1">_uar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">stn_df</span><span class="p">[</span><span class="n">target_stn</span><span class="p">]</span> <span class="o">/</span> <span class="n">da</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">stn_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">target_stn</span><span class="si">}</span><span class="s1">_uar&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">log_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">epsilon</span> <span class="o">=</span> <span class="mf">1e-6</span> 
+    <span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="n">epsilon</span>
+    <span class="n">n_eval_pts</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">12</span>
+    <span class="n">log_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">minx</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">maxx</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">n_eval_pts</span><span class="p">)</span>
+    <span class="n">lin_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_grid</span><span class="p">)</span>
+
+    <span class="c1"># akde = error_based_kde_fit_bootstrap(data, log_grid)</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">skde</span> <span class="o">=</span> <span class="n">deconvolution_kde_epanechnikov_local</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">log_grid</span><span class="p">)</span>
+    <span class="n">gkde</span> <span class="o">=</span> <span class="n">deconvolution_kde_gaussian_local</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">log_grid</span><span class="p">)</span>
+    <span class="c1"># fkde = deconvolution_kde_fft_gaussian_local(data, log_grid)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">s for epanechnikov kernel local bandwidth&#39;</span><span class="p">)</span>
+
+    <span class="c1"># plot the lognorm</span>
+    <span class="n">ln_params</span> <span class="o">=</span> <span class="n">ln_df</span><span class="p">[</span><span class="n">ln_df</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">target_stn</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">mean_logx</span> <span class="o">=</span> <span class="n">ln_params</span><span class="p">[</span><span class="s1">&#39;mean_logx&#39;</span><span class="p">]</span>
+    <span class="n">sd_logx</span> <span class="o">=</span> <span class="n">ln_params</span><span class="p">[</span><span class="s1">&#39;sd_logx&#39;</span><span class="p">]</span>
+    <span class="n">ln_pmf</span> <span class="o">=</span> <span class="n">compute_lognorm_pmf</span><span class="p">(</span><span class="n">log_grid</span><span class="p">,</span> <span class="n">mean_logx</span><span class="p">,</span> <span class="n">sd_logx</span><span class="p">)</span>
+    <span class="c1"># print(ln_pmf)</span>
+    <span class="n">fkde</span><span class="o">=</span><span class="kc">None</span>
+    
+    <span class="c1"># fit KDE</span>
+    <span class="n">kde_pmf</span> <span class="o">=</span> <span class="n">single_kde_fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">log_grid</span><span class="p">)</span>
+    <span class="n">plot_distributions</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">log_grid</span><span class="p">,</span> <span class="n">kde_pmf</span><span class="p">,</span> <span class="n">skde</span><span class="p">,</span> <span class="n">gkde</span><span class="p">,</span> <span class="n">fkde</span><span class="p">,</span> <span class="n">ln_pmf</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./notebooks/ss"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="simple visible nav section-nav flex-column">
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Dan Kovacek
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

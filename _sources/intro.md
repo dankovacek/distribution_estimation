@@ -1,15 +1,38 @@
 # Introduction
 
-This site contains supporting information for a paper in progress on predicting f-divergence measures from catchment attributes.  Catchment attributes are widely used in hydrological modelling and other environmental applications because of their associations with the hydrological response of catchments.  The f-divergence measures are a family of statistical measures that quantify the difference between two probability distributions.  
+The duration curve represents the proportion of time an observed variable exceeds some value.  In hydrology, the flow duration curve (FDC) is used in applications related to water resource planning as it represents a long-term expectation of water availability at some location.  Predicting long-term water resource availability at ungauged locations is an open problem in hydrology.  In this notebook, we present several approaches to estimating FDCs at ungauged locations.  Using a large sample of monitored locations around British Columbia, Canada, we test predicting the FDC for each location using a range of input information and methods, and test the accuracy of the prediction using the observed data.
 
-Hydrological signatures are minimal representations of process information contained in streamflow observations {cite}`gupta2008reconciling`. There is a large body of literature defining and describing the use of hydrological signatures in various fields of hydrology, see "*A review of hydrological signatures and their applications*" {cite}`mcmillan2021review`. According to  f-divergence measures have not been described in the context of hydrological signatures.  The aim of this work is to investigate the predictability of various f-divergence measures from catchment attributes and provide context for interpreting the impacts of key assumptions.
+This site contains the code and additional supporting information for a computational experiment exploring the estimation of probability distributions (flow duration curves) for ungauged locations.  The three methods tested are as follows:
+
+1. **Parametric Probability Distribution**: use XGboost to predict sufficient statistics of the log-normal (LN) distribution using catchment attributes.  This is done in two different ways, first by predicting mean and standard deviation of streamflow (per unit area) and estimating the LN location and scale by method of moments (MoM), and second by predicting the LN location and scale directly.  
+2. **k-Nearest Neighbours**: estimate unit area runoff at an ungauged location using daily streamflow from an ensemble of nearest neighbours.  Here we test the ensemble size $k$, the criteria used for selecting the ensemble, and the weights or proportions assigned to ensemble members reflecting their strength of influence.
+3. **Neural Network**: train a neural network model (LSTM) to predict daily streamflow from daily meteorological time series inputs (precipitation, temperature, shortwave radiation, vapour pressure, snow water equivalent). 
+
+
+```{figure} ../images/method_flowchart.jpeg
+---
+alt: Flowchart describing the methodology of the experiment.
+name: method-flowchart
+width: 500px
+align: center
+---
+The full experimental workflow from data preprocessing for three different model inputs that are each used to generate an estimated flow distribution, and the subsequent large-sample analysis.  
+```
+
+The experiments are organized in the following chapters (notebooks), corresponding to the workflow described in the figure above:
+
+1.  **Data**: introduce the input data and describe where to get additional data from outside sources.
+2.  **Methods**: introduce the various methods for estimating flow duration curves, define partitions for 5-fold CV and compare the target variable distribution over validation folds.
+3.  **Predict Runoff Statistics**: The hydrological signature prediction is done first to generate the predicted sufficient statistics of the log-normal distribution for the sample of catchments.
+4.  **Computation of reference distributions**: to evaluate the accuracy of estimated FDCs, we first compute a reference distribution on the observed data.  This is done by kernel density estimation (KDE).  The pre-processing of reference distribution makes the nearest neighbours experiment much more efficient in avoiding duplicate computations.
+5.  **FDC Estimation Validation**: here we iterate through all catchments in the sample and bring together the FDC estimates of the different approaches.
+6.  **Results Explorer**: The results are compiled to compare FDC estimation methods over the large sample.  
 
 ## Computational Notes
 
-The machine learning technique used to predict the various f-divergence measures from catchment attributes is gradient boosting, and the widely used XGBoost library is used for its implementation{cite}`chen2016xgboost`.  (notes about xgboost).  The XGBoost library facilitates parallel CPU and GPU training, making it feasible to run a large number of models to test sensitivity to key assumptions.  For the data structures tested, training on GPU doesn't provide notable efficiency gains over CPU.  The first two models predicting single-site target variables (mean annual runoff and entropy) from attributes takes roughly an hour to process, while the much larger catchment pair datasets used to train the f-divergence prediction models take longer, with the KL divergence set taking about 15 hours due to the combination of bitrates and priors tested. These processing times correspond to an Intel Xeon E5-2690 v4 @ 2.60GHz CPU.
+The prediction of hydrological signatures is done here with the widely used XGBoost library is used for its implementation{cite}`chen2016xgboost`.  (notes about xgboost).  The XGBoost library facilitates parallel CPU and GPU training, making it feasible to run a large number of models to test sensitivity to key assumptions.  The neural network estimation component is done using the [Neural Hydrology](https://github.com/neuralhydrology/neuralhydrology) library from {cite:p}`kratzert2022joss`.
 
-The catchment attribute validation / reprocessing is a memory intensive step in the data preparation.  Processing the various raster files for the largest catchments is the critical step in memory consumption, and this dataset was processed on a machine with 128GB DDR4 RAM.  The computation-intensive pre-processing steps can be bypassed by downloading the pre-processed data files from the repository linked at the beginning of the Data section.
-
+The computation-intensive pre-processing steps can be bypassed by downloading the pre-processed data files as described in each experiment notebook.
 
 ## Contents of this book
 

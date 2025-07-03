@@ -1,0 +1,1668 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Reference Distributions &#8212; Streamflow distribution estimation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/4_Reference_Distributions';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Streamflow distribution estimation - Home"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Streamflow distribution estimation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="1_data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="2_Methods.html">Methods</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/dankovacek/divergence_estimation" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/dankovacek/divergence_estimation/issues/new?title=Issue%20on%20page%20%2Fnotebooks/4_Reference_Distributions.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/notebooks/4_Reference_Distributions.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Reference Distributions</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-pre-processing-overview">Data pre-processing overview</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#get-updated-data-sources-and-validate-catchment-attributes">get updated data sources and validate catchment attributes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#import-hysets-catchment-attributes">Import HYSETS catchment attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-the-pre-filtered-stations-within-the-study-region">Import the pre-filtered stations within the study region</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#import-streamflow-timeseries">Import streamflow timeseries</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculate-period-of-record-por-probability-distribution-functions-for-each-station-record">Calculate Period of Record (POR) probability distribution functions for each station record</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-a-global-range-of-expected-unit-area-runoff">Define a global range of expected (unit area) runoff</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compute-the-entropy-of-each-pmf">Compute the entropy of each PMF</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">Citations</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="reference-distributions">
+<h1>Reference Distributions<a class="headerlink" href="#reference-distributions" title="Link to this heading">#</a></h1>
+<p>In this notebook we compute the reference distributions for each catchment in the sample to represent the baseline period of record (POR) flow duration curve for validation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pool</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">laplace</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">figure</span><span class="p">,</span> <span class="n">show</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">output_notebook</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="n">output_notebook</span><span class="p">()</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">data_processing_functions</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dpf</span>
+<span class="n">BASE_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+<span class="c1"># update this to the path where you stored `HYSETS_2023_update_QC_stations.nc`</span>
+<span class="n">HYSETS_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;/home/danbot/code/common_data/HYSETS&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">    <style>
+        .bk-notebook-logo {
+            display: block;
+            width: 20px;
+            height: 20px;
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAAOkSURBVDiNjZRtaJVlGMd/1/08zzln5zjP1LWcU9N0NkN8m2CYjpgQYQXqSs0I84OLIC0hkEKoPtiH3gmKoiJDU7QpLgoLjLIQCpEsNJ1vqUOdO7ppbuec5+V+rj4ctwzd8IIbbi6u+8f1539dt3A78eXC7QizUF7gyV1fD1Yqg4JWz84yffhm0qkFqBogB9rM8tZdtwVsPUhWhGcFJngGeWrPzHm5oaMmkfEg1usvLFyc8jLRqDOMru7AyC8saQr7GG7f5fvDeH7Ej8CM66nIF+8yngt6HWaKh7k49Soy9nXurCi1o3qUbS3zWfrYeQDTB/Qj6kX6Ybhw4B+bOYoLKCC9H3Nu/leUTZ1JdRWkkn2ldcCamzrcf47KKXdAJllSlxAOkRgyHsGC/zRday5Qld9DyoM4/q/rUoy/CXh3jzOu3bHUVZeU+DEn8FInkPBFlu3+nW3Nw0mk6vCDiWg8CeJaxEwuHS3+z5RgY+YBR6V1Z1nxSOfoaPa4LASWxxdNp+VWTk7+4vzaou8v8PN+xo+KY2xsw6une2frhw05CTYOmQvsEhjhWjn0bmXPjpE1+kplmmkP3suftwTubK9Vq22qKmrBhpY4jvd5afdRA3wGjFAgcnTK2s4hY0/GPNIb0nErGMCRxWOOX64Z8RAC4oCXdklmEvcL8o0BfkNK4lUg9HTl+oPlQxdNo3Mg4Nv175e/1LDGzZen30MEjRUtmXSfiTVu1kK8W4txyV6BMKlbgk3lMwYCiusNy9fVfvvwMxv8Ynl6vxoByANLTWplvuj/nF9m2+PDtt1eiHPBr1oIfhCChQMBw6Aw0UulqTKZdfVvfG7VcfIqLG9bcldL/+pdWTLxLUy8Qq38heUIjh4XlzZxzQm19lLFlr8vdQ97rjZVOLf8nclzckbcD4wxXMidpX30sFd37Fv/GtwwhzhxGVAprjbg0gCAEeIgwCZyTV2Z1REEW8O4py0wsjeloKoMr6iCY6dP92H6Vw/oTyICIthibxjm/DfN9lVz8IqtqKYLUXfoKVMVQVVJOElGjrnnUt9T9wbgp8AyYKaGlqingHZU/uG2NTZSVqwHQTWkx9hxjkpWDaCg6Ckj5qebgBVbT3V3NNXMSiWSDdGV3hrtzla7J+duwPOToIg42ChPQOQjspnSlp1V+Gjdged7+8UN5CRAV7a5EdFNwCjEaBR27b3W890TE7g24NAP/mMDXRWrGoFPQI9ls/MWO2dWFAar/xcOIImbbpA3zgAAAABJRU5ErkJggg==);
+        }
+    </style>
+    <div>
+        <a href="https://bokeh.org" target="_blank" class="bk-notebook-logo"></a>
+        <span id="e46d990b-877f-48a1-ab3a-a4edcec82ee6">Loading BokehJS ...</span>
+    </div>
+</div><script type="application/javascript">'use strict';
+(function(root) {
+  function now() {
+    return new Date();
+  }
+
+  const force = true;
+
+  if (typeof root._bokeh_onload_callbacks === "undefined" || force === true) {
+    root._bokeh_onload_callbacks = [];
+    root._bokeh_is_loading = undefined;
+  }
+
+const JS_MIME_TYPE = 'application/javascript';
+  const HTML_MIME_TYPE = 'text/html';
+  const EXEC_MIME_TYPE = 'application/vnd.bokehjs_exec.v0+json';
+  const CLASS_NAME = 'output_bokeh rendered_html';
+
+  /**
+   * Render data to the DOM node
+   */
+  function render(props, node) {
+    const script = document.createElement("script");
+    node.appendChild(script);
+  }
+
+  /**
+   * Handle when an output is cleared or removed
+   */
+  function handleClearOutput(event, handle) {
+    function drop(id) {
+      const view = Bokeh.index.get_by_id(id)
+      if (view != null) {
+        view.model.document.clear()
+        Bokeh.index.delete(view)
+      }
+    }
+
+    const cell = handle.cell;
+
+    const id = cell.output_area._bokeh_element_id;
+    const server_id = cell.output_area._bokeh_server_id;
+
+    // Clean up Bokeh references
+    if (id != null) {
+      drop(id)
+    }
+
+    if (server_id !== undefined) {
+      // Clean up Bokeh references
+      const cmd_clean = "from bokeh.io.state import curstate; print(curstate().uuid_to_server['" + server_id + "'].get_sessions()[0].document.roots[0]._id)";
+      cell.notebook.kernel.execute(cmd_clean, {
+        iopub: {
+          output: function(msg) {
+            const id = msg.content.text.trim()
+            drop(id)
+          }
+        }
+      });
+      // Destroy server and session
+      const cmd_destroy = "import bokeh.io.notebook as ion; ion.destroy_server('" + server_id + "')";
+      cell.notebook.kernel.execute(cmd_destroy);
+    }
+  }
+
+  /**
+   * Handle when a new output is added
+   */
+  function handleAddOutput(event, handle) {
+    const output_area = handle.output_area;
+    const output = handle.output;
+
+    // limit handleAddOutput to display_data with EXEC_MIME_TYPE content only
+    if ((output.output_type != "display_data") || (!Object.prototype.hasOwnProperty.call(output.data, EXEC_MIME_TYPE))) {
+      return
+    }
+
+    const toinsert = output_area.element.find("." + CLASS_NAME.split(' ')[0]);
+
+    if (output.metadata[EXEC_MIME_TYPE]["id"] !== undefined) {
+      toinsert[toinsert.length - 1].firstChild.textContent = output.data[JS_MIME_TYPE];
+      // store reference to embed id on output_area
+      output_area._bokeh_element_id = output.metadata[EXEC_MIME_TYPE]["id"];
+    }
+    if (output.metadata[EXEC_MIME_TYPE]["server_id"] !== undefined) {
+      const bk_div = document.createElement("div");
+      bk_div.innerHTML = output.data[HTML_MIME_TYPE];
+      const script_attrs = bk_div.children[0].attributes;
+      for (let i = 0; i < script_attrs.length; i++) {
+        toinsert[toinsert.length - 1].firstChild.setAttribute(script_attrs[i].name, script_attrs[i].value);
+        toinsert[toinsert.length - 1].firstChild.textContent = bk_div.children[0].textContent
+      }
+      // store reference to server id on output_area
+      output_area._bokeh_server_id = output.metadata[EXEC_MIME_TYPE]["server_id"];
+    }
+  }
+
+  function register_renderer(events, OutputArea) {
+
+    function append_mime(data, metadata, element) {
+      // create a DOM node to render to
+      const toinsert = this.create_output_subarea(
+        metadata,
+        CLASS_NAME,
+        EXEC_MIME_TYPE
+      );
+      this.keyboard_manager.register_events(toinsert);
+      // Render to node
+      const props = {data: data, metadata: metadata[EXEC_MIME_TYPE]};
+      render(props, toinsert[toinsert.length - 1]);
+      element.append(toinsert);
+      return toinsert
+    }
+
+    /* Handle when an output is cleared or removed */
+    events.on('clear_output.CodeCell', handleClearOutput);
+    events.on('delete.Cell', handleClearOutput);
+
+    /* Handle when a new output is added */
+    events.on('output_added.OutputArea', handleAddOutput);
+
+    /**
+     * Register the mime type and append_mime function with output_area
+     */
+    OutputArea.prototype.register_mime_type(EXEC_MIME_TYPE, append_mime, {
+      /* Is output safe? */
+      safe: true,
+      /* Index of renderer in `output_area.display_order` */
+      index: 0
+    });
+  }
+
+  // register the mime type if in Jupyter Notebook environment and previously unregistered
+  if (root.Jupyter !== undefined) {
+    const events = require('base/js/events');
+    const OutputArea = require('notebook/js/outputarea').OutputArea;
+
+    if (OutputArea.prototype.mime_types().indexOf(EXEC_MIME_TYPE) == -1) {
+      register_renderer(events, OutputArea);
+    }
+  }
+  if (typeof (root._bokeh_timeout) === "undefined" || force === true) {
+    root._bokeh_timeout = Date.now() + 5000;
+    root._bokeh_failed_load = false;
+  }
+
+  const NB_LOAD_WARNING = {'data': {'text/html':
+     "<div style='background-color: #fdd'>\n"+
+     "<p>\n"+
+     "BokehJS does not appear to have successfully loaded. If loading BokehJS from CDN, this \n"+
+     "may be due to a slow or bad network connection. Possible fixes:\n"+
+     "</p>\n"+
+     "<ul>\n"+
+     "<li>re-rerun `output_notebook()` to attempt to load from CDN again, or</li>\n"+
+     "<li>use INLINE resources instead, as so:</li>\n"+
+     "</ul>\n"+
+     "<code>\n"+
+     "from bokeh.resources import INLINE\n"+
+     "output_notebook(resources=INLINE)\n"+
+     "</code>\n"+
+     "</div>"}};
+
+  function display_loaded(error = null) {
+    const el = document.getElementById("e46d990b-877f-48a1-ab3a-a4edcec82ee6");
+    if (el != null) {
+      const html = (() => {
+        if (typeof root.Bokeh === "undefined") {
+          if (error == null) {
+            return "BokehJS is loading ...";
+          } else {
+            return "BokehJS failed to load.";
+          }
+        } else {
+          const prefix = `BokehJS ${root.Bokeh.version}`;
+          if (error == null) {
+            return `${prefix} successfully loaded.`;
+          } else {
+            return `${prefix} <b>encountered errors</b> while loading and may not function as expected.`;
+          }
+        }
+      })();
+      el.innerHTML = html;
+
+      if (error != null) {
+        const wrapper = document.createElement("div");
+        wrapper.style.overflow = "auto";
+        wrapper.style.height = "5em";
+        wrapper.style.resize = "vertical";
+        const content = document.createElement("div");
+        content.style.fontFamily = "monospace";
+        content.style.whiteSpace = "pre-wrap";
+        content.style.backgroundColor = "rgb(255, 221, 221)";
+        content.textContent = error.stack ?? error.toString();
+        wrapper.append(content);
+        el.append(wrapper);
+      }
+    } else if (Date.now() < root._bokeh_timeout) {
+      setTimeout(() => display_loaded(error), 100);
+    }
+  }
+
+  function run_callbacks() {
+    try {
+      root._bokeh_onload_callbacks.forEach(function(callback) {
+        if (callback != null)
+          callback();
+      });
+    } finally {
+      delete root._bokeh_onload_callbacks
+    }
+    console.debug("Bokeh: all callbacks have finished");
+  }
+
+  function load_libs(css_urls, js_urls, callback) {
+    if (css_urls == null) css_urls = [];
+    if (js_urls == null) js_urls = [];
+
+    root._bokeh_onload_callbacks.push(callback);
+    if (root._bokeh_is_loading > 0) {
+      console.debug("Bokeh: BokehJS is being loaded, scheduling callback at", now());
+      return null;
+    }
+    if (js_urls == null || js_urls.length === 0) {
+      run_callbacks();
+      return null;
+    }
+    console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
+    root._bokeh_is_loading = css_urls.length + js_urls.length;
+
+    function on_load() {
+      root._bokeh_is_loading--;
+      if (root._bokeh_is_loading === 0) {
+        console.debug("Bokeh: all BokehJS libraries/stylesheets loaded");
+        run_callbacks()
+      }
+    }
+
+    function on_error(url) {
+      console.error("failed to load " + url);
+    }
+
+    for (let i = 0; i < css_urls.length; i++) {
+      const url = css_urls[i];
+      const element = document.createElement("link");
+      element.onload = on_load;
+      element.onerror = on_error.bind(null, url);
+      element.rel = "stylesheet";
+      element.type = "text/css";
+      element.href = url;
+      console.debug("Bokeh: injecting link tag for BokehJS stylesheet: ", url);
+      document.body.appendChild(element);
+    }
+
+    for (let i = 0; i < js_urls.length; i++) {
+      const url = js_urls[i];
+      const element = document.createElement('script');
+      element.onload = on_load;
+      element.onerror = on_error.bind(null, url);
+      element.async = false;
+      element.src = url;
+      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
+      document.head.appendChild(element);
+    }
+  };
+
+  function inject_raw_css(css) {
+    const element = document.createElement("style");
+    element.appendChild(document.createTextNode(css));
+    document.body.appendChild(element);
+  }
+
+  const js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-3.7.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.7.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.7.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.7.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.7.3.min.js"];
+  const css_urls = [];
+
+  const inline_js = [    function(Bokeh) {
+      Bokeh.set_log_level("info");
+    },
+function(Bokeh) {
+    }
+  ];
+
+  function run_inline_js() {
+    if (root.Bokeh !== undefined || force === true) {
+      try {
+            for (let i = 0; i < inline_js.length; i++) {
+      inline_js[i].call(root, root.Bokeh);
+    }
+
+      } catch (error) {display_loaded(error);throw error;
+      }if (force === true) {
+        display_loaded();
+      }} else if (Date.now() < root._bokeh_timeout) {
+      setTimeout(run_inline_js, 100);
+    } else if (!root._bokeh_failed_load) {
+      console.log("Bokeh: BokehJS failed to load within specified timeout.");
+      root._bokeh_failed_load = true;
+    } else if (force !== true) {
+      const cell = $(document.getElementById("e46d990b-877f-48a1-ab3a-a4edcec82ee6")).parents('.cell').data().cell;
+      cell.output_area.append_execute_result(NB_LOAD_WARNING)
+    }
+  }
+
+  if (root._bokeh_is_loading === 0) {
+    console.debug("Bokeh: BokehJS loaded, going straight to plotting");
+    run_inline_js();
+  } else {
+    load_libs(css_urls, js_urls, function() {
+      console.debug("Bokeh: BokehJS plotting callback run at", now());
+      run_inline_js();
+    });
+  }
+}(window));</script></div>
+</div>
+<section id="data-pre-processing-overview">
+<h2>Data pre-processing overview<a class="headerlink" href="#data-pre-processing-overview" title="Link to this heading">#</a></h2>
+<p>Note that these steps are optional and the end results of these pre-processing steps are provided in the open data repository.</p>
+<section id="get-updated-data-sources-and-validate-catchment-attributes">
+<h3>get updated data sources and validate catchment attributes<a class="headerlink" href="#get-updated-data-sources-and-validate-catchment-attributes" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Extract catchment attributes using updated catchment geometries where available (optional, updated catchment geometries are saved in <code class="docutils literal notranslate"><span class="pre">data/BCUB_watershed_bounds_updated.geojson</span></code>).</p></li>
+<li><p>Process climate indices for HYSETS catchments in the study region (optional, pre-processed attributes are contained in <code class="docutils literal notranslate"><span class="pre">BCUB_watershed_attributes_updated.csv</span></code>)</p></li>
+</ol>
+</section>
+</section>
+<section id="import-hysets-catchment-attributes">
+<h2>Import HYSETS catchment attributes<a class="headerlink" href="#import-hysets-catchment-attributes" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># import the HYSETS attributes data</span>
+<span class="n">hysets_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">HYSETS_DIR</span> <span class="o">/</span> <span class="s1">&#39;HYSETS_watershed_properties.txt&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+<span class="n">ws_id_dict</span> <span class="o">=</span> <span class="n">hysets_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Official_ID&#39;</span><span class="p">)[</span><span class="s1">&#39;Watershed_ID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<span class="n">da_dict</span> <span class="o">=</span> <span class="n">hysets_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Official_ID&#39;</span><span class="p">)[</span><span class="s1">&#39;Drainage_Area_km2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<span class="n">official_id_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Official_ID&#39;</span><span class="p">]:</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Watershed_ID&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">hysets_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="import-the-pre-filtered-stations-within-the-study-region">
+<h3>Import the pre-filtered stations within the study region<a class="headerlink" href="#import-the-pre-filtered-stations-within-the-study-region" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># import the BCUB (study) region boundary</span>
+<span class="n">bcub_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;catchment_attributes_with_runoff_stats.csv&#39;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;official_id&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
+<span class="n">bcub_df</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bcub_df</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<span class="c1"># map the Hysets watershed IDs to the BCUB watershed IDs</span>
+<span class="c1"># create a dict to map HYSETS watershed IDs to the Official station IDs</span>
+<span class="n">bcub_df</span><span class="p">[</span><span class="s1">&#39;watershedID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bcub_df</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">official_id_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;   Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bcub_df</span><span class="p">)</span><span class="si">}</span><span class="s1"> catchments in the BCUB region with runoff statistics.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>   Found 1024 catchments in the BCUB region with runoff statistics.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/danbot/code/data_analysis/lib/python3.12/site-packages/pyogrio/raw.py:198: RuntimeWarning: driver CSV does not support open option DTYPE
+  return ogr_read(
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="import-streamflow-timeseries">
+<h2>Import streamflow timeseries<a class="headerlink" href="#import-streamflow-timeseries" title="Link to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>At the top of <code class="docutils literal notranslate"><span class="pre">data_processing_functions.py</span></code>, update the <code class="docutils literal notranslate"><span class="pre">STREAMFLOW_DIR</span></code> variable to match where the HYSETS streamflow time series are stored.</p>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load dataset</span>
+<span class="n">streamflow</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">HYSETS_DIR</span> <span class="o">/</span> <span class="s1">&#39;HYSETS_2023_update_QC_stations.nc&#39;</span><span class="p">)</span>
+
+<span class="c1"># Promote &#39;watershedID&#39; to a coordinate on &#39;watershed&#39;</span>
+<span class="n">streamflow</span> <span class="o">=</span> <span class="n">streamflow</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">watershedID</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;watershed&quot;</span><span class="p">,</span> <span class="n">streamflow</span><span class="p">[</span><span class="s2">&quot;watershedID&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+
+<span class="c1"># Set &#39;watershedID&#39; as index</span>
+<span class="n">streamflow</span> <span class="o">=</span> <span class="n">streamflow</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">watershed</span><span class="o">=</span><span class="s2">&quot;watershedID&quot;</span><span class="p">)</span>
+
+<span class="c1"># Select only watershedIDs present in bcub_df</span>
+<span class="n">valid_ids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span> <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">bcub_df</span><span class="p">[</span><span class="s1">&#39;watershedID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">streamflow</span><span class="o">.</span><span class="n">watershed</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">streamflow</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">watershed</span><span class="o">=</span><span class="n">valid_ids</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">retrieve_timeseries_discharge</span><span class="p">(</span><span class="n">stn</span><span class="p">):</span>
+    <span class="n">watershed_id</span> <span class="o">=</span> <span class="n">official_id_dict</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da_dict</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;discharge&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">watershed</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">watershed_id</span><span class="p">))</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;discharge&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Station </span><span class="si">{</span><span class="n">stn</span><span class="si">}</span><span class="s2"> not found in dataset under watershedID </span><span class="si">{</span><span class="n">watershed_id</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)[[</span><span class="s1">&#39;discharge&#39;</span><span class="p">]]</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;discharge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;discharge&#39;</span><span class="p">],</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;discharge&#39;</span><span class="p">:</span> <span class="n">stn</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stn</span><span class="si">}</span><span class="s1">_uar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span> <span class="o">/</span> <span class="n">da</span>
+    <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stn</span><span class="si">}</span><span class="s1">_mm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="mf">3.6</span> <span class="o">/</span> <span class="n">da</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;log_x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stn</span><span class="si">}</span><span class="s1">_uar&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">df</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>USGS station IDs are integers but they are stored in the dataset with the unfortunate characteristic that different stations can have identifiers that are substrings of each other.  We have to add a few extra lines of code to ensure we get the correct file.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Confirm all watershed IDs exist in ds</span>
+<span class="n">bcub_ws_ids</span> <span class="o">=</span> <span class="n">bcub_df</span><span class="p">[</span><span class="s1">&#39;watershedID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">ds_ids</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">watershed</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># After selection via sel(watershed=valid_ids)</span>
+
+<span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">wid</span> <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">bcub_ws_ids</span> <span class="k">if</span> <span class="n">wid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds_ids</span><span class="p">]</span>
+<span class="n">n_total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bcub_ws_ids</span><span class="p">)</span>
+<span class="n">n_missing</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">n_missing</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n_missing</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">n_total</span><span class="si">}</span><span class="s2"> watershedIDs missing from dataset. First few missing: </span><span class="si">{</span><span class="n">missing</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="calculate-period-of-record-por-probability-distribution-functions-for-each-station-record">
+<h2>Calculate Period of Record (POR) probability distribution functions for each station record<a class="headerlink" href="#calculate-period-of-record-por-probability-distribution-functions-for-each-station-record" title="Link to this heading">#</a></h2>
+<p>In order to compare distributions fairly without data leakage in the subsequent prediction steps, we will first define a “global evaluation grid”, or the support over which all PDFs will be evaluated.  We’ll do this by setting a global expected range of flow on a unit area basis. Since we clipped the lowest flows to 1e-4 <span class="math notranslate nohighlight">\(m^3/s\)</span> at import, and we know the minimum drainage area in the dataset is 0.7 <span class="math notranslate nohighlight">\(\text{km}^2\)</span>, we can set the minimum to $10^{-4} and find the minimum and maximum unit area runoff in the dataset and leave some margin.</p>
+<p>Since we’ll be computing KL divergences, we will also assume a prior distribution based on the heavy tailed Laplace distribution using mean and standard deviation (log) unit area runoff predicted (out of sample) from catchment attributes.  This prior will be assumed on the donor/proxy PMF to avoid division by zero where the support gets very small.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># import the predicted mean and standard deviation from the previous notebook (Predict Runoff Statistics)</span>
+<span class="n">predicted_params</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;data/results/parameter_prediction_results/mean_parameter_predictions.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">mean_param_dict</span> <span class="o">=</span> <span class="n">predicted_params</span><span class="p">[</span><span class="s1">&#39;mean_logx_mean_predicted&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<span class="n">sd_param_dict</span> <span class="o">=</span> <span class="n">predicted_params</span><span class="p">[</span><span class="s1">&#39;sd_logx_mean_predicted&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="define-a-global-range-of-expected-unit-area-runoff">
+<h2>Define a global range of expected (unit area) runoff<a class="headerlink" href="#define-a-global-range-of-expected-unit-area-runoff" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_station</span><span class="p">(</span><span class="n">stn</span><span class="p">,</span> <span class="n">da_dict</span><span class="p">):</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">retrieve_timeseries_discharge</span><span class="p">(</span><span class="n">stn</span><span class="p">)</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da_dict</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span>
+    <span class="n">uar</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span> <span class="o">/</span> <span class="n">da</span>  <span class="c1"># L/s/km²</span>
+    <span class="k">return</span> <span class="n">stn</span><span class="p">,</span> <span class="n">uar</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">uar</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parallel_min_max</span><span class="p">(</span><span class="n">bcub_stations</span><span class="p">,</span> <span class="n">da_dict</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">processes</span> <span class="o">=</span> <span class="n">processes</span> <span class="ow">or</span> <span class="mi">18</span>
+    <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">processes</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">process_station</span><span class="p">,</span> <span class="n">da_dict</span><span class="o">=</span><span class="n">da_dict</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">bcub_stations</span><span class="p">)</span>
+
+    <span class="n">global_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+    <span class="n">global_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">res</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="k">for</span> <span class="n">stn</span><span class="p">,</span> <span class="n">min_uar</span><span class="p">,</span> <span class="n">max_uar</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">max_uar</span> <span class="o">&gt;</span> <span class="n">global_max</span><span class="p">:</span>
+            <span class="n">global_max</span> <span class="o">=</span> <span class="n">max_uar</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Max streamflow for </span><span class="si">{</span><span class="n">stn</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">max_uar</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> L/s/km²&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">min_uar</span> <span class="o">&lt;</span> <span class="n">global_min</span><span class="p">:</span>
+            <span class="n">global_min</span> <span class="o">=</span> <span class="n">min_uar</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;   Min streamflow for </span><span class="si">{</span><span class="n">stn</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">min_uar</span><span class="si">:</span><span class="s1">.2e</span><span class="si">}</span><span class="s1"> L/s/km² (DA=</span><span class="si">{</span><span class="n">da_dict</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> km²)&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Global min = </span><span class="si">{</span><span class="n">global_min</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2"> L/s/km², max = </span><span class="si">{</span><span class="n">global_max</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> L/s/km²&quot;</span><span class="p">)</span>
+
+<span class="c1"># Usage</span>
+<span class="n">parallel_min_max</span><span class="p">(</span><span class="n">bcub_df</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">],</span> <span class="n">da_dict</span><span class="p">)</span>   
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Process ForkPoolWorker-9:
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Traceback (most recent call last):
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  File &quot;/usr/lib/python3.12/multiprocessing/process.py&quot;, line 314, in _bootstrap
+    self.run()
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  File &quot;/usr/lib/python3.12/multiprocessing/process.py&quot;, line 108, in run
+    self._target(*self._args, **self._kwargs)
+</pre></div>
+</div>
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">KeyboardInterrupt</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">line</span> <span class="mi">27</span>
+<span class="g g-Whitespace">     </span><span class="mi">24</span>     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Global min = </span><span class="si">{</span><span class="n">global_min</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2"> L/s/km², max = </span><span class="si">{</span><span class="n">global_max</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> L/s/km²&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">26</span> <span class="c1"># Usage</span>
+<span class="ne">---&gt; </span><span class="mi">27</span> <span class="n">parallel_min_max</span><span class="p">(</span><span class="n">bcub_df</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">],</span> <span class="n">da_dict</span><span class="p">)</span>   
+
+<span class="nn">Cell In[8], line 11,</span> in <span class="ni">parallel_min_max</span><span class="nt">(bcub_stations, da_dict, processes)</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span> <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">processes</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span>     <span class="n">fn</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">process_station</span><span class="p">,</span> <span class="n">da_dict</span><span class="o">=</span><span class="n">da_dict</span><span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">11</span>     <span class="n">results</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">bcub_stations</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="n">global_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="n">global_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+
+<span class="nn">File /usr/lib/python3.12/multiprocessing/pool.py:367,</span> in <span class="ni">Pool.map</span><span class="nt">(self, func, iterable, chunksize)</span>
+<span class="g g-Whitespace">    </span><span class="mi">362</span> <span class="k">def</span><span class="w"> </span><span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">363</span><span class="w">     </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="g g-Whitespace">    </span><span class="mi">364</span><span class="sd">     Apply `func` to each element in `iterable`, collecting the results</span>
+<span class="g g-Whitespace">    </span><span class="mi">365</span><span class="sd">     in a list that is returned.</span>
+<span class="g g-Whitespace">    </span><span class="mi">366</span><span class="sd">     &#39;&#39;&#39;</span>
+<span class="ne">--&gt; </span><span class="mi">367</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_async</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">mapstar</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+<span class="nn">File /usr/lib/python3.12/multiprocessing/pool.py:768,</span> in <span class="ni">ApplyResult.get</span><span class="nt">(self, timeout)</span>
+<span class="g g-Whitespace">    </span><span class="mi">767</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">768</span>     <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">769</span>     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ready</span><span class="p">():</span>
+<span class="g g-Whitespace">    </span><span class="mi">770</span>         <span class="k">raise</span> <span class="ne">TimeoutError</span>
+
+<span class="nn">File /usr/lib/python3.12/multiprocessing/pool.py:765,</span> in <span class="ni">ApplyResult.wait</span><span class="nt">(self, timeout)</span>
+<span class="g g-Whitespace">    </span><span class="mi">764</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">765</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_event</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+
+<span class="nn">File /usr/lib/python3.12/threading.py:655,</span> in <span class="ni">Event.wait</span><span class="nt">(self, timeout)</span>
+<span class="g g-Whitespace">    </span><span class="mi">653</span> <span class="n">signaled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag</span>
+<span class="g g-Whitespace">    </span><span class="mi">654</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">signaled</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">655</span>     <span class="n">signaled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cond</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">656</span> <span class="k">return</span> <span class="n">signaled</span>
+
+<span class="nn">File /usr/lib/python3.12/threading.py:355,</span> in <span class="ni">Condition.wait</span><span class="nt">(self, timeout)</span>
+<span class="g g-Whitespace">    </span><span class="mi">353</span> <span class="k">try</span><span class="p">:</span>    <span class="c1"># restore state no matter what (e.g., KeyboardInterrupt)</span>
+<span class="g g-Whitespace">    </span><span class="mi">354</span>     <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">355</span>         <span class="n">waiter</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">356</span>         <span class="n">gotit</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="g g-Whitespace">    </span><span class="mi">357</span>     <span class="k">else</span><span class="p">:</span>
+
+<span class="ne">KeyboardInterrupt</span>: 
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">set_grid</span><span class="p">(</span><span class="n">global_min</span><span class="p">,</span> <span class="n">global_max</span><span class="p">,</span> <span class="n">n_grid_points</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">):</span>
+    <span class="c1"># self.baseline_log_grid = np.linspace(np.log(adjusted_min_uar), np.log(max_uar), self.n_grid_points)</span>
+    <span class="n">baseline_log_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+        <span class="n">global_min</span><span class="p">,</span> <span class="n">global_max</span><span class="p">,</span> <span class="n">n_grid_points</span>
+    <span class="p">)</span>
+    <span class="n">baseline_lin_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">baseline_log_grid</span><span class="p">)</span>
+    <span class="n">log_dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">baseline_log_grid</span><span class="p">)</span>
+    <span class="n">max_step_size</span> <span class="o">=</span> <span class="n">baseline_lin_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">baseline_lin_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    max step size = </span><span class="si">{</span><span class="n">max_step_size</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1"> L/s/km^2 for n=</span><span class="si">{</span><span class="n">n_grid_points</span><span class="si">:</span><span class="s1">.1e</span><span class="si">}</span><span class="s1"> grid points&#39;</span><span class="p">)</span>
+    <span class="n">min_step_size</span> <span class="o">=</span> <span class="n">baseline_lin_grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">baseline_lin_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    min step size = </span><span class="si">{</span><span class="n">min_step_size</span><span class="si">:</span><span class="s1">.2e</span><span class="si">}</span><span class="s1"> L/s/km^2 for n=</span><span class="si">{</span><span class="n">n_grid_points</span><span class="si">:</span><span class="s1">.1e</span><span class="si">}</span><span class="s1"> grid points&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">baseline_lin_grid</span><span class="p">,</span> <span class="n">baseline_log_grid</span><span class="p">,</span> <span class="n">log_dx</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get the maximum streamflow from the streamflow dataset</span>
+<span class="c1"># max_streamflow = ds[&#39;discharge&#39;].max().values.item()</span>
+<span class="c1"># max_streamflow = # it&#39;s actually 19400 in the dataset</span>
+<span class="n">baseline_lin_grid</span><span class="p">,</span> <span class="n">baseline_log_grid</span><span class="p">,</span> <span class="n">log_dx</span> <span class="o">=</span> <span class="n">set_grid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1e-7</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span> <span class="n">n_grid_points</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>    max step size = 61.7 L/s/km^2 for n=4.1e+03 grid points
+    min step size = 6.20e-10 L/s/km^2 for n=4.1e+03 grid points
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_prior_from_laplace_fit</span><span class="p">(</span><span class="n">predicted_uar</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">target_da</span><span class="p">,</span> <span class="n">baseline_log_grid</span><span class="p">,</span> <span class="n">log_dx</span><span class="p">,</span> <span class="n">n_cols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scale_factor</span><span class="o">=</span><span class="mf">1.05</span><span class="p">,</span> <span class="n">recursion_depth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit a Laplace distribution to the simulation and define a </span>
+<span class="sd">    pdf across a pre-determined &quot;global&quot; range to avoid data</span>
+<span class="sd">    leakage.  &quot;Normalize&quot; by setting the total prior mass to</span>
+<span class="sd">    integrate to a factor related to the number of observations.</span>
+
+<span class="sd">    The location of the Laplace distribution is the median, </span>
+<span class="sd">    and the scale is the mean absolute deviation (MAD).</span>
+<span class="sd">    By Jensen&#39;s Inequality, the MAD is less than or equal to the standard deviation.</span>
+<span class="sd">    Here we just use the predicted log-mean and log-standard deviation</span>
+<span class="sd">    as an approximation of the Laplace distribution parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># assert no nan values</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">predicted_uar</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="sa">f</span><span class="s1">&#39;NaN values in predicted_uar: </span><span class="si">{</span><span class="n">predicted_uar</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="c1"># assert all positive values</span>
+    <span class="c1"># assert np.all(predicted_uar &gt; 0), f&#39;Negative values in predicted_uar: {np.min(predicted_uar)}&#39;</span>
+    <span class="c1"># replace anything &lt;= 0 with 1e-4 scaled by the drainage area</span>
+    <span class="n">predicted_uar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">predicted_uar</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mf">1e-4</span> <span class="o">/</span> <span class="n">target_da</span><span class="p">,</span> <span class="n">predicted_uar</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">predicted_uar</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;Negative values in predicted_uar: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">predicted_uar</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="c1"># print(&#39;min/max: &#39;, np.min(predicted_uar), np.max(predicted_uar))</span>
+    <span class="c1"># loc, scale = laplace.fit(np.log(predicted_uar))</span>
+
+    <span class="c1"># Apply scale factor in case of recursion</span>
+    <span class="k">if</span> <span class="n">scale</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">original_scale</span> <span class="o">=</span> <span class="n">scale</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">scale_factor</span> <span class="o">**</span> <span class="n">recursion_depth</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;   Adjusting scale from </span><span class="si">{</span><span class="n">original_scale</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> to </span><span class="si">{</span><span class="n">scale</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> for recursion depth </span><span class="si">{</span><span class="n">recursion_depth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">prior_pdf</span> <span class="o">=</span> <span class="n">laplace</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">baseline_log_grid</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
+    <span class="n">prior_check</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span><span class="n">prior_pdf</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">baseline_log_grid</span><span class="p">)</span>
+    <span class="n">prior_pdf</span> <span class="o">/=</span> <span class="n">prior_check</span>
+
+    <span class="c1"># Check for zeros</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">prior_pdf</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">prior_pdf</span><span class="p">)):</span>
+        <span class="c1"># Prevent scale from being too small</span>
+        <span class="k">if</span> <span class="n">recursion_depth</span> <span class="o">&gt;=</span> <span class="n">max_depth</span><span class="p">:</span>
+            <span class="c1"># set a very small prior</span>
+            <span class="n">prior_pdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">baseline_log_grid</span><span class="p">)</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Recursion limit reached. Scale=</span><span class="si">{</span><span class="n">scale</span><span class="si">}</span><span class="s2">, setting default prior to 1 pseudo-count uniform distribution.&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">prior_pdf</span>
+            <span class="c1"># raise ValueError(err_msg)</span>
+        <span class="c1"># print(f&quot;Recursion {recursion_depth}: Zero values detected. Increasing scale to {scale:.6f}&quot;)</span>
+        <span class="k">return</span> <span class="n">compute_prior_from_laplace_fit</span><span class="p">(</span><span class="n">predicted_uar</span><span class="p">,</span> <span class="n">target_da</span><span class="p">,</span> <span class="n">baseline_log_grid</span><span class="p">,</span> <span class="n">log_dx</span><span class="p">,</span> <span class="n">n_cols</span><span class="o">=</span><span class="n">n_cols</span><span class="p">,</span> <span class="n">scale_factor</span><span class="o">=</span><span class="n">scale_factor</span><span class="p">,</span> <span class="n">recursion_depth</span><span class="o">=</span><span class="n">recursion_depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">second_check</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span><span class="n">prior_pdf</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">baseline_log_grid</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">second_check</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;prior check != 1, </span><span class="si">{</span><span class="n">second_check</span><span class="si">:</span><span class="s1">.6f</span><span class="si">}</span><span class="s1"> N=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">predicted_uar</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">predicted_uar</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">prior_pdf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;min prior == 0, scale=</span><span class="si">{</span><span class="n">scale</span><span class="si">:</span><span class="s1">.5f</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="c1"># convert prior PDF to PMF (pseudo-count mass function)</span>
+    <span class="n">prior_pmf</span> <span class="o">=</span> <span class="n">prior_pdf</span> <span class="o">*</span> <span class="n">log_dx</span>
+
+    <span class="c1"># scale the number of pseudo-counts based on years of record  (365 / n_observations)</span>
+    <span class="c1"># and number of models in the ensemble (given by n_cols)</span>
+    <span class="n">prior_pseudo_counts</span> <span class="o">=</span> <span class="n">prior_pmf</span> <span class="o">*</span> <span class="p">(</span><span class="mi">365</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predicted_uar</span><span class="p">)</span> <span class="o">*</span> <span class="n">n_cols</span><span class="p">))</span>
+    
+    <span class="c1"># return weighted_prior_pdf</span>
+    <span class="k">return</span> <span class="n">prior_pseudo_counts</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">gaussian_kernel</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">u</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">measurement_error_bandwidth_function</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">error_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="mf">1e-1</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1e1</span><span class="p">,</span> <span class="mf">1e2</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">,</span> <span class="mf">1e4</span><span class="p">,</span> <span class="mf">1e5</span><span class="p">])</span>
+    <span class="n">error_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">error_points</span><span class="p">,</span> <span class="n">error_values</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">adaptive_bandwidths</span><span class="p">(</span><span class="n">uar</span><span class="p">,</span> <span class="n">da</span><span class="p">):</span>
+    <span class="n">flow_data</span> <span class="o">=</span> <span class="n">uar</span> <span class="o">*</span> <span class="n">da</span> <span class="o">/</span> <span class="mi">1000</span>
+    <span class="n">unique_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">flow_data</span><span class="p">)</span>
+    <span class="n">error_model</span> <span class="o">=</span> <span class="n">measurement_error_bandwidth_function</span><span class="p">(</span><span class="n">unique_q</span><span class="p">)</span>
+    <span class="n">unique_UAR</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="n">da</span><span class="p">)</span> <span class="o">*</span> <span class="n">unique_q</span>
+    <span class="n">upper_err_UAR</span> <span class="o">=</span> <span class="n">unique_UAR</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">error_model</span><span class="p">)</span>
+    <span class="n">err_widths_UAR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">upper_err_UAR</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">unique_UAR</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_UAR</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">noise_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">unique_UAR</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">error_model</span><span class="p">),</span> <span class="n">unique_UAR</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">error_model</span><span class="p">))</span>
+        <span class="n">flow_data</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="n">noise_bounds</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">flow_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">unique_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">flow_data</span><span class="p">)</span>
+        <span class="n">unique_UAR</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="n">da</span><span class="p">)</span> <span class="o">*</span> <span class="n">unique_q</span>
+
+    <span class="n">log_midpoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">unique_UAR</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">unique_UAR</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="n">unique_UAR</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">log_midpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">unique_UAR</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">right</span> <span class="o">=</span> <span class="n">unique_UAR</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">unique_UAR</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">log_midpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">log_midpoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="n">left</span><span class="p">],</span> <span class="n">log_midpoints</span><span class="p">,</span> <span class="p">[</span><span class="n">right</span><span class="p">]))</span>
+    <span class="n">log_diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">log_midpoints</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">1.15</span>
+
+    <span class="c1"># use the error-based bandwidth except where the log difference </span>
+    <span class="c1"># between unique values is greater </span>
+    <span class="n">bw_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">log_diffs</span> <span class="o">&gt;</span> <span class="n">err_widths_UAR</span><span class="p">,</span> <span class="n">log_diffs</span><span class="p">,</span> <span class="n">err_widths_UAR</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">unique_UAR</span><span class="p">,</span> <span class="n">uar</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">bw_vals</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">KDEEstimator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_grid</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">mean_param_dict</span><span class="p">,</span> <span class="n">sd_param_dict</span><span class="p">,</span> <span class="n">set_global_prior</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">log_grid</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_param_dict</span> <span class="o">=</span> <span class="n">mean_param_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sd_param_dict</span> <span class="o">=</span> <span class="n">sd_param_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_prior_from_laplace_fit</span> <span class="o">=</span> <span class="n">set_global_prior</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">uar_data</span><span class="p">,</span> <span class="n">da</span><span class="p">,</span> <span class="n">n_years</span><span class="p">,</span> <span class="p">):</span>
+        <span class="n">uar_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">uar_data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">bw_values</span> <span class="o">=</span> <span class="n">adaptive_bandwidths</span><span class="p">(</span><span class="n">uar_data</span><span class="p">,</span> <span class="n">da</span><span class="p">)</span>
+        <span class="n">log_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">uar_data</span><span class="p">)</span>
+
+        <span class="n">H</span> <span class="o">=</span> <span class="n">bw_values</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_grid</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">log_data</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">/</span> <span class="n">H</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="n">gaussian_kernel</span><span class="p">(</span><span class="n">U</span><span class="p">)</span> <span class="o">/</span> <span class="n">H</span>
+
+        <span class="n">pdf</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">log_data</span><span class="p">)</span>
+        <span class="n">pdf</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_grid</span><span class="p">)</span>
+        <span class="n">pmf</span> <span class="o">=</span> <span class="n">pdf</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
+        <span class="n">pmf</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pmf</span><span class="p">)</span>
+
+        <span class="n">mu</span><span class="p">,</span> <span class="n">sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_param_dict</span><span class="p">[</span><span class="n">stn</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd_param_dict</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span>
+        <span class="n">posterior_pmf</span> <span class="o">=</span> <span class="n">pmf</span>
+        <span class="n">posterior_pdf</span> <span class="o">=</span> <span class="n">pdf</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_prior_from_laplace_fit</span><span class="p">:</span>
+            <span class="c1"># Compute prior counts from Laplace fit</span>
+            <span class="c1"># This is a global prior based on the mean and standard deviation of the log-mean</span>
+            <span class="c1"># and log-standard deviation of the UAR data.</span>
+            <span class="c1"># The prior is computed across a pre-defined &quot;global&quot; range to avoid data leakage.</span>
+            <span class="c1"># The prior counts are scaled by the number of observations and the number of columns in the ensemble.</span>
+            <span class="n">laplace_prior_counts</span> <span class="o">=</span> <span class="n">compute_prior_from_laplace_fit</span><span class="p">(</span><span class="n">uar_data</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">da</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_grid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span>
+            <span class="n">posterior_counts</span> <span class="o">=</span> <span class="n">pmf</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">uar_data</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span>  <span class="n">n_years</span><span class="p">)</span> <span class="o">*</span> <span class="n">laplace_prior_counts</span>
+            <span class="n">posterior_pmf</span> <span class="o">=</span> <span class="n">posterior_counts</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">posterior_counts</span><span class="p">)</span>
+            <span class="n">posterior_pdf</span> <span class="o">=</span> <span class="n">posterior_pmf</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">posterior_pmf</span><span class="p">,</span> <span class="n">posterior_pdf</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set the minimum record length</span>
+<span class="n">min_record_years</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="c1"># choose if you want to set a global prior distribution based on the </span>
+<span class="c1"># Laplace fit to (out of sample) predicted location and scale</span>
+<span class="n">set_global_prior</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">validated_stations</span> <span class="o">=</span> <span class="n">bcub_df</span><span class="p">[</span><span class="n">bcub_df</span><span class="p">[</span><span class="s1">&#39;n_complete_years&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_record_years</span><span class="p">][</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Filtering stations with at least </span><span class="si">{</span><span class="n">min_record_years</span><span class="si">}</span><span class="s1"> complete years of data: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">validated_stations</span><span class="p">)</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bcub_df</span><span class="p">)</span><span class="si">}</span><span class="s1"> stations.&#39;</span><span class="p">)</span>
+
+<span class="c1"># theres a problem with finding &#39;0212414900&#39; in the data, drop it</span>
+<span class="n">validated_stations</span> <span class="o">=</span> <span class="p">[</span><span class="n">stn</span> <span class="k">for</span> <span class="n">stn</span> <span class="ow">in</span> <span class="n">validated_stations</span> <span class="k">if</span> <span class="n">stn</span> <span class="o">!=</span> <span class="s1">&#39;0212414900&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Filtering stations with at least 5 complete years of data: 1024/1024 stations.
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># from kde_estimator import KDEEstimator</span>
+<span class="n">pdf_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;results&#39;</span> <span class="o">/</span> <span class="s1">&#39;baseline_distributions&#39;</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;bcub_pdfs.csv&#39;</span>
+<span class="n">pmf_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;results&#39;</span> <span class="o">/</span> <span class="s1">&#39;baseline_distributions&#39;</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;bcub_pmfs.csv&#39;</span>
+
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">):</span>
+    <span class="n">pmf_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">pmf_path</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;q&#39;</span><span class="p">)</span>
+    <span class="n">pdf_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;q&#39;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># compute the PDF and PMF for each station</span>
+    <span class="n">log_dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">baseline_log_grid</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">validated_stations</span><span class="p">),</span> <span class="s1">&#39;stations with at least 2 complete years of data also in the predicted parameter dict.&#39;</span><span class="p">)</span>
+    <span class="n">validated_stations</span> <span class="o">=</span> <span class="p">[</span><span class="n">stn</span> <span class="k">for</span> <span class="n">stn</span> <span class="ow">in</span> <span class="n">validated_stations</span> <span class="k">if</span> <span class="n">stn</span> <span class="ow">in</span> <span class="n">mean_param_dict</span> <span class="ow">and</span> <span class="n">stn</span> <span class="ow">in</span> <span class="n">sd_param_dict</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">stn</span> <span class="ow">in</span> <span class="n">mean_param_dict</span> <span class="k">for</span> <span class="n">stn</span> <span class="ow">in</span> <span class="n">validated_stations</span><span class="p">]),</span> <span class="s2">&quot;Not all stations have predicted mean parameters.&quot;</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">stn</span> <span class="ow">in</span> <span class="n">sd_param_dict</span> <span class="k">for</span> <span class="n">stn</span> <span class="ow">in</span> <span class="n">validated_stations</span><span class="p">]),</span> <span class="s2">&quot;Not all stations have predicted standard deviation parameters.&quot;</span>
+    <span class="n">estimator</span> <span class="o">=</span> <span class="n">KDEEstimator</span><span class="p">(</span><span class="n">baseline_log_grid</span><span class="p">,</span> <span class="n">log_dx</span><span class="p">,</span> <span class="n">mean_param_dict</span><span class="p">,</span> <span class="n">sd_param_dict</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_pdf_and_pmf_from_kde</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">):</span>
+        <span class="n">stn</span><span class="p">,</span> <span class="n">n_years</span> <span class="o">=</span> <span class="n">input_tuple</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">retrieve_timeseries_discharge</span><span class="p">(</span><span class="n">stn</span><span class="p">)</span>
+        <span class="c1"># convert the streamflow to L/s/km²</span>
+        <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stn</span><span class="si">}</span><span class="s1">_uar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span> <span class="o">/</span> <span class="n">da_dict</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span>
+        
+        <span class="c1"># compute the PDF and PMF</span>
+        <span class="n">pmf</span><span class="p">,</span> <span class="n">pdf</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">stn</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stn</span><span class="si">}</span><span class="s1">_uar&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">da_dict</span><span class="p">[</span><span class="n">stn</span><span class="p">],</span> <span class="n">n_years</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">stn</span><span class="p">,</span> <span class="n">pmf</span><span class="p">,</span> <span class="n">pdf</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">validated_stations</span><span class="p">),</span> <span class="s1">&#39;stations meeting minimum complete period of record.&#39;</span><span class="p">)</span>
+    <span class="n">years_by_stn</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">complete_year_dict</span><span class="p">[</span><span class="n">stn</span><span class="p">])</span> <span class="k">for</span> <span class="n">stn</span> <span class="ow">in</span> <span class="n">validated_stations</span><span class="p">]</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">validated_stations</span><span class="p">,</span> <span class="n">years_by_stn</span><span class="p">))</span>
+    <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">compute_pdf_and_pmf_from_kde</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+
+    <span class="c1"># concatenate the results</span>
+    <span class="n">stations</span><span class="p">,</span> <span class="n">pmfs</span><span class="p">,</span> <span class="n">pdfs</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">results</span><span class="p">)</span>
+    <span class="n">pdf_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">pdfs</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">stations</span><span class="p">)</span>
+    <span class="n">pmf_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">pmfs</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">stations</span><span class="p">)</span>
+    <span class="n">pdf_df</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">baseline_lin_grid</span>
+    <span class="n">pmf_df</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">baseline_lin_grid</span>
+
+    <span class="c1"># save the pdf and pmf files</span>
+    <span class="n">pdf_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">pmf_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">pdf_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">)</span>
+    <span class="n">pmf_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">pmf_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1024 stations with at least 2 complete years of data also in the predicted parameter dict.
+1024 stations meeting minimum complete period of record.
+</pre></div>
+</div>
+</div>
+</div>
+<section id="compute-the-entropy-of-each-pmf">
+<h3>Compute the entropy of each PMF<a class="headerlink" href="#compute-the-entropy-of-each-pmf" title="Link to this heading">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The remainder of this notebook is not part of the analysis presented in the accompanying paper.</p>
+</div>
+<p>The entropy of the distribution represents the randomness or disorder of the system, and it is given by the sum of log probabilities of the system states:</p>
+<div class="math notranslate nohighlight">
+\[H(X) = \sum_{i=1}^N -\log p_i\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># compute the entropy of the posterior distribution for each station</span>
+<span class="n">bits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">13</span><span class="p">))</span> <span class="c1"># set a range that is both too low and too high for the data</span>
+<span class="n">entropy_output_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;results&#39;</span> <span class="o">/</span> <span class="s1">&#39;entropy_results&#39;</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">entropy_output_folder</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">entropy_output_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">states</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="o">**</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bits</span><span class="p">]</span>
+<span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-12</span> <span class="c1"># set a small epsilon to avoid numerical issues</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">states</span><span class="p">:</span>
+    <span class="n">q_values</span> <span class="o">=</span> <span class="n">pmf_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
+    <span class="c1"># resample the PMF by q_values to the number of states</span>
+    <span class="n">resampled_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">q_values</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">-</span><span class="n">eps</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">q_values</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">+</span><span class="n">eps</span><span class="p">),</span> <span class="n">s</span><span class="p">)</span>
+    <span class="n">resampled_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">resampled_q</span><span class="p">)</span>  <span class="c1"># convert back to original scale</span>
+    
+    <span class="c1"># create a new DataFrame with the resampled PMF</span>
+    <span class="n">pmf_resampled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">resampled_q</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">pmf_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">stn</span> <span class="ow">in</span> <span class="n">pmf_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">pmf</span> <span class="o">=</span> <span class="n">pmf_df</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">bin_numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">q_values</span><span class="p">,</span> <span class="n">resampled_q</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;q&#39;</span><span class="p">:</span> <span class="n">q_values</span><span class="p">,</span> <span class="s1">&#39;pmf&#39;</span><span class="p">:</span> <span class="n">pmf</span><span class="p">,</span> <span class="s1">&#39;bin&#39;</span><span class="p">:</span> <span class="n">bin_numbers</span><span class="p">})</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;bin&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">pmf_resampled</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;pmf&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;pmf&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mi">1</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;PMF for </span><span class="si">{</span><span class="n">stn</span><span class="si">}</span><span class="s1"> does not sum to 1: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pmf</span><span class="p">)</span><span class="si">:</span><span class="s1">.6f</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">bits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    <span class="n">pmf_resampled</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span>
+    <span class="n">pmf_resampled</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">entropy_output_folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;bcub_pmf_resampled_</span><span class="si">{</span><span class="n">bits</span><span class="si">}</span><span class="s1">bits.csv&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.palettes</span><span class="w"> </span><span class="kn">import</span> <span class="n">RdYlGn</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">logspace_edges_from_linear_centers</span><span class="p">(</span><span class="n">centers</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Given linear-space bin centers from a log-uniform KDE, return log-space edges in linear space.&quot;&quot;&quot;</span>
+    <span class="n">log_centers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">centers</span><span class="p">)</span>
+    <span class="n">dlog</span> <span class="o">=</span> <span class="n">log_centers</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">log_centers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">log_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+        <span class="p">[</span><span class="n">log_centers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dlog</span> <span class="o">/</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="n">log_centers</span> <span class="o">+</span> <span class="n">dlog</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="p">])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_edges</span><span class="p">)</span>  <span class="c1"># return edges in linear space</span>
+
+
+<span class="n">pmf_fig</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;BCUB PMF Resampled&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">750</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">x_axis_type</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">entropy_distributions</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">states</span><span class="p">:</span>
+    <span class="n">bits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    <span class="n">pmf_resampled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">entropy_output_folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;bcub_pmf_resampled_</span><span class="si">{</span><span class="n">bits</span><span class="si">}</span><span class="s1">bits.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">pmf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">pmf_resampled</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># get the percentile value corresponding to the mean PMF over all rows</span>
+    <span class="n">mean_pmf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pmf_resampled</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">mean_percentile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">mean_pmf</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+
+    <span class="n">linear_centers</span> <span class="o">=</span> <span class="n">pmf_resampled</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">logspace_edges_from_linear_centers</span><span class="p">(</span><span class="n">linear_centers</span><span class="p">)</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>  <span class="c1"># linear bin widths corresponding to log-space bins</span>
+    <span class="n">pdf</span> <span class="o">=</span> <span class="n">pmf</span> <span class="o">/</span> <span class="n">dx</span>  <span class="c1"># convert PMF to PDF</span>
+
+    <span class="n">entropy</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pmf</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">pmf</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">))</span>  <span class="c1"># add a small epsilon to avoid log(0)</span>
+    
+    <span class="c1"># print(len(dx), len(edges), len(pmf))</span>
+    <span class="c1"># print(asdf)</span>
+    <span class="n">bits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">entropy</span> <span class="o">/</span> <span class="n">bits</span>
+    <span class="c1"># add an edge at the end to close the PMF</span>
+    
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
+        <span class="n">top</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span>
+        <span class="n">bottom</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">left</span><span class="o">=</span><span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">right</span><span class="o">=</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+        <span class="n">fill_color</span><span class="o">=</span><span class="n">RdYlGn</span><span class="p">[</span><span class="mi">11</span><span class="p">][</span><span class="n">states</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">RdYlGn</span><span class="p">[</span><span class="mi">11</span><span class="p">])],</span>
+        <span class="n">line_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+        <span class="n">legend_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">bits</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">b (H=</span><span class="si">{</span><span class="n">entropy</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">ratio</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">%)&#39;</span>
+    <span class="p">)</span>
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">click_policy</span> <span class="o">=</span> <span class="s1">&#39;hide&#39;</span>
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s1">&#39;top_right&#39;</span>
+    <span class="c1"># pmf_fig.xaxis.axis_label = r&#39;$$\text{Unit Area Runoff } \frac{L}{s\cdot \text{km}^2}$$&#39;</span>
+    <span class="c1"># pmf_fig.yaxis.axis_label = r&#39;$$\text{PDF } P(X\leq x)$$&#39;</span>
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">&quot;Unit Area Runoff (L/s/km²)&quot;</span>
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">&quot;Probability Density&quot;</span>
+    <span class="n">pmf_fig</span> <span class="o">=</span> <span class="n">dpf</span><span class="o">.</span><span class="n">format_fig_fonts</span><span class="p">(</span><span class="n">pmf_fig</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">pmf_fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_empirical_cdf</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the empirical cumulative distribution function (CDF) of the given values.&quot;&quot;&quot;</span>
+    <span class="n">sorted_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_values</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sorted_values</span><span class="p">,</span> <span class="n">cdf</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.palettes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Viridis10</span>
+<span class="c1"># plot the CDFs of entropy by number of bits</span>
+<span class="n">entropy_dist_fig</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Entropy Distributions by Number of Bits&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">750</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+<span class="n">colours</span> <span class="o">=</span> <span class="n">Viridis10</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">states</span><span class="p">:</span>
+    <span class="n">bits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    <span class="n">pmf_resampled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">entropy_output_folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;bcub_pmf_resampled_</span><span class="si">{</span><span class="n">bits</span><span class="si">}</span><span class="s1">bits.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># drop the &#39;q&#39; column</span>
+    <span class="c1"># pmf = pmf_resampled.drop(columns=[&#39;q&#39;]).values</span>
+    <span class="c1"># broadcast the computation of entropy across all columns</span>
+    <span class="c1"># to compute the entropy for each column</span>
+    <span class="n">sample_entropy</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pmf_resampled</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">pmf_resampled</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># add a small epsilon to avoid log(0)</span>
+    <span class="n">mean_entropy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">sample_entropy</span><span class="p">)</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">cdf</span> <span class="o">=</span> <span class="n">compute_empirical_cdf</span><span class="p">(</span><span class="n">sample_entropy</span><span class="p">)</span>
+
+    <span class="n">entropy_dist_fig</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">cdf</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="n">states</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">colours</span><span class="p">)],</span>
+                          <span class="n">legend_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">bits</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">b (H=</span><span class="si">{</span><span class="n">mean_entropy</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+<span class="n">entropy_dist_fig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s1">&#39;bottom_right&#39;</span>
+<span class="n">entropy_dist_fig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">background_fill_alpha</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">entropy_dist_fig</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">&quot;Entropy (bits)&quot;</span>
+<span class="n">entropy_dist_fig</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">&quot;Cumulative Probability&quot;</span>
+<span class="n">entropy_dist_fig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">click_policy</span> <span class="o">=</span> <span class="s1">&#39;hide&#39;</span>
+<span class="n">entropy_dist_fig</span> <span class="o">=</span> <span class="n">dpf</span><span class="o">.</span><span class="n">format_fig_fonts</span><span class="p">(</span><span class="n">entropy_dist_fig</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">entropy_dist_fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">logspace_edges_from_linear_centers</span><span class="p">(</span><span class="n">centers</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Given linear-space bin centers from a log-uniform KDE, return log-space edges in linear space.&quot;&quot;&quot;</span>
+    <span class="n">log_centers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">centers</span><span class="p">)</span>
+    <span class="n">dlog</span> <span class="o">=</span> <span class="n">log_centers</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">log_centers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">log_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+        <span class="p">[</span><span class="n">log_centers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dlog</span> <span class="o">/</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="n">log_centers</span> <span class="o">+</span> <span class="n">dlog</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="p">])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_edges</span><span class="p">)</span>  <span class="c1"># return edges in linear space</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.palettes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Viridis10</span> <span class="k">as</span> <span class="n">colours</span>
+<span class="n">pmf_fig</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot; PDF by Percentile&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">x_axis_type</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">percentiles</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">95</span><span class="p">,</span> <span class="mi">96</span><span class="p">,</span> <span class="mi">98</span><span class="p">,</span> <span class="mi">99</span>
+<span class="k">for</span> <span class="n">pct</span> <span class="ow">in</span> <span class="n">percentiles</span><span class="p">:</span>
+    <span class="n">pmf_resampled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">entropy_output_folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;bcub_pmf_resampled_8bits.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">pmf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">pmf_resampled</span><span class="p">,</span> <span class="n">pct</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">linear_centers</span> <span class="o">=</span> <span class="n">pmf_resampled</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">logspace_edges_from_linear_centers</span><span class="p">(</span><span class="n">linear_centers</span><span class="p">)</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>  <span class="c1"># linear bin widths corresponding to log-space bins</span>
+    <span class="n">pdf</span> <span class="o">=</span> <span class="n">pmf</span> <span class="o">/</span> <span class="n">dx</span>  <span class="c1"># convert PMF to PDF</span>
+    <span class="c1"># compute the area under the PDF</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pdf</span> <span class="o">=</span> <span class="n">pdf</span> <span class="o">/</span> <span class="n">area</span>  <span class="c1"># normalize the PDF to have unit area</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;Area under PDF for </span><span class="si">{</span><span class="n">pct</span><span class="si">}</span><span class="s1">th percentile does not equal 1: </span><span class="si">{</span><span class="n">area</span><span class="si">:</span><span class="s1">.6f</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="c1"># print(asdf)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">pmf</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">entropy</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pmf</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">pmf</span><span class="p">[</span><span class="n">mask</span><span class="p">]))</span>  
+    
+    <span class="c1"># print(len(dx), len(edges), len(pmf))</span>
+    <span class="c1"># print(asdf)</span>
+    <span class="n">bits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">entropy</span> <span class="o">/</span> <span class="n">bits</span>
+    <span class="c1"># add an edge at the end to close the PMF</span>
+    
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span>
+        <span class="n">line_width</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="n">percentiles</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pct</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">colours</span><span class="p">)],</span>
+        <span class="n">legend_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">pct</span><span class="si">}</span><span class="s1">th Percentile (H=</span><span class="si">{</span><span class="n">entropy</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">ratio</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">%)&#39;</span>
+    <span class="p">)</span>
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">click_policy</span> <span class="o">=</span> <span class="s1">&#39;hide&#39;</span>
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s1">&#39;top_right&#39;</span>
+    <span class="c1"># pmf_fig.xaxis.axis_label = r&#39;$$\text{Unit Area Runoff } \frac{L}{s\cdot \text{km}^2}$$&#39;</span>
+    <span class="c1"># pmf_fig.yaxis.axis_label = r&#39;$$\text{PDF } P(X\leq x)$$&#39;</span>
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">&quot;Unit Area Runoff (L/s/km²)&quot;</span>
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">&quot;Probability Density&quot;</span>
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">background_fill_alpha</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">pmf_fig</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">pmf_fig</span><span class="o">.</span><span class="n">legend</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;right&#39;</span><span class="p">)</span>
+    <span class="n">pmf_fig</span> <span class="o">=</span> <span class="n">dpf</span><span class="o">.</span><span class="n">format_fig_fonts</span><span class="p">(</span><span class="n">pmf_fig</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">pmf_fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogColorMapper</span><span class="p">,</span> <span class="n">ColorBar</span><span class="p">,</span> <span class="n">FixedTicker</span><span class="p">,</span> <span class="n">ColumnDataSource</span><span class="p">,</span> <span class="n">LinearColorMapper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.palettes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Viridis256</span>
+
+<span class="n">percentiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">99.9</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+<span class="n">exceedance_probs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">percentiles</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>  <span class="c1"># Convert percentiles to exceedance probabilities</span>
+<span class="n">pmf_resampled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">entropy_output_folder</span> <span class="o">/</span> <span class="s1">&#39;bcub_pmf_resampled_12bits.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">pmf_resampled</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;PMF does not sum to 1 across all stations.&quot;</span>
+<span class="n">linear_centers</span> <span class="o">=</span> <span class="n">pmf_resampled</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+<span class="n">edges</span> <span class="o">=</span> <span class="n">logspace_edges_from_linear_centers</span><span class="p">(</span><span class="n">linear_centers</span><span class="p">)</span>
+<span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+<span class="n">x_vals</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">log_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">x_vals</span><span class="p">)</span>
+
+<span class="n">z_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">pct</span> <span class="ow">in</span> <span class="n">percentiles</span><span class="p">:</span>
+    <span class="n">pmf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">pmf_resampled</span><span class="p">,</span> <span class="n">pct</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># pmf /= np.sum(pmf)</span>
+    <span class="n">z_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmf</span><span class="p">)</span>
+
+<span class="n">z_image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">z_matrix</span><span class="p">))</span>
+
+<span class="c1"># Use log color mapping for dynamic range of PDF values</span>
+<span class="n">mapper</span> <span class="o">=</span> <span class="n">LogColorMapper</span><span class="p">(</span><span class="n">palette</span><span class="o">=</span><span class="n">Viridis256</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="n">z_image</span><span class="p">[</span><span class="n">z_image</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">high</span><span class="o">=</span><span class="n">z_image</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create figure with x-axis in log space (via manual transformation)</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;PMF across Large Sample of Watersheds&quot;</span><span class="p">,</span>
+    <span class="c1"># x_range=(log_x.min(), log_x.max()),</span>
+    <span class="n">x_range</span><span class="o">=</span><span class="p">(</span><span class="n">x_vals</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x_vals</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span>
+    <span class="n">y_range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">99.9</span><span class="p">),</span>
+    <span class="c1"># y_range=(np.min(exceedance_probs), np.max(exceedance_probs)),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+    <span class="n">x_axis_type</span><span class="o">=</span><span class="s2">&quot;log&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># exceedance_probs = 1 - (percentiles / 100)</span>
+<span class="c1"># p.yaxis.axis_label = &quot;Exceedance Probability&quot;</span>
+
+<span class="n">p</span><span class="o">.</span><span class="n">image</span><span class="p">(</span>
+    <span class="n">image</span><span class="o">=</span><span class="p">[</span><span class="n">z_image</span><span class="p">],</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">x_vals</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+    <span class="n">y</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">dw</span><span class="o">=</span><span class="n">x_vals</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x_vals</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+    <span class="n">dh</span><span class="o">=</span><span class="mi">98</span><span class="p">,</span>
+    <span class="n">color_mapper</span><span class="o">=</span><span class="n">mapper</span>
+<span class="p">)</span>
+
+<span class="c1"># Axis labels</span>
+<span class="n">p</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">&quot;Unit Area Runoff (L/s/km²)&quot;</span>
+<span class="n">p</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">&quot;Percentile&quot;</span>
+
+<span class="c1"># Color bar</span>
+<span class="n">color_bar</span> <span class="o">=</span> <span class="n">ColorBar</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Probability Mass&quot;</span><span class="p">,</span>  <span class="n">color_mapper</span><span class="o">=</span><span class="n">mapper</span><span class="p">,</span> <span class="n">label_standoff</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">color_bar</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">)</span>
+
+<span class="n">show</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mean_pmf</span> <span class="o">=</span> <span class="n">pmf_resampled</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Mean PMF per bin</span>
+
+<span class="c1"># Create a new figure for the mean PDF</span>
+<span class="n">mean_pdf_fig</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Mean PDF of Unit Area Runoff&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">x_axis_type</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">mean_pdf_fig</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">mean_pmf</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;Mean PDF&#39;</span><span class="p">)</span>
+<span class="n">mean_pdf_fig</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">&quot;Unit Area Runoff (L/s/km²)&quot;</span>
+<span class="n">mean_pdf_fig</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">&quot;Probability Density&quot;</span>
+<span class="n">mean_pdf_fig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s1">&#39;top_right&#39;</span>
+<span class="n">mean_pdf_fig</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">click_policy</span> <span class="o">=</span> <span class="s1">&#39;hide&#39;</span>
+<span class="n">mean_pdf_fig</span> <span class="o">=</span> <span class="n">dpf</span><span class="o">.</span><span class="n">format_fig_fonts</span><span class="p">(</span><span class="n">mean_pdf_fig</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">mean_pdf_fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading">#</a></h2>
+<p>In the subsequent chapters, we’ll use the KL divergence computed for each station in a gradient boosting model to test their predictability from catchment attributes.</p>
+</section>
+<section id="citations">
+<h2>Citations<a class="headerlink" href="#citations" title="Link to this heading">#</a></h2>
+<span class="target" id="id1"></span></section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./notebooks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-pre-processing-overview">Data pre-processing overview</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#get-updated-data-sources-and-validate-catchment-attributes">get updated data sources and validate catchment attributes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#import-hysets-catchment-attributes">Import HYSETS catchment attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-the-pre-filtered-stations-within-the-study-region">Import the pre-filtered stations within the study region</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#import-streamflow-timeseries">Import streamflow timeseries</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculate-period-of-record-por-probability-distribution-functions-for-each-station-record">Calculate Period of Record (POR) probability distribution functions for each station record</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-a-global-range-of-expected-unit-area-runoff">Define a global range of expected (unit area) runoff</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compute-the-entropy-of-each-pmf">Compute the entropy of each PMF</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">Citations</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Dan Kovacek
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

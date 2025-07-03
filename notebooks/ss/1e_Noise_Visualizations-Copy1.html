@@ -28,11 +28,11 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -184,7 +184,6 @@
         <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../1_data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../2_Methods.html">Methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../2a_Fit_Continuous_Distributions.html">Fit Continuous Distributions</a></li>
 </ul>
 
     </div>
@@ -419,49 +418,360 @@ document.write(`
                   
   <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">entropy</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
-<span class="kn">import</span> <span class="nn">data_processing_functions</span> <span class="k">as</span> <span class="nn">dpf</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">entropy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">data_processing_functions</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dpf</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 
 <span class="c1"># visualize the catchment centroid locations</span>
-<span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="n">figure</span><span class="p">,</span> <span class="n">show</span>
-<span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">gridplot</span>
-<span class="kn">from</span> <span class="nn">bokeh.io</span> <span class="kn">import</span> <span class="n">output_notebook</span><span class="p">,</span> <span class="n">export_png</span>
-<span class="kn">from</span> <span class="nn">bokeh.models</span> <span class="kn">import</span> <span class="n">ColumnDataSource</span><span class="p">,</span> <span class="n">LinearAxis</span><span class="p">,</span> <span class="n">Range1d</span>
-<span class="kn">from</span> <span class="nn">bokeh.palettes</span> <span class="kn">import</span> <span class="n">Colorblind</span><span class="p">,</span> <span class="n">Sunset10</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">figure</span><span class="p">,</span> <span class="n">show</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.layouts</span><span class="w"> </span><span class="kn">import</span> <span class="n">gridplot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">output_notebook</span><span class="p">,</span> <span class="n">export_png</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColumnDataSource</span><span class="p">,</span> <span class="n">LinearAxis</span><span class="p">,</span> <span class="n">Range1d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.palettes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Colorblind</span><span class="p">,</span> <span class="n">Sunset10</span>
 <span class="n">output_notebook</span><span class="p">()</span>
 
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">lognorm</span><span class="p">,</span> <span class="n">expon</span><span class="p">,</span> <span class="n">kappa4</span><span class="p">,</span> <span class="n">gaussian_kde</span>
-<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">kl_div</span><span class="p">,</span> <span class="n">gammaln</span>
-<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">lognorm</span><span class="p">,</span> <span class="n">expon</span><span class="p">,</span> <span class="n">kappa4</span><span class="p">,</span> <span class="n">gaussian_kde</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">kl_div</span><span class="p">,</span> <span class="n">gammaln</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize</span>
 
-<span class="kn">import</span> <span class="nn">jax</span>
-<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
-<span class="kn">from</span> <span class="nn">jax.scipy.stats</span> <span class="kn">import</span> <span class="n">gaussian_kde</span> <span class="k">as</span> <span class="n">jkde</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax.scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussian_kde</span> <span class="k">as</span> <span class="n">jkde</span>
 
 <span class="n">BASE_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">5</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">entropy</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
-<span class="ne">----&gt; </span><span class="mi">5</span> <span class="kn">import</span> <span class="nn">data_processing_functions</span> <span class="k">as</span> <span class="nn">dpf</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="output text_html">    <style>
+        .bk-notebook-logo {
+            display: block;
+            width: 20px;
+            height: 20px;
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAAOkSURBVDiNjZRtaJVlGMd/1/08zzln5zjP1LWcU9N0NkN8m2CYjpgQYQXqSs0I84OLIC0hkEKoPtiH3gmKoiJDU7QpLgoLjLIQCpEsNJ1vqUOdO7ppbuec5+V+rj4ctwzd8IIbbi6u+8f1539dt3A78eXC7QizUF7gyV1fD1Yqg4JWz84yffhm0qkFqBogB9rM8tZdtwVsPUhWhGcFJngGeWrPzHm5oaMmkfEg1usvLFyc8jLRqDOMru7AyC8saQr7GG7f5fvDeH7Ej8CM66nIF+8yngt6HWaKh7k49Soy9nXurCi1o3qUbS3zWfrYeQDTB/Qj6kX6Ybhw4B+bOYoLKCC9H3Nu/leUTZ1JdRWkkn2ldcCamzrcf47KKXdAJllSlxAOkRgyHsGC/zRday5Qld9DyoM4/q/rUoy/CXh3jzOu3bHUVZeU+DEn8FInkPBFlu3+nW3Nw0mk6vCDiWg8CeJaxEwuHS3+z5RgY+YBR6V1Z1nxSOfoaPa4LASWxxdNp+VWTk7+4vzaou8v8PN+xo+KY2xsw6une2frhw05CTYOmQvsEhjhWjn0bmXPjpE1+kplmmkP3suftwTubK9Vq22qKmrBhpY4jvd5afdRA3wGjFAgcnTK2s4hY0/GPNIb0nErGMCRxWOOX64Z8RAC4oCXdklmEvcL8o0BfkNK4lUg9HTl+oPlQxdNo3Mg4Nv175e/1LDGzZen30MEjRUtmXSfiTVu1kK8W4txyV6BMKlbgk3lMwYCiusNy9fVfvvwMxv8Ynl6vxoByANLTWplvuj/nF9m2+PDtt1eiHPBr1oIfhCChQMBw6Aw0UulqTKZdfVvfG7VcfIqLG9bcldL/+pdWTLxLUy8Qq38heUIjh4XlzZxzQm19lLFlr8vdQ97rjZVOLf8nclzckbcD4wxXMidpX30sFd37Fv/GtwwhzhxGVAprjbg0gCAEeIgwCZyTV2Z1REEW8O4py0wsjeloKoMr6iCY6dP92H6Vw/oTyICIthibxjm/DfN9lVz8IqtqKYLUXfoKVMVQVVJOElGjrnnUt9T9wbgp8AyYKaGlqingHZU/uG2NTZSVqwHQTWkx9hxjkpWDaCg6Ckj5qebgBVbT3V3NNXMSiWSDdGV3hrtzla7J+duwPOToIg42ChPQOQjspnSlp1V+Gjdged7+8UN5CRAV7a5EdFNwCjEaBR27b3W890TE7g24NAP/mMDXRWrGoFPQI9ls/MWO2dWFAar/xcOIImbbpA3zgAAAABJRU5ErkJggg==);
+        }
+    </style>
+    <div>
+        <a href="https://bokeh.org" target="_blank" class="bk-notebook-logo"></a>
+        <span id="be52bf04-611b-4f8f-9450-8ed2c3f5c096">Loading BokehJS ...</span>
+    </div>
+</div><script type="application/javascript">'use strict';
+(function(root) {
+  function now() {
+    return new Date();
+  }
 
-<span class="ne">ModuleNotFoundError</span>: No module named &#39;data_processing_functions&#39;
-</pre></div>
-</div>
-</div>
+  const force = true;
+
+  if (typeof root._bokeh_onload_callbacks === "undefined" || force === true) {
+    root._bokeh_onload_callbacks = [];
+    root._bokeh_is_loading = undefined;
+  }
+
+const JS_MIME_TYPE = 'application/javascript';
+  const HTML_MIME_TYPE = 'text/html';
+  const EXEC_MIME_TYPE = 'application/vnd.bokehjs_exec.v0+json';
+  const CLASS_NAME = 'output_bokeh rendered_html';
+
+  /**
+   * Render data to the DOM node
+   */
+  function render(props, node) {
+    const script = document.createElement("script");
+    node.appendChild(script);
+  }
+
+  /**
+   * Handle when an output is cleared or removed
+   */
+  function handleClearOutput(event, handle) {
+    function drop(id) {
+      const view = Bokeh.index.get_by_id(id)
+      if (view != null) {
+        view.model.document.clear()
+        Bokeh.index.delete(view)
+      }
+    }
+
+    const cell = handle.cell;
+
+    const id = cell.output_area._bokeh_element_id;
+    const server_id = cell.output_area._bokeh_server_id;
+
+    // Clean up Bokeh references
+    if (id != null) {
+      drop(id)
+    }
+
+    if (server_id !== undefined) {
+      // Clean up Bokeh references
+      const cmd_clean = "from bokeh.io.state import curstate; print(curstate().uuid_to_server['" + server_id + "'].get_sessions()[0].document.roots[0]._id)";
+      cell.notebook.kernel.execute(cmd_clean, {
+        iopub: {
+          output: function(msg) {
+            const id = msg.content.text.trim()
+            drop(id)
+          }
+        }
+      });
+      // Destroy server and session
+      const cmd_destroy = "import bokeh.io.notebook as ion; ion.destroy_server('" + server_id + "')";
+      cell.notebook.kernel.execute(cmd_destroy);
+    }
+  }
+
+  /**
+   * Handle when a new output is added
+   */
+  function handleAddOutput(event, handle) {
+    const output_area = handle.output_area;
+    const output = handle.output;
+
+    // limit handleAddOutput to display_data with EXEC_MIME_TYPE content only
+    if ((output.output_type != "display_data") || (!Object.prototype.hasOwnProperty.call(output.data, EXEC_MIME_TYPE))) {
+      return
+    }
+
+    const toinsert = output_area.element.find("." + CLASS_NAME.split(' ')[0]);
+
+    if (output.metadata[EXEC_MIME_TYPE]["id"] !== undefined) {
+      toinsert[toinsert.length - 1].firstChild.textContent = output.data[JS_MIME_TYPE];
+      // store reference to embed id on output_area
+      output_area._bokeh_element_id = output.metadata[EXEC_MIME_TYPE]["id"];
+    }
+    if (output.metadata[EXEC_MIME_TYPE]["server_id"] !== undefined) {
+      const bk_div = document.createElement("div");
+      bk_div.innerHTML = output.data[HTML_MIME_TYPE];
+      const script_attrs = bk_div.children[0].attributes;
+      for (let i = 0; i < script_attrs.length; i++) {
+        toinsert[toinsert.length - 1].firstChild.setAttribute(script_attrs[i].name, script_attrs[i].value);
+        toinsert[toinsert.length - 1].firstChild.textContent = bk_div.children[0].textContent
+      }
+      // store reference to server id on output_area
+      output_area._bokeh_server_id = output.metadata[EXEC_MIME_TYPE]["server_id"];
+    }
+  }
+
+  function register_renderer(events, OutputArea) {
+
+    function append_mime(data, metadata, element) {
+      // create a DOM node to render to
+      const toinsert = this.create_output_subarea(
+        metadata,
+        CLASS_NAME,
+        EXEC_MIME_TYPE
+      );
+      this.keyboard_manager.register_events(toinsert);
+      // Render to node
+      const props = {data: data, metadata: metadata[EXEC_MIME_TYPE]};
+      render(props, toinsert[toinsert.length - 1]);
+      element.append(toinsert);
+      return toinsert
+    }
+
+    /* Handle when an output is cleared or removed */
+    events.on('clear_output.CodeCell', handleClearOutput);
+    events.on('delete.Cell', handleClearOutput);
+
+    /* Handle when a new output is added */
+    events.on('output_added.OutputArea', handleAddOutput);
+
+    /**
+     * Register the mime type and append_mime function with output_area
+     */
+    OutputArea.prototype.register_mime_type(EXEC_MIME_TYPE, append_mime, {
+      /* Is output safe? */
+      safe: true,
+      /* Index of renderer in `output_area.display_order` */
+      index: 0
+    });
+  }
+
+  // register the mime type if in Jupyter Notebook environment and previously unregistered
+  if (root.Jupyter !== undefined) {
+    const events = require('base/js/events');
+    const OutputArea = require('notebook/js/outputarea').OutputArea;
+
+    if (OutputArea.prototype.mime_types().indexOf(EXEC_MIME_TYPE) == -1) {
+      register_renderer(events, OutputArea);
+    }
+  }
+  if (typeof (root._bokeh_timeout) === "undefined" || force === true) {
+    root._bokeh_timeout = Date.now() + 5000;
+    root._bokeh_failed_load = false;
+  }
+
+  const NB_LOAD_WARNING = {'data': {'text/html':
+     "<div style='background-color: #fdd'>\n"+
+     "<p>\n"+
+     "BokehJS does not appear to have successfully loaded. If loading BokehJS from CDN, this \n"+
+     "may be due to a slow or bad network connection. Possible fixes:\n"+
+     "</p>\n"+
+     "<ul>\n"+
+     "<li>re-rerun `output_notebook()` to attempt to load from CDN again, or</li>\n"+
+     "<li>use INLINE resources instead, as so:</li>\n"+
+     "</ul>\n"+
+     "<code>\n"+
+     "from bokeh.resources import INLINE\n"+
+     "output_notebook(resources=INLINE)\n"+
+     "</code>\n"+
+     "</div>"}};
+
+  function display_loaded(error = null) {
+    const el = document.getElementById("be52bf04-611b-4f8f-9450-8ed2c3f5c096");
+    if (el != null) {
+      const html = (() => {
+        if (typeof root.Bokeh === "undefined") {
+          if (error == null) {
+            return "BokehJS is loading ...";
+          } else {
+            return "BokehJS failed to load.";
+          }
+        } else {
+          const prefix = `BokehJS ${root.Bokeh.version}`;
+          if (error == null) {
+            return `${prefix} successfully loaded.`;
+          } else {
+            return `${prefix} <b>encountered errors</b> while loading and may not function as expected.`;
+          }
+        }
+      })();
+      el.innerHTML = html;
+
+      if (error != null) {
+        const wrapper = document.createElement("div");
+        wrapper.style.overflow = "auto";
+        wrapper.style.height = "5em";
+        wrapper.style.resize = "vertical";
+        const content = document.createElement("div");
+        content.style.fontFamily = "monospace";
+        content.style.whiteSpace = "pre-wrap";
+        content.style.backgroundColor = "rgb(255, 221, 221)";
+        content.textContent = error.stack ?? error.toString();
+        wrapper.append(content);
+        el.append(wrapper);
+      }
+    } else if (Date.now() < root._bokeh_timeout) {
+      setTimeout(() => display_loaded(error), 100);
+    }
+  }
+
+  function run_callbacks() {
+    try {
+      root._bokeh_onload_callbacks.forEach(function(callback) {
+        if (callback != null)
+          callback();
+      });
+    } finally {
+      delete root._bokeh_onload_callbacks
+    }
+    console.debug("Bokeh: all callbacks have finished");
+  }
+
+  function load_libs(css_urls, js_urls, callback) {
+    if (css_urls == null) css_urls = [];
+    if (js_urls == null) js_urls = [];
+
+    root._bokeh_onload_callbacks.push(callback);
+    if (root._bokeh_is_loading > 0) {
+      console.debug("Bokeh: BokehJS is being loaded, scheduling callback at", now());
+      return null;
+    }
+    if (js_urls == null || js_urls.length === 0) {
+      run_callbacks();
+      return null;
+    }
+    console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
+    root._bokeh_is_loading = css_urls.length + js_urls.length;
+
+    function on_load() {
+      root._bokeh_is_loading--;
+      if (root._bokeh_is_loading === 0) {
+        console.debug("Bokeh: all BokehJS libraries/stylesheets loaded");
+        run_callbacks()
+      }
+    }
+
+    function on_error(url) {
+      console.error("failed to load " + url);
+    }
+
+    for (let i = 0; i < css_urls.length; i++) {
+      const url = css_urls[i];
+      const element = document.createElement("link");
+      element.onload = on_load;
+      element.onerror = on_error.bind(null, url);
+      element.rel = "stylesheet";
+      element.type = "text/css";
+      element.href = url;
+      console.debug("Bokeh: injecting link tag for BokehJS stylesheet: ", url);
+      document.body.appendChild(element);
+    }
+
+    for (let i = 0; i < js_urls.length; i++) {
+      const url = js_urls[i];
+      const element = document.createElement('script');
+      element.onload = on_load;
+      element.onerror = on_error.bind(null, url);
+      element.async = false;
+      element.src = url;
+      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
+      document.head.appendChild(element);
+    }
+  };
+
+  function inject_raw_css(css) {
+    const element = document.createElement("style");
+    element.appendChild(document.createTextNode(css));
+    document.body.appendChild(element);
+  }
+
+  const js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-3.7.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.7.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.7.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.7.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.7.3.min.js"];
+  const css_urls = [];
+
+  const inline_js = [    function(Bokeh) {
+      Bokeh.set_log_level("info");
+    },
+function(Bokeh) {
+    }
+  ];
+
+  function run_inline_js() {
+    if (root.Bokeh !== undefined || force === true) {
+      try {
+            for (let i = 0; i < inline_js.length; i++) {
+      inline_js[i].call(root, root.Bokeh);
+    }
+
+      } catch (error) {display_loaded(error);throw error;
+      }if (force === true) {
+        display_loaded();
+      }} else if (Date.now() < root._bokeh_timeout) {
+      setTimeout(run_inline_js, 100);
+    } else if (!root._bokeh_failed_load) {
+      console.log("Bokeh: BokehJS failed to load within specified timeout.");
+      root._bokeh_failed_load = true;
+    } else if (force !== true) {
+      const cell = $(document.getElementById("be52bf04-611b-4f8f-9450-8ed2c3f5c096")).parents('.cell').data().cell;
+      cell.output_area.append_execute_result(NB_LOAD_WARNING)
+    }
+  }
+
+  if (root._bokeh_is_loading === 0) {
+    console.debug("Bokeh: BokehJS loaded, going straight to plotting");
+    run_inline_js();
+  } else {
+    load_libs(css_urls, js_urls, function() {
+      console.debug("Bokeh: BokehJS plotting callback run at", now());
+      run_inline_js();
+    });
+  }
+}(window));</script></div>
 </div>
 <section id="streamflow-observation-as-a-model-of-streamflow-observation">
 <h1>Streamflow observation as a model of streamflow observation<a class="headerlink" href="#streamflow-observation-as-a-model-of-streamflow-observation" title="Link to this heading">#</a></h1>
@@ -567,6 +877,74 @@ document.write(`
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">FileNotFoundError</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">4</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">attributes_filename</span> <span class="o">=</span> <span class="s1">&#39;BCUB_watershed_attributes_updated.csv&#39;</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">attributes_fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">attributes_filename</span><span class="p">)</span>
+<span class="ne">----&gt; </span><span class="mi">4</span> <span class="n">attr_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">attributes_fpath</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="n">attr_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">attr_df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="c1"># df.columns</span>
+
+<span class="nn">File ~/code/data_analysis/lib/python3.12/site-packages/pandas/io/parsers/readers.py:1026,</span> in <span class="ni">read_csv</span><span class="nt">(filepath_or_buffer, sep, delimiter, header, names, index_col, usecols, dtype, engine, converters, true_values, false_values, skipinitialspace, skiprows, skipfooter, nrows, na_values, keep_default_na, na_filter, verbose, skip_blank_lines, parse_dates, infer_datetime_format, keep_date_col, date_parser, date_format, dayfirst, cache_dates, iterator, chunksize, compression, thousands, decimal, lineterminator, quotechar, quoting, doublequote, escapechar, comment, encoding, encoding_errors, dialect, on_bad_lines, delim_whitespace, low_memory, memory_map, float_precision, storage_options, dtype_backend)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1013</span> <span class="n">kwds_defaults</span> <span class="o">=</span> <span class="n">_refine_defaults_read</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1014</span>     <span class="n">dialect</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1015</span>     <span class="n">delimiter</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>   <span class="mi">1022</span>     <span class="n">dtype_backend</span><span class="o">=</span><span class="n">dtype_backend</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1023</span> <span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1024</span> <span class="n">kwds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwds_defaults</span><span class="p">)</span>
+<span class="ne">-&gt; </span><span class="mi">1026</span> <span class="k">return</span> <span class="n">_read</span><span class="p">(</span><span class="n">filepath_or_buffer</span><span class="p">,</span> <span class="n">kwds</span><span class="p">)</span>
+
+<span class="nn">File ~/code/data_analysis/lib/python3.12/site-packages/pandas/io/parsers/readers.py:620,</span> in <span class="ni">_read</span><span class="nt">(filepath_or_buffer, kwds)</span>
+<span class="g g-Whitespace">    </span><span class="mi">617</span> <span class="n">_validate_names</span><span class="p">(</span><span class="n">kwds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;names&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+<span class="g g-Whitespace">    </span><span class="mi">619</span> <span class="c1"># Create the parser.</span>
+<span class="ne">--&gt; </span><span class="mi">620</span> <span class="n">parser</span> <span class="o">=</span> <span class="n">TextFileReader</span><span class="p">(</span><span class="n">filepath_or_buffer</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">622</span> <span class="k">if</span> <span class="n">chunksize</span> <span class="ow">or</span> <span class="n">iterator</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">623</span>     <span class="k">return</span> <span class="n">parser</span>
+
+<span class="nn">File ~/code/data_analysis/lib/python3.12/site-packages/pandas/io/parsers/readers.py:1620,</span> in <span class="ni">TextFileReader.__init__</span><span class="nt">(self, f, engine, **kwds)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1617</span>     <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;has_index_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwds</span><span class="p">[</span><span class="s2">&quot;has_index_names&quot;</span><span class="p">]</span>
+<span class="g g-Whitespace">   </span><span class="mi">1619</span> <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="p">:</span> <span class="n">IOHandles</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="ne">-&gt; </span><span class="mi">1620</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_engine</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">)</span>
+
+<span class="nn">File ~/code/data_analysis/lib/python3.12/site-packages/pandas/io/parsers/readers.py:1880,</span> in <span class="ni">TextFileReader._make_engine</span><span class="nt">(self, f, engine)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1878</span>     <span class="k">if</span> <span class="s2">&quot;b&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1879</span>         <span class="n">mode</span> <span class="o">+=</span> <span class="s2">&quot;b&quot;</span>
+<span class="ne">-&gt; </span><span class="mi">1880</span> <span class="bp">self</span><span class="o">.</span><span class="n">handles</span> <span class="o">=</span> <span class="n">get_handle</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1881</span>     <span class="n">f</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1882</span>     <span class="n">mode</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1883</span>     <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;encoding&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+<span class="g g-Whitespace">   </span><span class="mi">1884</span>     <span class="n">compression</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;compression&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+<span class="g g-Whitespace">   </span><span class="mi">1885</span>     <span class="n">memory_map</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;memory_map&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+<span class="g g-Whitespace">   </span><span class="mi">1886</span>     <span class="n">is_text</span><span class="o">=</span><span class="n">is_text</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1887</span>     <span class="n">errors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;encoding_errors&quot;</span><span class="p">,</span> <span class="s2">&quot;strict&quot;</span><span class="p">),</span>
+<span class="g g-Whitespace">   </span><span class="mi">1888</span>     <span class="n">storage_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;storage_options&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+<span class="g g-Whitespace">   </span><span class="mi">1889</span> <span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1890</span> <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">handles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<span class="g g-Whitespace">   </span><span class="mi">1891</span> <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="o">.</span><span class="n">handle</span>
+
+<span class="nn">File ~/code/data_analysis/lib/python3.12/site-packages/pandas/io/common.py:873,</span> in <span class="ni">get_handle</span><span class="nt">(path_or_buf, mode, encoding, compression, memory_map, is_text, errors, storage_options)</span>
+<span class="g g-Whitespace">    </span><span class="mi">868</span> <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">869</span>     <span class="c1"># Check whether the filename is to be opened in binary mode.</span>
+<span class="g g-Whitespace">    </span><span class="mi">870</span>     <span class="c1"># Binary mode does not support &#39;encoding&#39; and &#39;newline&#39;.</span>
+<span class="g g-Whitespace">    </span><span class="mi">871</span>     <span class="k">if</span> <span class="n">ioargs</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">and</span> <span class="s2">&quot;b&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ioargs</span><span class="o">.</span><span class="n">mode</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">872</span>         <span class="c1"># Encoding</span>
+<span class="ne">--&gt; </span><span class="mi">873</span>         <span class="n">handle</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">874</span>             <span class="n">handle</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">875</span>             <span class="n">ioargs</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">876</span>             <span class="n">encoding</span><span class="o">=</span><span class="n">ioargs</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">877</span>             <span class="n">errors</span><span class="o">=</span><span class="n">errors</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">878</span>             <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">879</span>         <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">880</span>     <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">881</span>         <span class="c1"># Binary mode</span>
+<span class="g g-Whitespace">    </span><span class="mi">882</span>         <span class="n">handle</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">ioargs</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>
+
+<span class="ne">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;/home/danbot/code/distribution_estimation/docs/notebooks/ss/data/BCUB_watershed_attributes_updated.csv&#39;
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -656,7 +1034,7 @@ time
 <span class="n">bitrates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">17</span><span class="p">))</span>
 <span class="n">bitrate</span> <span class="o">=</span> <span class="mi">4</span><span class="c1">#bitrates[-1]</span>
 
-<span class="k">def</span> <span class="nf">digitize_by_log_binning</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">digitize_by_log_binning</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">):</span>
 
     <span class="n">min_log_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
     <span class="n">max_log_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">+</span> <span class="mf">1e-3</span>
@@ -734,7 +1112,7 @@ time
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot the observed and simulated histograms</span>
-<span class="k">def</span> <span class="nf">plot_histograms</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_histograms</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot two overlaid histograms for specified columns in a DataFrame using Bokeh.</span>
 <span class="sd">    </span>
@@ -829,7 +1207,7 @@ time
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="n">hist</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="n">hist</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">hist</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
 <span class="n">bins</span> <span class="o">=</span> <span class="mi">16</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
@@ -951,7 +1329,7 @@ time
 </ol>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_noise</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">obs_label</span><span class="p">,</span> <span class="n">posterior_sim_label</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_noise</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">obs_label</span><span class="p">,</span> <span class="n">posterior_sim_label</span><span class="p">):</span>
     <span class="c1"># compute DKL(Q||Q_post), or the divergence</span>
     <span class="c1"># of the posterior from the likelihood due to the prior</span>
     <span class="n">p</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">obs_label</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="n">posterior_sim_label</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
@@ -986,8 +1364,8 @@ time
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot the posterior distribution for each prior</span>
-<span class="kn">from</span> <span class="nn">bokeh.palettes</span> <span class="kn">import</span> <span class="n">TolRainbow14</span>
-<span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">gridplot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.palettes</span><span class="w"> </span><span class="kn">import</span> <span class="n">TolRainbow14</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.layouts</span><span class="w"> </span><span class="kn">import</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">gridplot</span>
 
 <span class="n">post_fig</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">450</span><span class="p">,</span> <span class="n">x_axis_type</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
 <span class="c1"># Compute bin width in log space and extend bins</span>
@@ -1080,7 +1458,7 @@ time
 <p>The point of the comparison is that the noise due to the prior can “push” <span class="math notranslate nohighlight">\(Q\)</span> further away from <span class="math notranslate nohighlight">\(P\)</span>, and it can also bring it closer.  Since we can’t know this a priori, we should ensure that regardless of the direction the different sources of epistemic noise “pushes” <strong>both</strong> <span class="math notranslate nohighlight">\(P\)</span> and <span class="math notranslate nohighlight">\(P\)</span> relative to each other should not be significant in comparison to the magnitude of the discriminant.  The example below illustrates how the prior flattens <span class="math notranslate nohighlight">\(Q\)</span> and it can make it more or less similar to the target <span class="math notranslate nohighlight">\(P\)</span>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generate_and_plot_lognormal</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">prior_pseudo_count</span><span class="p">,</span> <span class="n">y_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.035</span><span class="p">)):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_and_plot_lognormal</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">prior_pseudo_count</span><span class="p">,</span> <span class="n">y_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.035</span><span class="p">)):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates two log-normal distributions, quantizes them with 2^b symbols,</span>
 <span class="sd">    applies a uniform pseudo-count prior to one, and plots the distributions</span>
@@ -1212,10 +1590,10 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 <p>The example that follows computes the discrete distribution frequencies estimated from a 5-bit (32 symbol) dictionary and those from a 4-bit (16 symbol) dictionary, and computes the KL divergence between the two to express the divergence of the lower-resolution distribution (<span class="math notranslate nohighlight">\(Q_{b=4}\)</span>) from the higher (<span class="math notranslate nohighlight">\(Q_{b=5}\)</span>).  Also plotted in the example are log-normal, exponential distributions, and 4-parameter kappa distributions fit to the data using Maximum Likelihood Estimation (MLE) for the best-fit parameters.  These extra series are included to compare the fit of several parametric distributions widely used in hydrology, and to serve as a preview and a conceptual link to a subsequent exercise linking the current analysis of quantization noise to an analogous “noise” quantity related to parametric distribution fitting error, or “parametric fit noise”.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">neg_log_likelihood</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">neg_log_likelihood</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
     <span class="n">h</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">params</span>
     <span class="k">if</span> <span class="n">scale</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>  <span class="c1"># Enforce positive scale</span>
@@ -1227,7 +1605,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
 
-<span class="k">def</span> <span class="nf">fit_kappa4_mle</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_kappa4_mle</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># Handle edge cases where MLE is not feasible</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;h&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;loc&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">}</span>
@@ -1249,7 +1627,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
     
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;h&#39;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span> <span class="s1">&#39;loc&#39;</span><span class="p">:</span> <span class="n">loc</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="p">:</span> <span class="n">scale</span><span class="p">}</span>
 
-<span class="k">def</span> <span class="nf">compute_pdf_cdf_kde_scipy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">grid_points</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">bandwidth</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_pdf_cdf_kde_scipy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">grid_points</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">bandwidth</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the probability density function (pdf) and cumulative distribution function (cdf)</span>
 <span class="sd">    from an array of values using Kernel Density Estimation (KDE) with scipy.stats.</span>
@@ -1289,7 +1667,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_ecdf</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_ecdf</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the empirical CDF of a dataset.&quot;&quot;&quot;</span>
     <span class="n">sorted_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_data</span><span class="p">)</span>
@@ -1301,7 +1679,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_discrete_distributions</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_discrete_distributions</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
     <span class="c1"># 1. Determine the log-spaced bin edges</span>
     <span class="n">bin_dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">total_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -1338,7 +1716,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">remap_low_to_high_resolution</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">which_binning</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">remap_low_to_high_resolution</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">which_binning</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Vectorized distribution of low-resolution frequencies over high-resolution bins.</span>
 <span class="sd">    Expands each low-res bin&#39;s frequency uniformly across the corresponding high-res bins.</span>
@@ -1369,7 +1747,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_kl_divergence</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_kl_divergence</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
     <span class="c1"># compute DKL(Q||Q_post), or the divergence</span>
     <span class="c1"># of the posterior from the likelihood due to the prior</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">q</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">p</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
@@ -1382,7 +1760,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fit_continuous_distributions</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">fit_continuous_distributions</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;simulate the target using the parametric MLE parameters from the proxy&quot;&quot;&quot;</span>
     <span class="c1"># fit and plot a lognormal distribution</span>
     <span class="n">ln_shape</span><span class="p">,</span> <span class="n">ln_loc</span><span class="p">,</span> <span class="n">ln_scale</span> <span class="o">=</span> <span class="n">lognorm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">floc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Fixing location to 0</span>
@@ -1424,7 +1802,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_distribution_comparisons</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">binning_method</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_distribution_comparisons</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">binning_method</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">):</span>
     <span class="n">bin_dict</span> <span class="o">=</span> <span class="p">{}</span>    
     
     <span class="n">discrete_dict</span> <span class="o">=</span> <span class="n">compute_discrete_distributions</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b1</span><span class="p">)</span>
@@ -1441,7 +1819,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_distribution_comparison</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">binning_method</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">log_axis</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_distribution_comparison</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">binning_method</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">log_axis</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">test_fig</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span> 
     <span class="k">if</span> <span class="n">log_axis</span><span class="p">:</span>
@@ -1493,7 +1871,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">column</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.layouts</span><span class="w"> </span><span class="kn">import</span> <span class="n">column</span>
 
 <span class="n">test_df</span> <span class="o">=</span> <span class="n">dpf</span><span class="o">.</span><span class="n">get_timeseries_data</span><span class="p">(</span><span class="n">test_target</span><span class="p">)</span>
 <span class="n">approximated_bitrate</span> <span class="o">=</span> <span class="mi">4</span>
@@ -1541,7 +1919,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 <p>The representation that retains the most information and introduces the least noise or error is the discrete quantization with a dictionary large enough to preserve the full precision of the observations. Assuming the larger of the two discrete distributions is the “ground truth” the next example compares two sources of approximation error: the quantization noise introduced by reducing the number of bins, and the error from continuous representations. The parametric continuous fits impose structural assumptions on the data, and the nonparametric methods impose a degree of smoothing, depending on the kernel choice using KDE or by the reduction in dictionary size for the discrete representation.  By computing KL divergence against the higher precision quantization, the deviation of each representation from the “ground truth” distribution is quantified in information terms.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">continuous_klds</span><span class="p">(</span><span class="n">stn</span><span class="p">,</span> <span class="n">freqs</span><span class="p">,</span> <span class="n">continuous</span><span class="p">,</span> <span class="n">binning_method</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">print_results</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">continuous_klds</span><span class="p">(</span><span class="n">stn</span><span class="p">,</span> <span class="n">freqs</span><span class="p">,</span> <span class="n">continuous</span><span class="p">,</span> <span class="n">binning_method</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">print_results</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         
     <span class="c1"># compute the KL divergence between the discrete and continuous forms, </span>
     <span class="c1"># where the discrete form is the &quot;ground truth&quot;</span>
@@ -1657,7 +2035,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_discrete_probabilities</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">test_target</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_discrete_probabilities</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">test_target</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">):</span>
     <span class="c1"># define states / binning</span>
     <span class="n">target_bin_edges</span> <span class="o">=</span> <span class="n">digitize_by_log_binning</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">test_target</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
 
@@ -1696,7 +2074,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">remap_probabilities</span><span class="p">(</span><span class="n">b2_bins</span><span class="p">,</span> <span class="n">b1_bins</span><span class="p">,</span> <span class="n">b1_probs</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">remap_probabilities</span><span class="p">(</span><span class="n">b2_bins</span><span class="p">,</span> <span class="n">b1_bins</span><span class="p">,</span> <span class="n">b1_probs</span><span class="p">):</span>
     <span class="n">bin_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">b2_bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">b1_bins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># Map high-res bins to low-res bins</span>
     
     <span class="c1"># Compute counts of high-res bins falling into each low-res bin</span>
@@ -1799,7 +2177,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bokeh.palettes</span> <span class="kn">import</span> <span class="n">Sunset11</span><span class="p">,</span> <span class="n">TolRainbow23</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.palettes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sunset11</span><span class="p">,</span> <span class="n">TolRainbow23</span>
 
 <span class="n">noise_ratio_plot</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">y_axis_type</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
 <span class="n">noise_ratio_plot</span><span class="o">.</span><span class="n">varea</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mf">3.75</span><span class="p">],</span> <span class="n">y1</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y2</span><span class="o">=</span><span class="p">[</span><span class="mf">1e4</span><span class="p">,</span> <span class="mf">1e4</span><span class="p">],</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;Signal &gt; Noise&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;lightgreen&#39;</span><span class="p">,</span> <span class="n">fill_alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -1837,7 +2215,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 <p><strong>Observation</strong>: Somewhere between 6 and 7 bits there is a threshold.  Below this threshold, the quantization adds more noise to the observed series, and above the threshold the quantization adds more noise to the simulated series.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_adjusted_noise</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_adjusted_noise</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
     <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;obs_noise&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;sim_noise&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;prior_noise&#39;</span><span class="p">]</span>
     <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">c</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
 </pre></div>
@@ -1846,7 +2224,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bokeh.palettes</span> <span class="kn">import</span> <span class="n">tol</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.palettes</span><span class="w"> </span><span class="kn">import</span> <span class="n">tol</span>
 <span class="c1"># noise_ratio_plot = figure(width=800, height=500)</span>
 <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">noise_decomp_plots</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1944,11 +2322,11 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_kl_divergence</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_kl_divergence</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the KL divergence DKL(P || Q).&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">P</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">P</span> <span class="o">/</span> <span class="n">Q</span><span class="p">),</span> <span class="n">where</span><span class="o">=</span><span class="p">(</span><span class="n">P</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">))</span>
 
-<span class="k">def</span> <span class="nf">generate_and_plot_kl_vs_prior</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">priors</span><span class="p">,</span> <span class="n">y_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">)):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_and_plot_kl_vs_prior</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">priors</span><span class="p">,</span> <span class="n">y_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">)):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates two log-normal distributions, quantizes them with 2^b symbols,</span>
 <span class="sd">    computes the posterior with varying priors, and plots KL divergences DKL(P||R) and DKL(Q||R).</span>
@@ -2081,7 +2459,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 1: Compute L-moments</span>
-<span class="k">def</span> <span class="nf">compute_l_moments</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_l_moments</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="n">sorted_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_data</span><span class="p">)</span>
     
@@ -2100,7 +2478,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
     <span class="k">return</span> <span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">,</span> <span class="n">tau3</span><span class="p">,</span> <span class="n">tau4</span>
 
 <span class="c1"># Step 2: Estimate initial Kappa parameters using L-moments</span>
-<span class="k">def</span> <span class="nf">initial_kappa_params</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initial_kappa_params</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">,</span> <span class="n">tau3</span><span class="p">,</span> <span class="n">tau4</span> <span class="o">=</span> <span class="n">compute_l_moments</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     
     <span class="c1"># Use L-moment formulas to estimate the shape and scale of Kappa distribution</span>
@@ -2113,11 +2491,11 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
     <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">scale</span>
 
 <span class="c1"># Step 3: Define constraints based on Castellarin (e.g., ensuring kK &lt;= 0 and hK &gt; 0)</span>
-<span class="k">def</span> <span class="nf">constrained_optimization</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">constrained_optimization</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="n">initial_params</span> <span class="o">=</span> <span class="n">initial_kappa_params</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
     <span class="c1"># Define the objective function as the negative log-likelihood</span>
-    <span class="k">def</span> <span class="nf">neg_log_likelihood</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">neg_log_likelihood</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
         <span class="n">h</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">params</span>
         <span class="k">if</span> <span class="n">scale</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Enforce positive scale</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
@@ -2149,7 +2527,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_MLE_fit_plot</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_MLE_fit_plot</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">):</span>
     <span class="n">test_fig</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">width</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">x_axis_type</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>  
 
@@ -2187,20 +2565,20 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_logspace_bins</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_logspace_bins</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create linearly spaced bins in log space over the range of `data`.&quot;&quot;&quot;</span>
     <span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="n">log_min</span><span class="p">,</span> <span class="n">log_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">min_val</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">max_val</span><span class="p">)</span>
     <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">log_min</span><span class="p">,</span> <span class="n">log_max</span><span class="p">,</span> <span class="n">num_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">bin_edges</span>
 
-<span class="k">def</span> <span class="nf">calculate_probabilities</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_probabilities</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the probabilities of data falling into each bin given `bin_edges`.&quot;&quot;&quot;</span>
     <span class="n">counts</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bin_edges</span><span class="p">)</span>
     <span class="n">probabilities</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">/</span> <span class="n">counts</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  <span class="c1"># Normalize to get probabilities</span>
     <span class="k">return</span> <span class="n">probabilities</span>
 
-<span class="k">def</span> <span class="nf">aggregate_probabilities</span><span class="p">(</span><span class="n">high_res_probs</span><span class="p">,</span> <span class="n">high_res_bins</span><span class="p">,</span> <span class="n">low_res_bins</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">aggregate_probabilities</span><span class="p">(</span><span class="n">high_res_probs</span><span class="p">,</span> <span class="n">high_res_bins</span><span class="p">,</span> <span class="n">low_res_bins</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Aggregate high-resolution probabilities to match low-resolution bins.</span>
 <span class="sd">    This will sum the high_res_probs that fall within each low-res bin.</span>
@@ -2213,7 +2591,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
         <span class="n">low_res_probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">high_res_probs</span><span class="p">[</span><span class="n">indices</span><span class="p">]))</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">low_res_probs</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">compute_kl_divergence</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_kl_divergence</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute KL divergence between two probability distributions `p` and `q`.&quot;&quot;&quot;</span>
     <span class="c1"># Avoid division by zero and log of zero by adding a small epsilon</span>
     <span class="c1"># epsilon = 1e-10</span>
@@ -2222,7 +2600,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
     <span class="n">kl_divergence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="n">q</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">kl_divergence</span>
 
-<span class="k">def</span> <span class="nf">compute_discrete_distributions</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">log_bins</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_discrete_distributions</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">log_bins</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="c1"># 1. Determine the log-spaced bin edges</span>
     <span class="n">vals</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
     <span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
@@ -2294,7 +2672,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bokeh.io</span> <span class="kn">import</span> <span class="n">export_png</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_png</span>
 
 <span class="n">test_stn</span> <span class="o">=</span> <span class="n">filtered_stns</span>
 <span class="k">for</span> <span class="n">stn</span> <span class="ow">in</span> <span class="n">filtered_stns</span><span class="p">:</span>
@@ -2367,7 +2745,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 <p>The quantization will take in a bitrate <span class="math notranslate nohighlight">\(b\)</span>, and it will divide and log-transform the measured interval <span class="math notranslate nohighlight">\((\log(x_\text{min}),\log(x_\text{max}))\)</span> into <span class="math notranslate nohighlight">\(2^b\)</span> log-spaced bins.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_log_uniform_bins</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">bitrate</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_log_uniform_bins</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">bitrate</span><span class="p">):</span>
     <span class="n">n_bins</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">bitrate</span>
     <span class="n">min_log_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
     <span class="n">max_log_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
@@ -2395,7 +2773,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">apply_error_to_observations</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">bitrate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">apply_error_to_observations</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">bitrate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
     <span class="n">min_q</span><span class="p">,</span> <span class="n">max_q</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="mf">1e-9</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="n">stn</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-9</span>
     <span class="k">assert</span> <span class="n">min_q</span> <span class="o">&gt;</span> <span class="mi">0</span>
     <span class="c1"># use equal width bins in log10 space</span>
@@ -2419,7 +2797,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_unadjusted_counts</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">bitrate</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_unadjusted_counts</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">bitrate</span><span class="p">):</span>
     <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">compute_log_uniform_bins</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">bitrate</span><span class="p">)</span>
     <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stn</span><span class="si">}</span><span class="s1">_simple_</span><span class="si">{</span><span class="n">bitrate</span><span class="si">}</span><span class="s1">bits&#39;</span>
     <span class="n">df</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">stn</span><span class="p">],</span> <span class="n">bin_edges</span><span class="p">)</span>
@@ -2440,7 +2818,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_distortion</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_distortion</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>
     <span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">inputs</span>
     <span class="n">simple_frequencies</span> <span class="o">=</span> <span class="n">compute_unadjusted_counts</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
     <span class="n">error_adjusted_frequencies</span> <span class="o">=</span> <span class="n">apply_error_to_observations</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">stn</span><span class="p">,</span> <span class="n">bitrate</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">err</span><span class="p">)</span>
@@ -2460,7 +2838,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 <h1>Pairwise Processing<a class="headerlink" href="#pairwise-processing" title="Link to this heading">#</a></h1>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
 
 <span class="c1"># generate all combinations of pairs of station ids</span>
 <span class="n">id_pairs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">filtered_stns</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
@@ -2528,7 +2906,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">input_batch_generator</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_pairs_filtered</span><span class="p">,</span> <span class="n">min_years</span><span class="p">,</span> <span class="n">use_partial_counts</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">input_batch_generator</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_pairs_filtered</span><span class="p">,</span> <span class="n">min_years</span><span class="p">,</span> <span class="n">use_partial_counts</span><span class="p">):</span>
     <span class="n">batch_inputs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">proxy</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">id_pairs_filtered</span><span class="p">:</span>
         
@@ -2550,7 +2928,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_kl_estimates</span><span class="p">(</span><span class="n">P_dd</span><span class="p">,</span> <span class="n">Q_dd</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_kl_estimates</span><span class="p">(</span><span class="n">P_dd</span><span class="p">,</span> <span class="n">Q_dd</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute row-wise KL divergence estimates while ensuring positivity and handling edge cases.</span>
 
@@ -2584,7 +2962,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">adjust_kde_bandwidth</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">existing_bw</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">adjust_kde_bandwidth</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">existing_bw</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adjust the bandwidth of a Gaussian KDE by scaling Scott&#39;s bandwidth.</span>
 
@@ -2613,7 +2991,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">assert_alignment</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">assert_alignment</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
     <span class="c1"># Define a mask for valid kde_density values</span>
     <span class="n">valid_mask_1</span> <span class="o">=</span> <span class="o">~</span><span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
     
@@ -2630,7 +3008,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">justify</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">invalid_val</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">):</span>    
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">justify</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">invalid_val</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">):</span>    
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Justifies a 2D array</span>
 
@@ -2660,7 +3038,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
     <span class="k">return</span> <span class="n">out</span>
 
 
-<span class="k">def</span> <span class="nf">compute_adjusted_cdf_and_density</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_adjusted_cdf_and_density</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute adjusted CDF and density for each row of a 2D array using JAX.</span>
 
@@ -2703,7 +3081,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_hist_and_log_edges</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_hist_and_log_edges</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
     <span class="n">min_log_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
     <span class="n">max_log_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
@@ -2730,7 +3108,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">kde_test</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">sim_kde</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">kde_test</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">sim_kde</span><span class="p">):</span>
 
     <span class="k">return</span> <span class="n">hist_obs</span><span class="p">,</span> <span class="n">hist_sim</span><span class="p">,</span> <span class="n">edges</span>
 </pre></div>
@@ -2739,9 +3117,9 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bokeh.io</span> <span class="kn">import</span> <span class="n">reset_output</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">reset_output</span>
 
-<span class="k">def</span> <span class="nf">plot_and_save_cdf_kde_histogram</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">sim_kde</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="s2">&quot;plot.png&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_and_save_cdf_kde_histogram</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">sim_kde</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="s2">&quot;plot.png&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot and save the empirical CDF, KDE fit, and histogram using Bokeh.</span>
 
@@ -2812,7 +3190,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">kl_divergence_convergence</span><span class="p">(</span><span class="n">proxy</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">n_resamples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">bw_method</span><span class="o">=</span><span class="s1">&#39;scott&#39;</span><span class="p">,</span> <span class="n">existing_bw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_q_allowed</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">kl_divergence_convergence</span><span class="p">(</span><span class="n">proxy</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">n_resamples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">bw_method</span><span class="o">=</span><span class="s1">&#39;scott&#39;</span><span class="p">,</span> <span class="n">existing_bw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_q_allowed</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Vectorized estimation of KL divergence convergence using bootstrap resampling.</span>
 
@@ -2899,7 +3277,7 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">process_batch</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>    
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_batch</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>    
     <span class="n">proxy</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">min_concurrent_years</span> <span class="o">=</span> <span class="n">inputs</span>
     
     <span class="n">proxy_id</span><span class="p">,</span> <span class="n">target_id</span> <span class="o">=</span> <span class="n">proxy</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">],</span> <span class="n">target</span><span class="p">[</span><span class="s1">&#39;official_id&#39;</span><span class="p">]</span>
@@ -3001,12 +3379,12 @@ DKL_2(P||Q) = 0.05, DKL(P||Q_hat) = 0.12
 <span class="c1"># a million rows per iteration when the book is built for pushing to github pages.</span>
 
     <span class="c1"># Evaluate KDE on grid points for each sample set</span>
-<span class="k">def</span> <span class="nf">kde_per_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">bw</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">kde_per_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">bw</span><span class="p">):</span>
     <span class="c1"># Compute Gaussian kernel values for each grid point</span>
     <span class="n">kernels</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">((</span><span class="n">grid_points</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">row</span><span class="p">)</span> <span class="o">/</span> <span class="n">bw</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">kernels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">bw</span>
 
-<span class="k">def</span> <span class="nf">kde_fit_per_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">bw</span><span class="p">):</span>    
+<span class="k">def</span><span class="w"> </span><span class="nf">kde_fit_per_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">bw</span><span class="p">):</span>    
     <span class="c1"># Vectorized computation across all rows</span>
     <span class="n">kde_values</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span><span class="n">kde_per_row</span><span class="p">)(</span><span class="n">samples</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">)</span>
 

@@ -7,6 +7,7 @@ import geopandas as gpd
 import xarray as xr
 from scipy.spatial import cKDTree
 from sklearn.preprocessing import StandardScaler
+from shapely.geometry import Point
 
 from numba import jit
 import jax.numpy as jnp
@@ -33,6 +34,26 @@ class FDCEstimationContext:
         self._build_network_trees()
         self._set_attribute_indexers()
         self.overlap_dict = self._compute_concurrent_overlap_dict()
+        self._load_baseline_distributions()
+
+    
+    def _load_baseline_distributions(self):
+        """Load the baseline distributions for the stations."""
+        self.baseline_distribution_folder = Path(self.baseline_distribution_folder)
+        if not self.baseline_distribution_folder.exists():
+            raise FileNotFoundError(f"Baseline distribution folder {self.baseline_distribution_folder} does not exist.")
+        
+        # Load the baseline distributions
+        self.baseline_distributions = {}
+        for file in [e for e in os.listdir(self.baseline_distribution_folder) if e.endswith('.csv')]:
+            fpath = os.path.join(self.baseline_distribution_folder, file)
+            if 'pmf' in file:
+                self.baseline_pmf_df = pd.read_csv(fpath, index_col='q')
+            elif 'pdf' in file:
+                self.baseline_pdf_df = pd.read_csv(fpath, index_col='q')
+            else:
+                raise Exception(f"Unexpected file format in {self.baseline_distribution_folder}: {file.name}")
+        
         
     
     def _load_and_filter_hysets_data(self):
@@ -41,10 +62,10 @@ class FDCEstimationContext:
             self.global_start_date = pd.to_datetime('1980-01-01') # Daymet starts 1980-01-01
         else:            
             self.global_start_date = pd.to_datetime('1950-01-01') # Hysets streamflow starts 1950-01-01
+        
         hs_df = hs_df[hs_df['Official_ID'].isin(self.official_ids)]
         self.hs_df = hs_df
         self.official_ids = hs_df['Official_ID'].values
-        print(f'Use only stations with minimum concurrency with Daymet / LSTM results: {self.LSTM_concurrent_network} (n={len(self.official_ids)})')
 
         # load the updated HYSETS data
         updated_filename = 'HYSETS_2023_update_QC_stations.nc'
@@ -71,8 +92,12 @@ class FDCEstimationContext:
     
     
     def _load_catchment_data(self):
-        gdf = gpd.read_file(self.attr_gdf_fpath)
-        gdf.columns = [c.lower() for c in gdf.columns]
+        df = gpd.read_file(self.attr_df_fpath)
+        df.columns = [c.lower() for c in df.columns]
+
+        df['geometry'] = df.apply(lambda row: Point(row['centroid_lon_deg_e'], row['centroid_lat_deg_n']), axis=1)
+        df = gpd.GeoDataFrame(df, geometry='geometry', crs='EPSG:4326')  # Ensure the CRS is WGS84
+        df = df.to_crs(epsg=3005)  # Ensure the CRS is BC Albers for distance calculations
 
         # LSTM ensemble predictions
         # lstm_result_folder = '/home/danbot/code/neuralhydrology/data/ensemble_results'
@@ -82,33 +107,35 @@ class FDCEstimationContext:
         # filter for the common stations between BCUB region and LSTM-compatible (i.e. 1980-)
         if self.LSTM_concurrent_network == True:
             self.official_ids = self.daymet_concurrent_stations
+            print(f'   Using only stations with Daymet concurrency: {len(self.official_ids)}')
         else:
-            self.official_ids = self.all_official_ids 
+            self.official_ids = self.baseline_pmf_stations
+            print(f'    Using all stations in the catchment data with a baseline PMF (validated): {len(self.official_ids)}')
 
-        gdf = gdf[gdf['official_id'].isin(self.official_ids)]
+        df = df[df['official_id'].isin(self.official_ids)]
         # import the license water extraction points
-        dam_gdf = gpd.read_file('data/Dam_Points_20240103.gpkg')
-        assert gdf.crs == dam_gdf.crs, "CRS of catchment and dam dataframes do not match"
-        joined = gpd.sjoin(gdf, dam_gdf, how="inner", predicate="contains")
-        joined = joined[joined['official_id'].isin(self.official_ids)]
+        # dam_gdf = gpd.read_file('data/Dam_Points_20240103.gpkg')
+        # assert gdf.crs == dam_gdf.crs, "CRS of catchment and dam dataframes do not match"
+        # joined = gpd.sjoin(gdf, dam_gdf, how="inner", predicate="contains")
+        # joined = joined[joined['official_id'].isin(self.official_ids)]
         # Create a new boolean column 'contains_dam' in catchment_gdf.
         # If a polygon's index appears in the joined result, it means it contains at least one point.
-        regulated = joined['official_id'].values
-        N = len(gdf)
-        print(f'{len(regulated)}/{N} catchments contain withdrawal licenses')
+        # regulated = joined['official_id'].values
+            # N = len(df)
+            # print(f'{len(regulated)}/{N} catchments contain withdrawal licenses')
                 
         # create dict structures for easier access of attributes and geometries
-        self.da_dict = gdf[['official_id', 'drainage_area_km2']].set_index('official_id').to_dict()['drainage_area_km2']
-        self.polygon_dict = gdf[['official_id', 'geometry']].set_index('official_id').to_dict()['geometry']
-        
-        centroids = gdf.apply(lambda x: self.polygon_dict[x['official_id']].centroid, axis=1)
-        attr_gdf = gpd.GeoDataFrame(gdf, geometry=centroids, crs=gdf.crs)
-        print(len(attr_gdf))
-        attr_gdf["contains_dam"] = attr_gdf['official_id'].apply(lambda x: x in regulated)
-        attr_gdf.reset_index(inplace=True, drop=True)
-        attr_gdf['tmean'] = (attr_gdf['tmin'] + attr_gdf['tmax']) / 2.0
-        attr_gdf['log_drainage_area_km2'] = np.log(attr_gdf['drainage_area_km2'])
-        self.attr_gdf = attr_gdf
+        self.da_dict = df[['official_id', 'drainage_area_km2']].set_index('official_id').to_dict()['drainage_area_km2']
+        # self.polygon_dict = df[['official_id', 'geometry']].set_index('official_id').to_dict()['geometry']
+
+        # centroids = gdf.apply(lambda x: self.polygon_dict[x['official_id']].centroid, axis=1)
+        # attr_gdf = gpd.GeoDataFrame(gdf, geometry=centroids, crs=gdf.crs)
+        # print(len(attr_gdf))
+        # attr_gdf["contains_dam"] = attr_gdf['official_id'].apply(lambda x: x in regulated)
+        # attr_gdf.reset_index(inplace=True, drop=True)
+        df['tmean'] = (df['tmin'].astype(float) + df['tmax'].astype(float)) / 2.0
+        df['log_drainage_area_km2'] = np.log(df['drainage_area_km2'].astype(float))
+        self.attr_gdf = df
 
 
     def _build_network_trees(self, attribute_cols=['log_drainage_area_km2', 'elevation_m', 'prcp', 'tmean', 'swe', 'srad',
@@ -148,7 +175,7 @@ class FDCEstimationContext:
 
     def _get_ln_params(self):
         """Retrieve log-normal parameters for a station."""
-        parameter_prediction_results_folder = os.path.join('data', 'parameter_prediction_results', )
+        parameter_prediction_results_folder = os.path.join('data', 'results', 'parameter_prediction_results', )
         predicted_params_fpath   = os.path.join(parameter_prediction_results_folder, 'mean_parameter_predictions.csv')
         rdf = pd.read_csv(predicted_params_fpath, index_col=['official_id'], dtype={'official_id': str})
         rdf.columns = ['_'.join(c.split('_')[:-1]) for c in rdf.columns]
@@ -231,7 +258,7 @@ class FDCEstimationContext:
         
         # loop over minimum concurrent proportions
         overlap_dict = defaultdict(dict)
-        for prop in self.min_target_overlap_proportions:
+        for prop in [0, 25, 50, 75, 100]:
             # Mask where concurrent years ≥ required proportion of complete years for i
             thresholds = (complete_years * prop / 100.0).astype(int)  # shape: (N,)
             valid_mask = concurrent_years_matrix >= thresholds[:, None]  # broadcast shape: (N, N)

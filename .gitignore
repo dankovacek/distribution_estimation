@@ -1,3 +1,6 @@
+docs/notebooks/data/record_overlap_dict.json
+docs/notebooks/images/weekly_data_availability_matrix.html
+docs/notebooks/images/data_availability_matrix.html
 docs/notebooks/data/hysets_streamflow_timeseries/
 docs/notebooks/data/processed_divergence_inputs/
 docs/notebooks/data/divergence_test_results/
@@ -9,6 +12,9 @@ docs/notebooks/data/tvd_prediction_results/*
 docs/notebooks/data/kld_prediction_results/*
 docs/notebooks/data/geospatial_layers/
 docs/notebooks/data/catchment_polygons
+docs/notebooks/data/results/*
+docs/notebooks/data/temp/*
+docs/notebooks/ss/
 .ipynb_checkpoints/
 docs/_build
 docs/.ipynb_checkpoints

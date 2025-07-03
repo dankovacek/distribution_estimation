@@ -8,7 +8,18 @@ This site contains the code and additional supporting information for a computat
 2. **k-Nearest Neighbours**: estimate unit area runoff at an ungauged location using daily streamflow from an ensemble of nearest neighbours.  Here we test the ensemble size $k$, the criteria used for selecting the ensemble, and the weights or proportions assigned to ensemble members reflecting their strength of influence.
 3. **Neural Network**: train a neural network model (LSTM) to predict daily streamflow from daily meteorological time series inputs (precipitation, temperature, shortwave radiation, vapour pressure, snow water equivalent). 
 
-The experiments are organized in the following chapters (notebooks):
+
+```{figure} ../images/method_flowchart.jpeg
+---
+alt: Flowchart describing the methodology of the experiment.
+name: method-flowchart
+width: 500px
+align: center
+---
+The full experimental workflow from data preprocessing for three different model inputs that are each used to generate an estimated flow distribution, and the subsequent large-sample analysis.  
+```
+
+The experiments are organized in the following chapters (notebooks), corresponding to the workflow described in the figure above:
 
 1.  **Data**: introduce the input data and describe where to get additional data from outside sources.
 2.  **Methods**: introduce the various methods for estimating flow duration curves, define partitions for 5-fold CV and compare the target variable distribution over validation folds.

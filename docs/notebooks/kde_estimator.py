@@ -109,3 +109,5 @@ class KDEEstimator:
         pmf /= jnp.sum(pmf)
         
         return pmf, pdf
+    
+    

@@ -22,10 +22,30 @@ class StationData:
         
         self.target_da = self.attr_gdf[self.attr_gdf['official_id'] == stn]['drainage_area_km2'].values[0]
         self._initialize_target_streamflow_data()
-        self.global_max, self.global_min = self._set_global_range(epsilon=1e-12)
         self._set_grid()
         self._set_divergence_measure_functions()
+        self._load_baseline_distribution()
+
     
+    def _load_baseline_distribution(self):
+        """
+        Set the baseline distribution for the target station.
+        This is used to compare the simulated distributions against the observed distribution.
+        """
+        # load the baseline PMF for the target station
+        self.baseline_pmf = self.ctx.baseline_pmf_df[self.target_stn].values
+        assert np.isclose(np.sum(self.baseline_pmf), 1), f'Baseline PMF for {self.target_stn} does not sum to 1: {np.sum(self.baseline_pmf)}'
+        self.baseline_pdf = self.ctx.baseline_pdf_df[self.target_stn].values
+        eval_grid = self.ctx.baseline_pdf_df.index.values
+        # compute the PDF from the PMF given the linear grid (index of the pdf_df)
+        self.baseline_pdf = self.baseline_pmf / eval_grid
+        pdf_area = np.trapezoid(self.baseline_pdf, x=eval_grid)
+        self.baseline_pdf /= pdf_area  # normalize the PDF to sum to 1
+        assert np.isclose(np.trapezoid(self.baseline_pdf, x=eval_grid), 1), f'Baseline PDF for {self.target_stn} does not sum to 1: {pdf_area}'
+        self.baseline_lin_grid = self.ctx.baseline_pmf_df.index.values
+        self.baseline_log_grid = np.log(self.baseline_lin_grid)
+        self.log_dx = np.gradient(self.baseline_log_grid)
+
 
     def retrieve_timeseries_discharge(self, stn):
         watershed_id = self.ctx.official_id_dict[stn]
@@ -52,29 +72,14 @@ class StationData:
 
     def _set_grid(self):        
         # self.baseline_log_grid = np.linspace(np.log(adjusted_min_uar), np.log(max_uar), self.n_grid_points)
-        self.baseline_log_grid = np.linspace(self.global_min, self.global_max, self.n_grid_points)
+        min_q, max_q = 1e-7, 1e4
+        log_min, log_max = np.log(min_q), np.log(max_q)
+        self.baseline_log_grid = np.linspace(log_min, log_max, self.n_grid_points)
         self.baseline_lin_grid = np.exp(self.baseline_log_grid)
         self.log_dx = np.gradient(self.baseline_log_grid)
         # max_step_size = self.baseline_lin_grid[-1] - self.baseline_lin_grid[-2]
         # print(f'    max step size = {max_step_size:.1f} L/s/km^2 for n={self.n_grid_points:.1e} grid points')        
-        
-        
-    def _set_global_range(self, xminglobal=1e-1, xmaxglobal=1e5, epsilon=1e-12):
-        """
-        xminglobal should be expressed in terms that equate to 
-        a minimum flow of 0.1 L/s, or 1e-4 m^3/s must be divided by area to make UAR
-        NOTE: xmaxglobal is already expressed in unit area (100m^3/s/km^2 = 1e5 L/s/km^2
-        """
-        # shift the minimum flow by a small amount to force the left interval bound
-        # to include the assumed global minimum flow (1e-4 m^/3) or 0.1 L/s) 
-        # expressed in unit area terms on a site-specific basis
-        gmin_uar = (xminglobal - epsilon) / self.target_da
-        # w_global = np.log(xmaxglobal) - np.log(gmin_uar)
-        # check to make sure that the maximum UAR contains the max observed value
-        max_uar = self.stn_df[self.uar_label].max()
-        assert max_uar <= xmaxglobal, f'max UAR > max global assumption {max_uar:.1e} > {xmaxglobal:.1e}'
-        return np.log(xmaxglobal), np.log(gmin_uar)
-    
+            
 
     def _adjust_Q_pdf_with_prior(self, Q, label):
         """

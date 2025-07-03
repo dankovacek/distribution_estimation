@@ -19,8 +19,8 @@ class StationData:
         self.divergence_measures = context.divergence_measures
         self.met_forcings_folder = context.LSTM_forcings_folder
         self.LSTM_ensemble_result_folder = context.LSTM_ensemble_result_folder
-        
-        self.target_da = self.attr_gdf[self.attr_gdf['official_id'] == stn]['drainage_area_km2'].values[0]
+
+        self.target_da = float(self.attr_gdf[self.attr_gdf['official_id'] == stn]['drainage_area_km2'].values[0])
         self._initialize_target_streamflow_data()
         self._set_grid()
         self._set_divergence_measure_functions()

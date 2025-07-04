@@ -40,5 +40,5 @@ html:
   navigation_depth: 4  # or higher if you want more nesting
   
 exclude_patterns:
- - "docs/notebooks/ss/"
+ - "docs/notebooks/ss/*"
  - "docs/notebooks/results/"

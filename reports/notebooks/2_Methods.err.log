@@ -1,0 +1,135 @@
+Traceback (most recent call last):
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_core/utils/__init__.py", line 154, in wrapped
+    asyncio.get_running_loop()
+RuntimeError: no running event loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 1319, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_core/utils/__init__.py", line 158, in wrapped
+    return loop.run_until_complete(inner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+target_plots = []
+for c in ['mean_uar', 'sd_uar', 'mean_logx', 'sd_logx']:
+    p = figure(title=f"{c}", tools="pan,wheel_zoom,reset", width=900, height=650)
+    for cluster_id in sorted_gdf[f'{n_classes}_spatial'].unique():
+        # Get marker and color for each cluster
+        
+        # print(cluster_data.head(3))
+        target_sample = sorted_gdf[c].dropna().values
+
+        percentiles = np.linspace(0, 100, 200)
+        train_sample = sorted_gdf[sorted_gdf[f'{n_classes}_spatial'] != cluster_id][c].dropna().values
+        test_sample = sorted_gdf[sorted_gdf[f'{n_classes}_spatial'] == cluster_id][c].dropna().values
+
+        # Compute the percentile values for each dataset
+        percentile_values_train = np.percentile(train_sample, percentiles)
+        percentile_values_test = np.percentile(test_sample, percentiles)
+
+        # Create CDF values for each set of percentiles (from 0 to 1)
+        cdf_values = percentiles / 100
+
+        # Prepare data for Bokeh
+        source_and = ColumnDataSource(data={'x': percentile_values_train, 'y': cdf_values})
+        source_nor = ColumnDataSource(data={'x': percentile_values_test, 'y': cdf_values})        
+        # Plot the CDFs
+        p.line('x', 'y', source=source_and, line_width=2, color='dodgerblue', legend_label=f'Test', alpha=0.75)
+        p.line('x', 'y', source=source_nor, line_width=2, color='magenta', legend_label=f'Train', alpha=0.85)       
+        
+        # Show the plot
+        p.legend.location = "bottom_right"
+
+    p.xaxis.axis_label = 'KL Divergence [bits/sample]'
+    p.yaxis.axis_label = r'$$P(X \geq x)$$'
+    p.legend.click_policy = 'hide'
+    target_plots.append(p)
+lt = gridplot(target_plots, ncols=2, merge_tools=True, toolbar_location='above', width=400, height=300)
+show(lt)
+    
+------------------
+
+
+[31m---------------------------------------------------------------------------[39m
+[31mKeyError[39m                                  Traceback (most recent call last)
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/pandas/core/indexes/base.py:3812[39m, in [36mIndex.get_loc[39m[34m(self, key)[39m
+[32m   3811[39m [38;5;28;01mtry[39;00m:
+[32m-> [39m[32m3812[39m     [38;5;28;01mreturn[39;00m [38;5;28;43mself[39;49m[43m.[49m[43m_engine[49m[43m.[49m[43mget_loc[49m[43m([49m[43mcasted_key[49m[43m)[49m
+[32m   3813[39m [38;5;28;01mexcept[39;00m [38;5;167;01mKeyError[39;00m [38;5;28;01mas[39;00m err:
+
+[36mFile [39m[32mpandas/_libs/index.pyx:167[39m, in [36mpandas._libs.index.IndexEngine.get_loc[39m[34m()[39m
+
+[36mFile [39m[32mpandas/_libs/index.pyx:196[39m, in [36mpandas._libs.index.IndexEngine.get_loc[39m[34m()[39m
+
+[36mFile [39m[32mpandas/_libs/hashtable_class_helper.pxi:7088[39m, in [36mpandas._libs.hashtable.PyObjectHashTable.get_item[39m[34m()[39m
+
+[36mFile [39m[32mpandas/_libs/hashtable_class_helper.pxi:7096[39m, in [36mpandas._libs.hashtable.PyObjectHashTable.get_item[39m[34m()[39m
+
+[31mKeyError[39m: 'mean_uar'
+
+The above exception was the direct cause of the following exception:
+
+[31mKeyError[39m                                  Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[11][39m[32m, line 8[39m
+[32m      3[39m p = figure(title=[33mf[39m[33m"[39m[38;5;132;01m{[39;00mc[38;5;132;01m}[39;00m[33m"[39m, tools=[33m"[39m[33mpan,wheel_zoom,reset[39m[33m"[39m, width=[32m900[39m, height=[32m650[39m)
+[32m      4[39m [38;5;28;01mfor[39;00m cluster_id [38;5;129;01min[39;00m sorted_gdf[[33mf[39m[33m'[39m[38;5;132;01m{[39;00mn_classes[38;5;132;01m}[39;00m[33m_spatial[39m[33m'[39m].unique():
+[32m      5[39m     [38;5;66;03m# Get marker and color for each cluster[39;00m
+[32m      6[39m 
+[32m      7[39m     [38;5;66;03m# print(cluster_data.head(3))[39;00m
+[32m----> [39m[32m8[39m     target_sample = [43msorted_gdf[49m[43m[[49m[43mc[49m[43m][49m.dropna().values
+[32m     10[39m     percentiles = np.linspace([32m0[39m, [32m100[39m, [32m200[39m)
+[32m     11[39m     train_sample = sorted_gdf[sorted_gdf[[33mf[39m[33m'[39m[38;5;132;01m{[39;00mn_classes[38;5;132;01m}[39;00m[33m_spatial[39m[33m'[39m] != cluster_id][c].dropna().values
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/geopandas/geodataframe.py:1910[39m, in [36mGeoDataFrame.__getitem__[39m[34m(self, key)[39m
+[32m   1904[39m [38;5;28;01mdef[39;00m[38;5;250m [39m[34m__getitem__[39m([38;5;28mself[39m, key):
+[32m   1905[39m [38;5;250m    [39m[33;03m"""[39;00m
+[32m   1906[39m [33;03m    If the result is a column containing only 'geometry', return a[39;00m
+[32m   1907[39m [33;03m    GeoSeries. If it's a DataFrame with any columns of GeometryDtype,[39;00m
+[32m   1908[39m [33;03m    return a GeoDataFrame.[39;00m
+[32m   1909[39m [33;03m    """[39;00m
+[32m-> [39m[32m1910[39m     result = [38;5;28;43msuper[39;49m[43m([49m[43m)[49m[43m.[49m[34;43m__getitem__[39;49m[43m([49m[43mkey[49m[43m)[49m
+[32m   1911[39m     [38;5;66;03m# Custom logic to avoid waiting for pandas GH51895[39;00m
+[32m   1912[39m     [38;5;66;03m# result is not geometry dtype for multi-indexes[39;00m
+[32m   1913[39m     [38;5;28;01mif[39;00m (
+[32m   1914[39m         pd.api.types.is_scalar(key)
+[32m   1915[39m         [38;5;129;01mand[39;00m key == [33m"[39m[33m"[39m
+[32m   (...)[39m[32m   1918[39m         [38;5;129;01mand[39;00m [38;5;129;01mnot[39;00m is_geometry_type(result)
+[32m   1919[39m     ):
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/pandas/core/frame.py:4107[39m, in [36mDataFrame.__getitem__[39m[34m(self, key)[39m
+[32m   4105[39m [38;5;28;01mif[39;00m [38;5;28mself[39m.columns.nlevels > [32m1[39m:
+[32m   4106[39m     [38;5;28;01mreturn[39;00m [38;5;28mself[39m._getitem_multilevel(key)
+[32m-> [39m[32m4107[39m indexer = [38;5;28;43mself[39;49m[43m.[49m[43mcolumns[49m[43m.[49m[43mget_loc[49m[43m([49m[43mkey[49m[43m)[49m
+[32m   4108[39m [38;5;28;01mif[39;00m is_integer(indexer):
+[32m   4109[39m     indexer = [indexer]
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/pandas/core/indexes/base.py:3819[39m, in [36mIndex.get_loc[39m[34m(self, key)[39m
+[32m   3814[39m     [38;5;28;01mif[39;00m [38;5;28misinstance[39m(casted_key, [38;5;28mslice[39m) [38;5;129;01mor[39;00m (
+[32m   3815[39m         [38;5;28misinstance[39m(casted_key, abc.Iterable)
+[32m   3816[39m         [38;5;129;01mand[39;00m [38;5;28many[39m([38;5;28misinstance[39m(x, [38;5;28mslice[39m) [38;5;28;01mfor[39;00m x [38;5;129;01min[39;00m casted_key)
+[32m   3817[39m     ):
+[32m   3818[39m         [38;5;28;01mraise[39;00m InvalidIndexError(key)
+[32m-> [39m[32m3819[39m     [38;5;28;01mraise[39;00m [38;5;167;01mKeyError[39;00m(key) [38;5;28;01mfrom[39;00m[38;5;250m [39m[34;01merr[39;00m
+[32m   3820[39m [38;5;28;01mexcept[39;00m [38;5;167;01mTypeError[39;00m:
+[32m   3821[39m     [38;5;66;03m# If we have a listlike key, _check_indexing_error will raise[39;00m
+[32m   3822[39m     [38;5;66;03m#  InvalidIndexError. Otherwise we fall through and re-raise[39;00m
+[32m   3823[39m     [38;5;66;03m#  the TypeError.[39;00m
+[32m   3824[39m     [38;5;28mself[39m._check_indexing_error(key)
+
+[31mKeyError[39m: 'mean_uar'
+

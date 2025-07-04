@@ -62,7 +62,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'intro';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Data" href="notebooks/1_data.html" />
+    <link rel="next" title="1. Data" href="notebooks/1_data.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -183,12 +183,12 @@
             </li>
         </ul>
         <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="notebooks/1_data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/2_Methods.html">Methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/3_Predict_Runoff_Statistics.html">Predict Runoff Statistics from Catchment Attributes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/4_Reference_Distributions.html">Reference Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/5_FDC_Estimation.html">FDC Estimation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/6_Large_Sample_Results_Comparison.html">Large Sample Comparison Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/1_data.html">1. Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/2_Methods.html">2. Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/3_Predict_Runoff_Statistics.html">3. Predict Runoff Statistics from Catchment Attributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/4_Reference_Distributions.html">4. Reference Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/5_FDC_Estimation.html">5. FDC Estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/6_Large_Sample_Results_Comparison.html">6. Large Sample Comparison Results</a></li>
 </ul>
 
     </div>
@@ -425,19 +425,19 @@ document.write(`
 </ol>
 <section id="computational-notes">
 <h2>Computational Notes<a class="headerlink" href="#computational-notes" title="Link to this heading">#</a></h2>
-<p>The prediction of hydrological signatures is done here with the widely used XGBoost library is used for its implementation<span id="id1">[<a class="reference internal" href="notebooks/ss/markdown.html#id10" title="Tianqi Chen and Carlos Guestrin. Xgboost: a scalable tree boosting system. In Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining, 785–794. 2016.">Chen and Guestrin, 2016</a>]</span>.  (notes about xgboost).  The XGBoost library facilitates parallel CPU and GPU training, making it feasible to run a large number of models to test sensitivity to key assumptions.  The neural network estimation component is done using the <a class="reference external" href="https://github.com/neuralhydrology/neuralhydrology">Neural Hydrology</a> library from <span id="id2">[<a class="reference internal" href="notebooks/ss/markdown.html#id9" title="Frederik Kratzert, Martin Gauch, Grey Nearing, and Daniel Klotz. Neuralhydrology — a python library for deep learning research in hydrology. Journal of Open Source Software, 7(71):4050, 2022. URL: https://doi.org/10.21105/joss.04050, doi:10.21105/joss.04050.">Kratzert <em>et al.</em>, 2022</a>]</span>.</p>
+<p>The prediction of hydrological signatures is done here with the widely used XGBoost library is used for its implementation<span id="id1">[<a class="reference internal" href="#id11" title="Tianqi Chen and Carlos Guestrin. Xgboost: a scalable tree boosting system. In Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining, 785–794. 2016.">Chen and Guestrin, 2016</a>]</span>.  (notes about xgboost).  The XGBoost library facilitates parallel CPU and GPU training, making it feasible to run a large number of models to test sensitivity to key assumptions.  The neural network estimation component is done using the <a class="reference external" href="https://github.com/neuralhydrology/neuralhydrology">Neural Hydrology</a> library from <span id="id2">[<a class="reference internal" href="#id10" title="Frederik Kratzert, Martin Gauch, Grey Nearing, and Daniel Klotz. Neuralhydrology — a python library for deep learning research in hydrology. Journal of Open Source Software, 7(71):4050, 2022. URL: https://doi.org/10.21105/joss.04050, doi:10.21105/joss.04050.">Kratzert <em>et al.</em>, 2022</a>]</span>.</p>
 <p>The computation-intensive pre-processing steps can be bypassed by downloading the pre-processed data files as described in each experiment notebook.</p>
 </section>
 <section id="contents-of-this-book">
 <h2>Contents of this book<a class="headerlink" href="#contents-of-this-book" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/1_data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/2_Methods.html">Methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/3_Predict_Runoff_Statistics.html">Predict Runoff Statistics from Catchment Attributes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/4_Reference_Distributions.html">Reference Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/5_FDC_Estimation.html">FDC Estimation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/6_Large_Sample_Results_Comparison.html">Large Sample Comparison Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/1_data.html">1. Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/2_Methods.html">2. Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/3_Predict_Runoff_Statistics.html">3. Predict Runoff Statistics from Catchment Attributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/4_Reference_Distributions.html">4. Reference Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/5_FDC_Estimation.html">5. FDC Estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/6_Large_Sample_Results_Comparison.html">6. Large Sample Comparison Results</a></li>
 </ul>
 </div>
 </section>
@@ -493,7 +493,7 @@ document.write(`
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Data</p>
+        <p class="prev-next-title"><span class="section-number">1. </span>Data</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

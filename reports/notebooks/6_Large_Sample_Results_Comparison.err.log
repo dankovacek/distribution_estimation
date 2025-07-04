@@ -1,0 +1,71 @@
+Traceback (most recent call last):
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_core/utils/__init__.py", line 154, in wrapped
+    asyncio.get_running_loop()
+RuntimeError: no running event loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 1319, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_core/utils/__init__.py", line 158, in wrapped
+    return loop.run_until_complete(inner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+# plot a correlation between land cover change and the DKL/EMD values
+# models = list(main_result_vals.keys())
+figs = []
+for dm in ['DKL', 'EMD']:
+    f = figure(title=f'Correlation between land cover change and {dm}', width=600, height=400, y_axis_type='log')
+    # models = [m for m in models if m.endswith(f'_{dm}')]
+    models = [f'PredictedLog_{dm}', f'kNN1980_{dm}', f'LSTM_freq_{dm}'] 
+    for i, model in enumerate(models):    
+        data = main_result_vals[f'LSTM_freq_{dm}'].copy()
+        # convert to a dict with the ids as keys
+        model_dict = dict(zip(data['ids'], data['values']))
+        # map the model values to the bcub_df
+        model_df = bcub_df.copy()
+        model_df[model] = model_df['official_id'].map(model_dict, None)
+        model_df = model_df[model_df[model].notna()].copy()
+        data = model_df[[model, 'forest_change']]
+        f.scatter(data['forest_change'], data[model], size=5, color=Bokeh6[i], legend_label=model, alpha=0.4)
+        slope, intercept, r_value, p_value, std_err = linregress(data['forest_change'], data[model])
+        x = np.linspace(data['forest_change'].min(), data['forest_change'].max(), 100)
+        y = slope * x + intercept
+        f.line(x, y, line_width=2, color=Bokeh6[2*i], legend_label=f'{model} (R²={r_value**2:.2f})')
+    f.xaxis.axis_label = 'Forest Change (2010-2020)'
+    f.yaxis.axis_label = f'{dm} Value'
+    f.legend.location = 'top_left'
+    f.legend.click_policy = 'hide'
+    f.legend.background_fill_alpha = 0.5
+    f = dpf.format_fig_fonts(f, font_size=14)
+    figs.append(f)
+
+
+------------------
+
+
+[31m---------------------------------------------------------------------------[39m
+[31mKeyError[39m                                  Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[56][39m[32m, line 9[39m
+[32m      7[39m models = [[33mf[39m[33m'[39m[33mPredictedLog_[39m[38;5;132;01m{[39;00mdm[38;5;132;01m}[39;00m[33m'[39m, [33mf[39m[33m'[39m[33mkNN1980_[39m[38;5;132;01m{[39;00mdm[38;5;132;01m}[39;00m[33m'[39m, [33mf[39m[33m'[39m[33mLSTM_freq_[39m[38;5;132;01m{[39;00mdm[38;5;132;01m}[39;00m[33m'[39m] 
+[32m      8[39m [38;5;28;01mfor[39;00m i, model [38;5;129;01min[39;00m [38;5;28menumerate[39m(models):    
+[32m----> [39m[32m9[39m     data = [43mmain_result_vals[49m[43m[[49m[33;43mf[39;49m[33;43m'[39;49m[33;43mLSTM_freq_[39;49m[38;5;132;43;01m{[39;49;00m[43mdm[49m[38;5;132;43;01m}[39;49;00m[33;43m'[39;49m[43m][49m.copy()
+[32m     10[39m     [38;5;66;03m# convert to a dict with the ids as keys[39;00m
+[32m     11[39m     model_dict = [38;5;28mdict[39m([38;5;28mzip[39m(data[[33m'[39m[33mids[39m[33m'[39m], data[[33m'[39m[33mvalues[39m[33m'[39m]))
+
+[31mKeyError[39m: 'LSTM_freq_DKL'
+

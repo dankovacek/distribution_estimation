@@ -38,3 +38,6 @@ html:
   navbar_number_sections: true  # optional, for numbered sections
   collapse_navigation: false
   navigation_depth: 4  # or higher if you want more nesting
+  
+exclude_patterns:
+ - "docs/notebooks/ss/"

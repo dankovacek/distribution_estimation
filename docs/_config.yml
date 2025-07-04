@@ -38,7 +38,6 @@ html:
   navbar_number_sections: true  # optional, for numbered sections
   collapse_navigation: false
   navigation_depth: 4  # or higher if you want more nesting
-  
-exclude_patterns:
- - "docs/notebooks/ss/*"
- - "docs/notebooks/results/"
+
+only_build_toc_files: true
+exclude_patterns: [ss/*, superseded/*, __pycache__/* .ipynb_checkpoints/*]

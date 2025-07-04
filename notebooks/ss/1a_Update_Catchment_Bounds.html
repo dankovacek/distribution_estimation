@@ -185,14 +185,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../1_data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../2_Methods.html">Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../3_Predict_Runoff_Statistics.html">Predict Runoff Statistics from Catchment Attributes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../5_FDC_Estimation.html">Non-Parametric Simulation</a></li>
-
-
-<li class="toctree-l1"><a class="reference internal" href="../6_Large_Sample_Results_Comparison.html">Notes</a></li>
-
-
-
-
+<li class="toctree-l1"><a class="reference internal" href="../4_Reference_Distributions.html">Reference Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../5_FDC_Estimation.html">FDC Estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../6_Large_Sample_Results_Comparison.html">Large Sample Comparison Results</a></li>
 </ul>
 
     </div>
@@ -431,7 +426,7 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="update-hysets-catchment-polygons">
 <h1>Update HYSETS Catchment Polygons<a class="headerlink" href="#update-hysets-catchment-polygons" title="Link to this heading">#</a></h1>
-<p>The HYSETS dataset <span id="id1">[]</span> contains an “artificial boundaries” flag to indicate where the catchment boundary for the monitoring location is approximated due to either missing data or uncertainty in catchment delineation, in general due to small drainage area.  Approximately 25% of the catchments in the study region (British Columbia and surrounding areas) feature this flag.</p>
+<p>The HYSETS dataset <span id="id1">[<a class="reference internal" href="markdown.html#id7" title="Richard Arsenault, François Brissette, Jean-Luc Martel, Magali Troin, Guillaume Lévesque, Jonathan Davidson-Chaput, Mariana Castañeda Gonzalez, Ali Ameli, and Annie Poulin. A comprehensive, multisource database for hydrometeorological modeling of 14,425 north american watersheds. Scientific Data, 7(1):243, 2020.">Arsenault <em>et al.</em>, 2020</a>]</span> contains an “artificial boundaries” flag to indicate where the catchment boundary for the monitoring location is approximated due to either missing data or uncertainty in catchment delineation, in general due to small drainage area.  Approximately 25% of the catchments in the study region (British Columbia and surrounding areas) feature this flag.</p>
 <p>In July 2022, the Water Survey of Canada (WSC) published updated polygons for over 8000 catchments in Canada.  We find updated catchment boundaries from WSC and USGS where available.  Polygons updated from USGS and WSC official sources represent over 3/4 of the “artificial bounds” flagged catchments, and the remaining 92 are updated using reprocessed USGS 3DEP DEM and an algorithm matching the closest stream pixel (required for catchment delineation) to the reported drainage area.</p>
 <p>To start, download the HYSETS catchment polygons (<code class="docutils literal notranslate"><span class="pre">HYSETS_watershed_boundaries.zip</span></code>) from <a class="reference external" href="https://osf.io/rpc3w/">that dataset’s open data repository</a>.</p>
 <p>The resulting updated polygons are used in the next chapter/section to extract and validate attributes as part of the supporting information for technical validation of the associated publication.</p>
@@ -474,7 +469,7 @@ document.write(`
     </style>
     <div>
         <a href="https://bokeh.org" target="_blank" class="bk-notebook-logo"></a>
-        <span id="f9a978fb-563f-4e64-93b8-2446267bddee">Loading BokehJS ...</span>
+        <span id="cf3e4a2f-7aa7-433c-b19e-16264ba7e6d8">Loading BokehJS ...</span>
     </div>
 </div><script type="application/javascript">'use strict';
 (function(root) {
@@ -639,7 +634,7 @@ const JS_MIME_TYPE = 'application/javascript';
      "</div>"}};
 
   function display_loaded(error = null) {
-    const el = document.getElementById("f9a978fb-563f-4e64-93b8-2446267bddee");
+    const el = document.getElementById("cf3e4a2f-7aa7-433c-b19e-16264ba7e6d8");
     if (el != null) {
       const html = (() => {
         if (typeof root.Bokeh === "undefined") {
@@ -773,7 +768,7 @@ function(Bokeh) {
       console.log("Bokeh: BokehJS failed to load within specified timeout.");
       root._bokeh_failed_load = true;
     } else if (force !== true) {
-      const cell = $(document.getElementById("f9a978fb-563f-4e64-93b8-2446267bddee")).parents('.cell').data().cell;
+      const cell = $(document.getElementById("cf3e4a2f-7aa7-433c-b19e-16264ba7e6d8")).parents('.cell').data().cell;
       cell.output_area.append_execute_result(NB_LOAD_WARNING)
     }
   }
@@ -1415,7 +1410,7 @@ function(Bokeh) {
 <p>In order to facilitate an iterative validation process for delineating catchment bounds that are uncertain, the stations will be processed one by one as follows:</p>
 <section id="find-the-nearest-pixel-in-the-stream-raster-corresponding-to-the-point-geometry">
 <h3>Find the nearest pixel in the stream raster corresponding to the point geometry<a class="headerlink" href="#find-the-nearest-pixel-in-the-stream-raster-corresponding-to-the-point-geometry" title="Link to this heading">#</a></h3>
-<p>Note that where the catchment geometry is missing in HYSETS, the centroid point is just the station location, and the geometry is simply a square centred at the station location and with an area equal to the drainage area reported by the official source <span id="id2">[]</span>.  We then find the nearest stream pixel to the “centroid” which is not actually the centroid but the reported station location.</p>
+<p>Note that where the catchment geometry is missing in HYSETS, the centroid point is just the station location, and the geometry is simply a square centred at the station location and with an area equal to the drainage area reported by the official source <span id="id2">[<a class="reference internal" href="markdown.html#id7" title="Richard Arsenault, François Brissette, Jean-Luc Martel, Magali Troin, Guillaume Lévesque, Jonathan Davidson-Chaput, Mariana Castañeda Gonzalez, Ali Ameli, and Annie Poulin. A comprehensive, multisource database for hydrometeorological modeling of 14,425 north american watersheds. Scientific Data, 7(1):243, 2020.">Arsenault <em>et al.</em>, 2020</a>]</span>.  We then find the nearest stream pixel to the “centroid” which is not actually the centroid but the reported station location.</p>
 <p>Historical (discontinued) stations are difficult to align automatically with the correct stream location because often their geographic locations (representing pour points) were not recorded precisely.  Catchment delineation requires an x,y input that aligns precisely with the stream network raster, meaning greater pour point precision is required as resolution increases.  There are less than 100 catchments in the study region remaining with a <code class="docutils literal notranslate"><span class="pre">Artificial_Bounds_Flag</span></code>, and this is a reasonable number to validate “manually”, which is done here.</p>
 <p>The process of validating these final catchments is as follows:</p>
 <ul class="simple">
@@ -2717,7 +2712,16 @@ processing 15109048 in 08B region (11.21 km²)
 </section>
 <section id="citations">
 <h2>Citations<a class="headerlink" href="#citations" title="Link to this heading">#</a></h2>
-<span class="target" id="id3"></span></section>
+<div class="docutils container" id="id3">
+<div role="list" class="citation-list">
+<div class="citation" id="id8" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>ABM+20<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>)</span>
+<p>Richard Arsenault, François Brissette, Jean-Luc Martel, Magali Troin, Guillaume Lévesque, Jonathan Davidson-Chaput, Mariana Castañeda Gonzalez, Ali Ameli, and Annie Poulin. A comprehensive, multisource database for hydrometeorological modeling of 14,425 north american watersheds. <em>Scientific Data</em>, 7(1):243, 2020.</p>
+</div>
+</div>
+</div>
+</section>
 </section>
 
     <script type="text/x-thebe-config">

@@ -9,7 +9,7 @@ This site contains the code and additional supporting information for a computat
 3. **Neural Network**: train a neural network model (LSTM) to predict daily streamflow from daily meteorological time series inputs (precipitation, temperature, shortwave radiation, vapour pressure, snow water equivalent). 
 
 
-```{figure} ../images/method_flowchart.jpeg
+```{figure} notebooks/images/method_flowchart.jpeg
 ---
 alt: Flowchart describing the methodology of the experiment.
 name: method-flowchart

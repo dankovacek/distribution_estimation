@@ -119,7 +119,7 @@ def format_fig_fonts(fig, font_size=20, font='Bitstream Charter', legend=True):
     fig.xaxis.axis_label_text_font = font
     fig.xaxis.major_label_text_font = font
     fig.yaxis.major_label_text_font = font
-    if legend == True:
+    if fig.legend == True:
         fig.legend.label_text_font_size = f'{font_size-2}pt'
         fig.legend.label_text_font = font
     return fig

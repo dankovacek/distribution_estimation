@@ -41,3 +41,4 @@ html:
   
 exclude_patterns:
  - "docs/notebooks/ss/"
+ - "docs/notebooks/results/"

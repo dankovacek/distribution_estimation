@@ -35,6 +35,19 @@ class FDCEstimationContext:
         self._set_attribute_indexers()
         self.overlap_dict = self._compute_concurrent_overlap_dict()
         self._load_baseline_distributions()
+        self._load_laplace_prior_params()
+
+    
+    def _load_laplace_prior_params(self):
+        predicted_params = pd.read_csv('data/results/parameter_prediction_results/mean_parameter_predictions.csv', index_col=0)
+        self.laplace_param_dict = {
+            'mean': predicted_params['log_uar_mean_mean_predicted'].to_dict(),
+            'sd': predicted_params['log_uar_std_mean_predicted'].to_dict(),
+            'median': predicted_params['log_uar_median_mean_predicted'].to_dict(),
+            'mad': predicted_params['log_uar_mad_mean_predicted'].to_dict(),
+        }
+
+
 
     
     def _load_baseline_distributions(self):

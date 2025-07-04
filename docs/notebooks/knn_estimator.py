@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from scipy.stats import laplace
 from jax import numpy as jnp
 from .kde_estimator import KDEEstimator
 
@@ -290,61 +289,6 @@ class kNNFDCEstimator:
             return inv_weights / jnp.sum(inv_weights)
     
     
-    def _compute_prior_from_laplace_fit(self, predicted_uar, n_cols=1, min_prior=1e-10, scale_factor=1.05, recursion_depth=0, max_depth=100):
-        """
-        Fit a Laplace distribution to the simulation and define a 
-        pdf across a pre-determined "global" range to avoid data
-        leakage.  "Normalize" by setting the total prior mass to
-        integrate to a factor related to the number of observations.
-        """
-        # assert no nan values
-        assert np.isfinite(predicted_uar).all(), f'NaN values in predicted_uar: {predicted_uar}'
-        # assert all positive values
-        # assert np.all(predicted_uar > 0), f'Negative values in predicted_uar: {np.min(predicted_uar)}'
-        # replace anything <= 0 with 1e-4 scaled by the drainage area
-        predicted_uar = np.where(predicted_uar <= 0, 1000 * 1e-4 / self.data.target_da, predicted_uar)
-        assert np.all(predicted_uar > 0), f'Negative values in predicted_uar: {np.min(predicted_uar)}'
-        # print('min/max: ', np.min(predicted_uar), np.max(predicted_uar))
-        loc, scale = laplace.fit(np.log(predicted_uar))       
-
-        # Apply scale factor in case of recursion
-        if scale <= 0:
-            original_scale = scale
-            scale = scale_factor ** recursion_depth
-            print(f'   Adjusting scale from {original_scale:.3f} to {scale:.3f} for recursion depth {recursion_depth}')
-
-        prior_pdf = laplace.pdf(self.data.baseline_log_grid, loc=loc, scale=scale)
-        prior_check = jnp.trapezoid(prior_pdf, x=self.data.baseline_log_grid)
-        prior_pdf /= prior_check
-
-        # Check for zeros
-        if np.any(prior_pdf == 0) | np.any(np.isnan(prior_pdf)):
-            # Prevent scale from being too small
-            if recursion_depth >= max_depth:
-                # set a very small prior
-                prior_pdf = np.ones_like(self.data.baseline_log_grid)
-                err_msg = f"Recursion limit reached. Scale={scale}, setting default prior to 1 pseudo-count uniform distribution."
-                print(err_msg)
-                return prior_pdf
-                # raise ValueError(err_msg)
-            # print(f"Recursion {recursion_depth}: Zero values detected. Increasing scale to {scale:.6f}")
-            return self._compute_prior_from_laplace_fit(predicted_uar, n_cols=n_cols, recursion_depth=recursion_depth + 1)
-        
-        second_check = jnp.trapezoid(prior_pdf, x=self.data.baseline_log_grid)
-        assert np.isclose(second_check, 1, atol=2e-4), f'prior check != 1, {second_check:.6f} N={len(predicted_uar)} {predicted_uar}'
-        assert np.min(prior_pdf) > 0, f'min prior == 0, scale={scale:.5f}'
-
-        # convert prior PDF to PMF (pseudo-count mass function)
-        prior_pmf = prior_pdf * self.data.log_dx
-
-        # scale the number of pseudo-counts based on years of record  (365 / n_observations)
-        # and number of models in the ensemble (given by n_cols)
-        prior_pseudo_counts = prior_pmf * (365 / (len(predicted_uar) * n_cols))
-        
-        # return weighted_prior_pdf
-        return prior_pseudo_counts
-    
-
     def _compute_frequency_ensemble_mean(self, pdfs, weights):
         """
         This function computes the weighted ensemble distribution estimates.
@@ -356,7 +300,6 @@ class kNNFDCEstimator:
             pdf_est = jnp.asarray(pdfs.to_numpy() @ weights)
         else:
             pdf_est = jnp.asarray(pdfs.mean(axis=1).to_numpy())
-
 
         # Check integral before normalization
         pdf_check = jnp.trapezoid(pdf_est, x=self.data.baseline_log_grid)
@@ -381,7 +324,7 @@ class kNNFDCEstimator:
             # evaluate the laplace on the prediction as a prior
             # drop the nan values
             values = df[c].dropna().values
-            obs_count = len(values)
+            # obs_count = len(values)
             assert len(values) > 0, f'0 values for {c}'
 
             # compute the pdf and pmf using kde
@@ -391,25 +334,10 @@ class kNNFDCEstimator:
                 values, self.data.target_da
             )
 
-            prior = self._compute_prior_from_laplace_fit(values, n_cols=1) # priors are expressed in pseudo-counts
-            # convert the pdf to counts and apply the prior
-            counts = kde_pmf * obs_count + prior
+            pdf, pmf = self.data._compute_posterior_with_laplace_prior(values, kde_pmf)
 
-            # re-normalize the pmf
-            pmf = counts / jnp.sum(counts)
-            pdf = pmf / self.data.log_dx
-
-            pdf_check = jnp.trapezoid(pdf, x=self.data.baseline_log_grid)
-            pdf /= pdf_check
-            # pdf /= pdf_check
-            assert jnp.isclose(jnp.trapezoid(pdf, x=self.data.baseline_log_grid), 1.0, atol=0.001), f'pdf does not integrate to 1 in compute_ensemble_member_distribution_estimates: {pdf_check:.4f}'
             pdfs[c] = pdf
 
-            # convert the pdf to pmf
-            pmf = pdf * self.data.log_dx
-            pmf /= jnp.sum(pmf)
-            # assert np.isclose(np.sum(pmf), 1, atol=1e-4), f'pmf does not sum to 1 in compute_ensemble_member_distribution_estimates: {np.sum(pmf):.5f}'
-            
             # compute the bias added by the prior
             prior_biases[c.split('_')[0]] = {'DKL': self.data._compute_kld(kde_pmf, pmf), 'EMD': self.data._compute_emd(kde_pmf, pmf)}
         return pdfs, prior_biases

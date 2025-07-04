@@ -1,5 +1,9 @@
 from dataclasses import dataclass
 from collections import defaultdict
+from scipy.stats import laplace
+import json
+
+from evaluation_metrics import EvaluationMetrics
 
 import numpy as np
 import pandas as pd
@@ -12,7 +16,7 @@ class StationData:
         self.ctx = context
         self.target_stn = stn
         self.attr_gdf = context.attr_gdf
-        self.LN_param_dict = context.LN_param_dict
+        self.predicted_param_dict = context.predicted_param_dict[stn]
         self.n_grid_points = context.n_grid_points
         # self.catchments = catchments
         self.min_flow = context.min_flow # don't allow flows below this value
@@ -23,8 +27,23 @@ class StationData:
         self.target_da = float(self.attr_gdf[self.attr_gdf['official_id'] == stn]['drainage_area_km2'].values[0])
         self._initialize_target_streamflow_data()
         self._set_grid()
-        self._set_divergence_measure_functions()
+        self.eval_metrics = EvaluationMetrics(self.baseline_log_grid, self.log_dx)
+        # self._set_divergence_measure_functions()
         self._load_baseline_distribution()
+        self._load_complete_year_dict()
+        self.location = self.ctx.laplace_param_dict['median'][stn]
+        self.scale = self.ctx.laplace_param_dict['mad'][stn]
+        self.prior_strength = self.ctx.prior_strength
+
+
+
+    def _load_complete_year_dict(self):
+        """
+        Load the complete year dictionary for the target station.
+        This is used to ensure that the time series data is complete for the target station.
+        """
+        with open('data/complete_years.json', 'r') as f:
+            self.complete_year_dict = json.load(f)
 
     
     def _load_baseline_distribution(self):
@@ -130,56 +149,63 @@ class StationData:
         
         return Q_mod
     
-
-    def _compute_emd(self, p, q, label=None):
-        assert np.isclose(np.sum(p), 1, atol=1e-3), f'sum P = {np.sum(p)}'
-        assert np.all(q >= 0), f'min q_i < 0: {np.min(q)}'
-        linear_grid = np.exp(self.baseline_log_grid)
-        emd = wasserstein_distance(linear_grid, linear_grid, p, q)
-        return float(round(emd, 3))#, {'bias': None, 'unsupported_mass': None, 'pct_of_signal': None}
-
     
-    def _compute_kld(self, p, q, label=None):
-        # assert p and q are 1d
-        assert jnp.ndim(p) >= 1, f'p is not 1D: {jnp.ndim(p)}'
-        assert jnp.ndim(q) >= 1, f'q is not 1D: {jnp.ndim(q)}'
-        # Ensure q is at least 2D for consistent broadcasting
-        assert jnp.isclose(np.sum(p), 1, atol=1e-3), f'sum P = {np.sum(p)}'
-        assert jnp.isclose(np.sum(q), 1, atol=1e-3), f'sum Q = {np.sum(q)}'
-        assert jnp.all(q >= 0), f'min q_i < 0: {np.min(q)}'
-        assert jnp.all(p >= 0), f'min p_i < 0: {np.min(p)}'
-        p_mask = (p > 0)
-        dkl = jnp.sum(jnp.where(p_mask, p * jnp.log2(p / q), 0)).item()        
-        return round(dkl, 3)
-
-
-    def _set_divergence_measure_functions(self):
-        self.divergence_functions = {k: None for k in self.divergence_measures}
-        for dm in self.divergence_measures:
-            # set the divergence measure functions
-            if dm == 'DKL':
-                self.divergence_functions[dm] = self._compute_kld
-            elif dm == 'EMD':
-                self.divergence_functions[dm] = self._compute_emd
-            else:
-                raise Exception("only KL divergence (DKL) and Earth Mover's Distance (EMD) are implemented")
-            
-
-    def _compute_bias_from_eps(self, pmf: jnp.ndarray, divergence_measure: str, eps: float = 1e-12) -> float:
-        """Compute KL divergence between original PMF and PMF + eps.
-
-        Parameters
-        ----------
-        pmf : jnp.ndarray
-            The original PMF (should sum to 1).
-        eps : float
-            Small value added to avoid zero bins.
-
-        Returns
-        -------
-        float
-            D_KL(pmf || pmf_eps) representing the bias introduced by smoothing.
+    def _compute_prior_from_laplace_fit(self, location, scale):
         """
-        pmf_eps = pmf + eps
-        pmf_eps /= pmf_eps.sum()
-        return self.divergence_functions[divergence_measure](pmf, pmf_eps)
+        Fit a Laplace distribution to the simulation and define a 
+        pdf across a pre-determined "global" range to avoid data
+        leakage.  "Normalize" by setting the total prior mass to
+        integrate to a factor related to the number of observations.
+
+        The location of the Laplace distribution is the median, 
+        and the scale is the mean absolute deviation (MAD).
+        By Jensen's Inequality, the MAD is less than or equal to the standard deviation.
+        Here we just use the predicted log-mean and log-standard deviation
+        as an approximation of the Laplace distribution parameters.
+        """
+        prior_pdf = laplace.pdf(self.baseline_log_grid, loc=location, scale=scale)
+        prior_check = np.trapezoid(prior_pdf, x=self.baseline_log_grid)
+        prior_pdf /= prior_check
+        assert np.min(prior_pdf) > 0, f'min prior == 0, scale={scale:.5f}'
+        # convert prior PDF to PMF (pseudo-count mass function)
+        return prior_pdf * self.log_dx
+        
+    
+    def _compute_posterior_with_laplace_prior(self, kde_pmf):
+        """Compute the posterior distribution using a Laplace prior.
+        Ensure that the prior is not too strong by checking the
+        evaluation metrics against the specified thresholds.
+        If the prior has too much influence in terms of any of the metrics tested, 
+        reduce the prior strength and recompute."""
+
+        prior_pmf = self._compute_prior_from_laplace_fit(self.location, self.scale)
+        # convert the pdf to counts and apply the prior
+        pseudo_counts = self.n_observations * (kde_pmf + prior_pmf * self.prior_strength)
+
+        # re-normalize the pmf
+        posterior_pmf = pseudo_counts / np.sum(pseudo_counts)
+        posterior_pdf = posterior_pmf / self.log_dx
+
+        pdf_check = np.trapezoid(posterior_pdf, x=self.baseline_log_grid)
+        posterior_pdf /= pdf_check
+        
+        # we are testing the prior influence, which means 
+        # the kde_pmf is the "baseline_pmf" and the posterior_pmf is the "pmf_est"
+        # this will tell us how far the prior has shifted the posterior from the baseline 
+        metrics = self.eval_metrics._evaluate_fdc_metrics_from_pmf(posterior_pmf, kde_pmf)
+        # check nse and kge for values LESS THAN the specified threshold
+
+        less_than_metrics = [metrics[k] < self.eval_metrics.metric_limits[k] for k in ['nse', 'kge']]
+        greater_than_metrics = [metrics[k] > self.eval_metrics.metric_limits[k] for k in ['rmse', 'relative_error', 'kld', 'emd']]
+        combined_thresholds = greater_than_metrics + less_than_metrics
+
+        if np.any(combined_thresholds):
+            # find which biases are greater than 1.0e-2
+            # for metric_label, bias in metrics.items():
+            #     if bias > self.EvalMetrics.metric_limits[metric_label]:
+            #         print(f'    Prior too strong: {metric_label} bias is > 10^-2: {bias:.2e}, adjusting prior strength to {self.prior_strength:.5e}')
+            self.prior_strength *= 0.5 * self.prior_strength
+            return self._compute_posterior_with_laplace_prior(kde_pmf)
+        
+        return posterior_pdf, posterior_pmf
+    

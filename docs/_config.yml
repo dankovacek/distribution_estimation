@@ -1,7 +1,7 @@
 # Book settings
 # Learn more at https://jupyterbook.org/customize/config.html
 
-title: Streamflow distribution estimation
+title: Streamflow Distribution Estimation
 author: Dan Kovacek
 logo: images/logo.png
 
@@ -35,3 +35,6 @@ repository:
 html:
   use_issues_button: true
   use_repository_button: true
+  navbar_number_sections: true  # optional, for numbered sections
+  collapse_navigation: false
+  navigation_depth: 4  # or higher if you want more nesting

@@ -6,5 +6,9 @@ root: intro
 chapters:
 - file: notebooks/1_data
 - file: notebooks/2_Methods
-- file: notebooks/2a_Fit_Continuous_Distributions
+- file: notebooks/3_Predict_Runoff_Statistics
+- file: notebooks/4_Reference_Distribution
+- file: notebooks/5_FDC_Estimation
+- file: notebooks/6_Large_Sample_Results_Comparison
+
 

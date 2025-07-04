@@ -400,6 +400,13 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h1>
+<figure class="align-center" id="example-fdc">
+<a class="reference internal image-reference" href="_images/example_FDC.png"><img alt="An example duration curve of streamflow comparing an ensemble estimation against observations." src="_images/example_FDC.png" style="width: 500px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">The flow duration curve above describes the percent of time that flow exceeds some value.  Note that to make comparisons between basins of very different size, the FDC is expressed on a unit area basis (<span class="math notranslate nohighlight">\(L/s/\text{km}^2\)</span>).</span><a class="headerlink" href="#example-fdc" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 <p>The duration curve represents the proportion of time an observed variable exceeds some value.  In hydrology, the flow duration curve (FDC) is used in applications related to water resource planning as it represents a long-term expectation of water availability at some location.  Predicting long-term water resource availability at ungauged locations is an open problem in hydrology.  In this notebook, we present several approaches to estimating FDCs at ungauged locations.  Using a large sample of monitored locations around British Columbia, Canada, we test predicting the FDC for each location using a range of input information and methods, and test the accuracy of the prediction using the observed data.</p>
 <p>This site contains the code and additional supporting information for a computational experiment exploring the estimation of probability distributions (flow duration curves) for ungauged locations.  The three methods tested are as follows:</p>
 <ol class="arabic simple">
@@ -408,10 +415,10 @@ document.write(`
 <li><p><strong>Neural Network</strong>: train a neural network model (LSTM) to predict daily streamflow from daily meteorological time series inputs (precipitation, temperature, shortwave radiation, vapour pressure, snow water equivalent).</p></li>
 </ol>
 <figure class="align-center" id="method-flowchart">
-<a class="reference internal image-reference" href="_images/method_flowchart.jpeg"><img alt="Flowchart describing the methodology of the experiment." src="_images/method_flowchart.jpeg" style="width: 500px;" />
+<a class="reference internal image-reference" href="_images/method_flowchart.jpeg"><img alt="Flowchart describing the methodology of the experiment." src="_images/method_flowchart.jpeg" style="width: 750px;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 1 </span><span class="caption-text">The full experimental workflow from data preprocessing for three different model inputs that are each used to generate an estimated flow distribution, and the subsequent large-sample analysis.</span><a class="headerlink" href="#method-flowchart" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 2 </span><span class="caption-text">The full experimental workflow from data preprocessing for three different model inputs that are each used to generate an estimated flow distribution, and the subsequent large-sample analysis.</span><a class="headerlink" href="#method-flowchart" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p>The experiments are organized in the following chapters (notebooks), corresponding to the workflow described in the figure above:</p>

@@ -1,5 +1,15 @@
 # Introduction
 
+```{figure} notebooks/images/example_FDC.png
+---
+alt: An example duration curve of streamflow comparing an ensemble estimation against observations.
+name: example_fdc
+width: 500px
+align: center
+---
+The flow duration curve above describes the percent of time that flow exceeds some value.  Note that to make comparisons between basins of very different size, the FDC is expressed on a unit area basis ($L/s/\text{km}^2$).  
+```
+
 The duration curve represents the proportion of time an observed variable exceeds some value.  In hydrology, the flow duration curve (FDC) is used in applications related to water resource planning as it represents a long-term expectation of water availability at some location.  Predicting long-term water resource availability at ungauged locations is an open problem in hydrology.  In this notebook, we present several approaches to estimating FDCs at ungauged locations.  Using a large sample of monitored locations around British Columbia, Canada, we test predicting the FDC for each location using a range of input information and methods, and test the accuracy of the prediction using the observed data.
 
 This site contains the code and additional supporting information for a computational experiment exploring the estimation of probability distributions (flow duration curves) for ungauged locations.  The three methods tested are as follows:
@@ -13,7 +23,7 @@ This site contains the code and additional supporting information for a computat
 ---
 alt: Flowchart describing the methodology of the experiment.
 name: method-flowchart
-width: 500px
+width: 750px
 align: center
 ---
 The full experimental workflow from data preprocessing for three different model inputs that are each used to generate an estimated flow distribution, and the subsequent large-sample analysis.  

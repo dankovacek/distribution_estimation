@@ -393,6 +393,8 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamflow-data-basic-validation-for-completeness">1.3. Streamflow data basic validation for completeness</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-streamflow-timeseries">1.3.1. Import streamflow timeseries</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#extra-catchments-to-exclude">1.3.2. Extra catchments to exclude</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#excluded-due-to-no-complete-years-of-data-seasonal-90-complete">1.3.3. Excluded due to no complete years of data (seasonal / &lt;= 90% complete)</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamflow-data-validation">1.4. Streamflow Data Validation</a></li>
@@ -402,7 +404,8 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#soil-attributes">1.5.3. Soil attributes</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">1.6. Citations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#daily-meteorological-forcings">1.6. Daily Meteorological Forcings</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">1.7. Citations</a></li>
 </ul>
             </nav>
         </div>
@@ -422,20 +425,20 @@ document.write(`
 <a class="reference internal image-reference" href="../_images/figure_1_study_region.png"><img alt="Study region polygons and HYSETS monitored catchment polygons." src="../_images/figure_1_study_region.png" style="width: 700px;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 1.1 </span><span class="caption-text">Study region polygons and WSC + USGS active (green triangles) and historical (yellow triangles) streamflow monitoring stations.  The purple dots represent ungauged catchments characterized in the BCUB dataset <span id="id1">[<a class="reference internal" href="#id17" title="Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. Earth System Science Data, 17(1):259–275, 2025.">Kovacek and Weijs, 2025</a>]</span>, but they are not used in this study.</span><a class="headerlink" href="#study-region-fig" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 1.1 </span><span class="caption-text">Study region polygons and WSC + USGS active (green triangles) and historical (yellow triangles) streamflow monitoring stations.  The purple dots represent ungauged catchments characterized in the BCUB dataset <span id="id1">[<a class="reference internal" href="#id18" title="Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. Earth System Science Data, 17(1):259–275, 2025.">Kovacek and Weijs, 2025</a>]</span>, but they are not used in this study.</span><a class="headerlink" href="#study-region-fig" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>The streamflow data used in this study comes from <em>The Hydrometeorological Sandbox École de Technologie Supérieure</em> (HYSETS) <span id="id2">[<a class="reference internal" href="2_Methods.html#id10" title="Richard Arsenault, François Brissette, Jean-Luc Martel, Magali Troin, Guillaume Lévesque, Jonathan Davidson-Chaput, Mariana Castañeda Gonzalez, Ali Ameli, and Annie Poulin. A comprehensive, multisource database for hydrometeorological modeling of 14,425 north american watersheds. Scientific Data, 7(1):243, 2020.">Arsenault <em>et al.</em>, 2020</a>]</span>.  The HYSETS data, including streamflow time series and attributes for 14,425 catchments can be accessed at <a class="reference external" href="https://osf.io/rpc3w/">https://osf.io/rpc3w/</a> (As of 2025-07-04, the streamflow timeseries and attribute filename is <code class="docutils literal notranslate"><span class="pre">HYSETS_2023_update_QC_stations.nc</span></code>).  We use a subset of approximately 1620 catchments contained in major basins covering and bounding British Columbia, as shown in <a class="reference internal" href="#study-region-fig"><span class="std std-numref">Figure 1.1</span></a>.</p>
+<p>The streamflow data used in this study comes from <em>The Hydrometeorological Sandbox École de Technologie Supérieure</em> (HYSETS) <span id="id2">[<a class="reference internal" href="#id16" title="Richard Arsenault, François Brissette, Jean-Luc Martel, Magali Troin, Guillaume Lévesque, Jonathan Davidson-Chaput, Mariana Castañeda Gonzalez, Ali Ameli, and Annie Poulin. A comprehensive, multisource database for hydrometeorological modeling of 14,425 north american watersheds. Scientific Data, 7(1):243, 2020.">Arsenault <em>et al.</em>, 2020</a>]</span>.  The HYSETS data, including streamflow time series and attributes for 14,425 catchments can be accessed at <a class="reference external" href="https://osf.io/rpc3w/">https://osf.io/rpc3w/</a> (As of 2025-07-04, the streamflow timeseries and attribute filename is <code class="docutils literal notranslate"><span class="pre">HYSETS_2023_update_QC_stations.nc</span></code>).  We use a subset of approximately 1620 catchments contained in major basins covering and bounding British Columbia, as shown in <a class="reference internal" href="#study-region-fig"><span class="std std-numref">Figure 1.1</span></a>.</p>
 <section id="catchment-attributes">
 <h3><span class="section-number">1.1.1. </span>Catchment attributes<a class="headerlink" href="#catchment-attributes" title="Link to this heading">#</a></h3>
 <p>Catchment attributes are used for all three models, and these are derived from four geospatial data sources:</p>
 <ol class="arabic simple">
-<li><p><strong>Terrain</strong> attributes are derived from 1 arc-second (30m at the equator) digital elevation data from USGS 3D Elevation Program (3DEP) <span id="id3">[<a class="reference internal" href="#id23" title="U.S. Geological Survey. 1 arc-second digital elevation models (dems) usgs national map 3d elevation program. 2022. [Online; accessed 3 March 2022]. URL: https://data.usgs.gov/datacatalog/data/USGS:35f9c4d4-b113-4c8d-8691-47c428c29a5b.">U.S. Geological Survey, 2022</a>]</span>,</p></li>
-<li><p><strong>Land Cover</strong>: classifications are from the North American Land Change Monitoring System dataset (NALCMS) <span id="id4">[<a class="reference internal" href="#id24" title="R Latifovic, C Homer, R Ressl, D Pouliot, SN Hossain, RR Colditz Colditz, I Olthof, C Giri, and A Victoria. North american land change monitoring system (nalcms). Remote sensing of land use and land cover: principles and applications. CRC Press, Boca Raton, 2010.">Latifovic <em>et al.</em>, 2010</a>]</span>.  Here we use attributes from 2010, however they are also processed for 2015 and 2020.</p></li>
-<li><p><strong>Soil</strong> permeability and porosity from the Global Hydrogeological Maps dataset (GlHyMps) <span id="id5">[<a class="reference internal" href="#id25" title="Tom Gleeson, Nils Moosdorf, Jens Hartmann, and LPH Van Beek. A glimpse beneath earth's surface: global hydrogeology maps (glhymps) of permeability and porosity. Geophysical Research Letters, 41(11):3891–3898, 2014.">Gleeson <em>et al.</em>, 2014</a>]</span>, and</p></li>
-<li><p><strong>Climate</strong>: indices were processed from <a class="reference external" href="https://daymet.ornl.gov/">Daymet</a> <span id="id6">[<a class="reference internal" href="#id22" title="MM Thornton, R Shrestha, Y Wei, PE Thornton, S Kao, and BE Wilson. Daymet: monthly climate summaries on a 1-km grid for north america, version 4 r1. ornl daac, oak ridge, tennessee, usa. 2022.">Thornton <em>et al.</em>, 2022</a>]</span>,</p></li>
+<li><p><strong>Terrain</strong> attributes are derived from 1 arc-second (30m at the equator) digital elevation data from USGS 3D Elevation Program (3DEP) <span id="id3">[<a class="reference internal" href="#id26" title="U.S. Geological Survey. 1 arc-second digital elevation models (dems) usgs national map 3d elevation program. 2022. [Online; accessed 3 March 2022]. URL: https://data.usgs.gov/datacatalog/data/USGS:35f9c4d4-b113-4c8d-8691-47c428c29a5b.">U.S. Geological Survey, 2022</a>]</span>,</p></li>
+<li><p><strong>Land Cover</strong>: classifications are from the North American Land Change Monitoring System dataset (NALCMS) <span id="id4">[<a class="reference internal" href="#id27" title="R Latifovic, C Homer, R Ressl, D Pouliot, SN Hossain, RR Colditz Colditz, I Olthof, C Giri, and A Victoria. North american land change monitoring system (nalcms). Remote sensing of land use and land cover: principles and applications. CRC Press, Boca Raton, 2010.">Latifovic <em>et al.</em>, 2010</a>]</span>.  Here we use attributes from 2010, however they are also processed for 2015 and 2020.</p></li>
+<li><p><strong>Soil</strong> permeability and porosity from the Global Hydrogeological Maps dataset (GlHyMps) <span id="id5">[<a class="reference internal" href="#id28" title="Tom Gleeson, Nils Moosdorf, Jens Hartmann, and LPH Van Beek. A glimpse beneath earth's surface: global hydrogeology maps (glhymps) of permeability and porosity. Geophysical Research Letters, 41(11):3891–3898, 2014.">Gleeson <em>et al.</em>, 2014</a>]</span>, and</p></li>
+<li><p><strong>Climate</strong>: indices were processed from <a class="reference external" href="https://daymet.ornl.gov/">Daymet</a> <span id="id6">[<a class="reference internal" href="#id24" title="MM Thornton, R Shrestha, Y Wei, PE Thornton, S Kao, and BE Wilson. Daymet: monthly climate summaries on a 1-km grid for north america, version 4 r1. ornl daac, oak ridge, tennessee, usa. 2022.">Thornton <em>et al.</em>, 2022</a>]</span>,</p></li>
 </ol>
-<p>For details on the data processing pipeline for the catchment attributes, see <em>BCUB - A large sample ungauged basin attribute dataset for British Columbia, Canada</em> <span id="id7">[<a class="reference internal" href="#id17" title="Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. Earth System Science Data, 17(1):259–275, 2025.">Kovacek and Weijs, 2025</a>]</span> (<a class="reference external" href="https://doi.org/10.5194/essd-2023-508">https://doi.org/10.5194/essd-2023-508</a>).  Pre-processed catchment attributes are provided in the <code class="docutils literal notranslate"><span class="pre">data/</span></code> folder of this repository, and they can be used directly in the notebook.</p>
+<p>For details on the data processing pipeline for the catchment attributes, see <em>BCUB - A large sample ungauged basin attribute dataset for British Columbia, Canada</em> <span id="id7">[<a class="reference internal" href="#id18" title="Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. Earth System Science Data, 17(1):259–275, 2025.">Kovacek and Weijs, 2025</a>]</span> (<a class="reference external" href="https://doi.org/10.5194/essd-2023-508">https://doi.org/10.5194/essd-2023-508</a>).  Pre-processed catchment attributes are provided in the <code class="docutils literal notranslate"><span class="pre">data/</span></code> folder of this repository, and they can be used directly in the notebook.</p>
 </section>
 <section id="pre-processed-data-files">
 <h3><span class="section-number">1.1.2. </span>Pre-processed data files<a class="headerlink" href="#pre-processed-data-files" title="Link to this heading">#</a></h3>
@@ -991,6 +994,39 @@ function(Bokeh) {
 </div>
 <p>From the above climate plots, it is clear there is very little information in the last three attributes, <code class="docutils literal notranslate"><span class="pre">low_prcp_freq</span></code>, <code class="docutils literal notranslate"><span class="pre">high_prcp_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">high_prcp_freq</span></code>.</p>
 </section>
+<section id="extra-catchments-to-exclude">
+<h3><span class="section-number">1.3.2. </span>Extra catchments to exclude<a class="headerlink" href="#extra-catchments-to-exclude" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Kakuhan Creek Near Haines AK - 15056030</p></li>
+</ul>
+<figure class="align-default" id="example-of-a-catchment-polygon-with-delineation-issues">
+<a class="reference internal image-reference" href="../_images/kakuhan_creek.png"><img alt="../_images/kakuhan_creek.png" src="../_images/kakuhan_creek.png" style="width: 600px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 1.2 </span><span class="caption-text">There is uncertainty in the delineation of the Kakuhan Creek catchment polygon.  The historical station location does not align with the stream network derived from 30m DEM data.</span><a class="headerlink" href="#example-of-a-catchment-polygon-with-delineation-issues" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="excluded-due-to-no-complete-years-of-data-seasonal-90-complete">
+<h3><span class="section-number">1.3.3. </span>Excluded due to no complete years of data (seasonal / &lt;= 90% complete)<a class="headerlink" href="#excluded-due-to-no-complete-years-of-data-seasonal-90-complete" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Genessee Creek at the Mouth - 08FA009</p></li>
+<li><p>McNair Creek near Port Mellon - 08GA037</p></li>
+<li><p>Canoe River near Valemount - 08NC003</p></li>
+<li><p>Big Quilcene River Near Quilcene, WA - 12052500</p></li>
+<li><p>Morey Creek above McChord Afb near Parkland, WA - 12090480</p></li>
+<li><p>North Fork Newaukum Creek Near Enumclaw, WA - 12107950</p></li>
+<li><p>Newaukum Creek Tributary Near Blacik Diamond, WA - 12108450</p></li>
+<li><p>May Creek near Issaquah, WA - 12119300</p></li>
+<li><p>Honey Creek near Renton, WA - 12119450</p></li>
+<li><p>Carpenter Creek near Bacon Rod near Mount Vernon, WA - 12200684</p></li>
+<li><p>Unnamed Tributary Massacre Bay on Orcas Island, WA - 12200762</p></li>
+<li><p>Whatcom Creek near Bellingham, WA - 12203000</p></li>
+<li><p>Hall Creek at Inchelium, WA - 12409500</p></li>
+<li><p>Dayebas Creek Near Haines, AK - 15056070</p></li>
+<li><p>Bonne Creek near Klawock, AK - 15081510</p></li>
+</ul>
+</section>
 </section>
 <section id="streamflow-data-validation">
 <h2><span class="section-number">1.4. </span>Streamflow Data Validation<a class="headerlink" href="#streamflow-data-validation" title="Link to this heading">#</a></h2>
@@ -1479,7 +1515,7 @@ function(Bokeh) {
 <a class="reference internal image-reference" href="../_images/terrain_attributes.png"><img alt="Terrain attributes are shown for an example catchment." src="../_images/terrain_attributes.png" style="width: 700px;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 1.2 </span><span class="caption-text">Terrain attributes are shown for an example catchment.</span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 1.3 </span><span class="caption-text">Terrain attributes are shown for an example catchment.  Images are from a video presentation on Streamflow Monitoring Network Optimization prepared for the 2024 Canadian Water Resources Association (CWRA) Annual Conference.  The video is available at <a class="reference external" href="https://vimeo.com/1094107902">https://vimeo.com/1094107902</a>.</span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <div class="cell docutils container">
@@ -1538,7 +1574,7 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
 <a class="reference internal image-reference" href="../_images/climate_attributes.png"><img alt="Climate attributes are shown for an example catchment." src="../_images/climate_attributes.png" style="width: 700px;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 1.3 </span><span class="caption-text">Climate attributes are shown for an example catchment.</span><a class="headerlink" href="#id10" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 1.4 </span><span class="caption-text">Climate attributes are shown for an example catchment.</span><a class="headerlink" href="#id10" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <div class="cell docutils container">
@@ -1590,7 +1626,7 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
 <a class="reference internal image-reference" href="../_images/soil_attributes.png"><img alt="Soil attributes are shown for an example catchment." src="../_images/soil_attributes.png" style="width: 600px;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 1.4 </span><span class="caption-text">Soil attributes are shown for an example catchment.</span><a class="headerlink" href="#id11" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 1.5 </span><span class="caption-text">Soil attributes are shown for an example catchment.</span><a class="headerlink" href="#id11" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <div class="cell docutils container">
@@ -1638,7 +1674,7 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
 <a class="reference internal image-reference" href="../_images/land_cover_attributes.png"><img alt="Land cover classifications are shown for an example catchment." src="../_images/land_cover_attributes.png" style="width: 700px;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 1.5 </span><span class="caption-text">Land cover classifications are shown for an example catchment.</span><a class="headerlink" href="#land-cover-classifications" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 1.6 </span><span class="caption-text">Land cover classifications are shown for an example catchment.</span><a class="headerlink" href="#land-cover-classifications" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <div class="cell docutils container">
@@ -1684,32 +1720,46 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
 </div>
 </section>
 </section>
+<section id="daily-meteorological-forcings">
+<h2><span class="section-number">1.6. </span>Daily Meteorological Forcings<a class="headerlink" href="#daily-meteorological-forcings" title="Link to this heading">#</a></h2>
+<p>The LSTM neural network model requires daily meteorological forcings for the catchments in the study region.  These are derived from the Daymet dataset <span id="id12">[<a class="reference internal" href="#id24" title="MM Thornton, R Shrestha, Y Wei, PE Thornton, S Kao, and BE Wilson. Daymet: monthly climate summaries on a 1-km grid for north america, version 4 r1. ornl daac, oak ridge, tennessee, usa. 2022.">Thornton <em>et al.</em>, 2022</a>]</span>, which provides daily meteorological data at a 1km resolution.  The forcings include:</p>
+<ul class="simple">
+<li><p><strong>Precipitation</strong>: total daily precipitation in mm</p></li>
+<li><p><strong>Minimum daily temperature</strong>: minimum daily temperature in degrees Celsius</p></li>
+<li><p><strong>Maximum daily temperature</strong>: maximum daily temperature in degrees Celsius</p></li>
+<li><p><strong>Shortwave radiation</strong>: total daily shortwave radiation in W/m²</p></li>
+<li><p><strong>Vapour pressure</strong>: total daily vapour pressure in kPa</p></li>
+<li><p><strong>Snow water equivalent</strong>: total daily snow water equivalent in mm</p></li>
+</ul>
+<p>These must be processed to catchment-average daily timeseries in netcdf file form for each catchment according to the <a class="reference external" href="https://neuralhydrology.readthedocs.io/en/latest/tutorials/add-dataset.html">NeuralHydrologydocumentation</a>.  The daily timeseries have been processed for the sample of catchments in this study, and they can be accessed at <a class="reference external" href="https://doi.org/10.5683/SP3/65FXAS">https://doi.org/10.5683/SP3/65FXAS</a>.  The full replication code for processing the meteorological forcings from the Daymet dataset is provided at <a class="github reference external" href="https://github.com/dankovacek/process_metforcings">dankovacek/process_metforcings</a></p>
+</section>
 <section id="citations">
-<h2><span class="section-number">1.6. </span>Citations<a class="headerlink" href="#citations" title="Link to this heading">#</a></h2>
-<div class="docutils container" id="id12">
+<h2><span class="section-number">1.7. </span>Citations<a class="headerlink" href="#citations" title="Link to this heading">#</a></h2>
+<div class="docutils container" id="id13">
 <div role="list" class="citation-list">
-<div class="citation" id="id15" role="doc-biblioentry">
+<div class="citation" id="id16" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">ABM+20</a><span class="fn-bracket">]</span></span>
 <p>Richard Arsenault, François Brissette, Jean-Luc Martel, Magali Troin, Guillaume Lévesque, Jonathan Davidson-Chaput, Mariana Castañeda Gonzalez, Ali Ameli, and Annie Poulin. A comprehensive, multisource database for hydrometeorological modeling of 14,425 north american watersheds. <em>Scientific Data</em>, 7(1):243, 2020.</p>
 </div>
-<div class="citation" id="id25" role="doc-biblioentry">
+<div class="citation" id="id28" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">GMHVB14</a><span class="fn-bracket">]</span></span>
 <p>Tom Gleeson, Nils Moosdorf, Jens Hartmann, and LPH Van Beek. A glimpse beneath earth's surface: global hydrogeology maps (glhymps) of permeability and porosity. <em>Geophysical Research Letters</em>, 41(11):3891–3898, 2014.</p>
 </div>
-<div class="citation" id="id17" role="doc-biblioentry">
+<div class="citation" id="id18" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span>KW25<span class="fn-bracket">]</span></span>
 <span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id7">2</a>)</span>
 <p>Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. <em>Earth System Science Data</em>, 17(1):259–275, 2025.</p>
 </div>
-<div class="citation" id="id24" role="doc-biblioentry">
+<div class="citation" id="id27" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">LHR+10</a><span class="fn-bracket">]</span></span>
 <p>R Latifovic, C Homer, R Ressl, D Pouliot, SN Hossain, RR Colditz Colditz, I Olthof, C Giri, and A Victoria. North american land change monitoring system (nalcms). <em>Remote sensing of land use and land cover: principles and applications. CRC Press, Boca Raton</em>, 2010.</p>
 </div>
-<div class="citation" id="id22" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">TSW+22</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id24" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>TSW+22<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id6">1</a>,<a role="doc-backlink" href="#id12">2</a>)</span>
 <p>MM Thornton, R Shrestha, Y Wei, PE Thornton, S Kao, and BE Wilson. Daymet: monthly climate summaries on a 1-km grid for north america, version 4 r1. ornl daac, oak ridge, tennessee, usa. 2022.</p>
 </div>
-<div class="citation" id="id23" role="doc-biblioentry">
+<div class="citation" id="id26" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">USGSurvey22</a><span class="fn-bracket">]</span></span>
 <p>U.S. Geological Survey. 1 arc-second digital elevation models (dems) usgs national map 3d elevation program. 2022. [Online; accessed 3 March 2022]. URL: <a class="reference external" href="https://data.usgs.gov/datacatalog/data/USGS:35f9c4d4-b113-4c8d-8691-47c428c29a5b">https://data.usgs.gov/datacatalog/data/USGS:35f9c4d4-b113-4c8d-8691-47c428c29a5b</a>.</p>
 </div>
@@ -1794,6 +1844,8 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamflow-data-basic-validation-for-completeness">1.3. Streamflow data basic validation for completeness</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-streamflow-timeseries">1.3.1. Import streamflow timeseries</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#extra-catchments-to-exclude">1.3.2. Extra catchments to exclude</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#excluded-due-to-no-complete-years-of-data-seasonal-90-complete">1.3.3. Excluded due to no complete years of data (seasonal / &lt;= 90% complete)</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamflow-data-validation">1.4. Streamflow Data Validation</a></li>
@@ -1803,7 +1855,8 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#soil-attributes">1.5.3. Soil attributes</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">1.6. Citations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#daily-meteorological-forcings">1.6. Daily Meteorological Forcings</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">1.7. Citations</a></li>
 </ul>
   </nav></div>
 

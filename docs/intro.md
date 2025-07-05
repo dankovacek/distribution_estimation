@@ -7,7 +7,7 @@ name: example_fdc
 width: 500px
 align: center
 ---
-The flow duration curve above describes the percent of time that flow exceeds some value.  Note that to make comparisons between basins of very different size, the FDC is expressed on a unit area basis ($L/s/\text{km}^2$).  
+The flow duration curve plot above describes the percent of time that flow exceeds some value.  Note that to make comparisons between basins of very different size, the FDC is expressed here on a unit area basis ($L/s/\text{km}^2$).  
 ```
 
 The duration curve represents the proportion of time an observed variable exceeds some value.  In hydrology, the flow duration curve (FDC) is used in applications related to water resource planning as it represents a long-term expectation of water availability at some location.  Predicting long-term water resource availability at ungauged locations is an open problem in hydrology.  In this notebook, we present several approaches to estimating FDCs at ungauged locations.  Using a large sample of monitored locations around British Columbia, Canada, we test predicting the FDC for each location using a range of input information and methods, and test the accuracy of the prediction using the observed data.
@@ -31,11 +31,11 @@ The full experimental workflow from data preprocessing for three different model
 
 The experiments are organized in the following chapters (notebooks), corresponding to the workflow described in the figure above:
 
-1.  **Data**: introduce the input data and describe where to get additional data from outside sources.
-2.  **Methods**: introduce the various methods for estimating flow duration curves, define partitions for 5-fold CV and compare the target variable distribution over validation folds.
-3.  **Predict Runoff Statistics**: The hydrological signature prediction is done first to generate the predicted sufficient statistics of the log-normal distribution for the sample of catchments.
-4.  **Computation of reference distributions**: to evaluate the accuracy of estimated FDCs, we first compute a reference distribution on the observed data.  This is done by kernel density estimation (KDE).  The pre-processing of reference distribution makes the nearest neighbours experiment much more efficient in avoiding duplicate computations.
-5.  **FDC Estimation Validation**: here we iterate through all catchments in the sample and bring together the FDC estimates of the different approaches.
+1.  **Data**: introduce the input data and describe where to get additional data from outside sources.  Data validation is done to filter stations based on length and completeness of records, and on the validation of catchment bound delineation as a way of validating catchment attribute representativeness.
+2.  **Methods**: introduce each method of flow duration curve estimation, describe assumptions and additional pre-processing steps to address known problems with different methods.
+3.  **Predict Runoff Statistics**: Use catchment attributes to predict "hydrological signatures" representing the log-normal distribution parameters for the sample of catchments.
+4.  **Computation of reference distributions**: to evaluate the accuracy of estimated FDCs, we first compute a reference distribution on the observed data for each catchment.  This is done by kernel density estimation (KDE).  The pre-processing of reference distribution makes the nearest neighbours experiment more efficient in avoiding duplicate computations.
+5.  **FDC Estimation Validation**: For each catchment in the study region, and bring together the FDC estimates of the different approaches.
 6.  **Results Explorer**: The results are compiled to compare FDC estimation methods over the large sample.  
 
 ## Computational Notes

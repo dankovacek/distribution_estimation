@@ -404,7 +404,7 @@ document.write(`
 <a class="reference internal image-reference" href="_images/example_FDC.png"><img alt="An example duration curve of streamflow comparing an ensemble estimation against observations." src="_images/example_FDC.png" style="width: 500px;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 1 </span><span class="caption-text">The flow duration curve above describes the percent of time that flow exceeds some value.  Note that to make comparisons between basins of very different size, the FDC is expressed on a unit area basis (<span class="math notranslate nohighlight">\(L/s/\text{km}^2\)</span>).</span><a class="headerlink" href="#example-fdc" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">The flow duration curve plot above describes the percent of time that flow exceeds some value.  Note that to make comparisons between basins of very different size, the FDC is expressed here on a unit area basis (<span class="math notranslate nohighlight">\(L/s/\text{km}^2\)</span>).</span><a class="headerlink" href="#example-fdc" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p>The duration curve represents the proportion of time an observed variable exceeds some value.  In hydrology, the flow duration curve (FDC) is used in applications related to water resource planning as it represents a long-term expectation of water availability at some location.  Predicting long-term water resource availability at ungauged locations is an open problem in hydrology.  In this notebook, we present several approaches to estimating FDCs at ungauged locations.  Using a large sample of monitored locations around British Columbia, Canada, we test predicting the FDC for each location using a range of input information and methods, and test the accuracy of the prediction using the observed data.</p>
@@ -423,11 +423,11 @@ document.write(`
 </figure>
 <p>The experiments are organized in the following chapters (notebooks), corresponding to the workflow described in the figure above:</p>
 <ol class="arabic simple">
-<li><p><strong>Data</strong>: introduce the input data and describe where to get additional data from outside sources.</p></li>
-<li><p><strong>Methods</strong>: introduce the various methods for estimating flow duration curves, define partitions for 5-fold CV and compare the target variable distribution over validation folds.</p></li>
-<li><p><strong>Predict Runoff Statistics</strong>: The hydrological signature prediction is done first to generate the predicted sufficient statistics of the log-normal distribution for the sample of catchments.</p></li>
-<li><p><strong>Computation of reference distributions</strong>: to evaluate the accuracy of estimated FDCs, we first compute a reference distribution on the observed data.  This is done by kernel density estimation (KDE).  The pre-processing of reference distribution makes the nearest neighbours experiment much more efficient in avoiding duplicate computations.</p></li>
-<li><p><strong>FDC Estimation Validation</strong>: here we iterate through all catchments in the sample and bring together the FDC estimates of the different approaches.</p></li>
+<li><p><strong>Data</strong>: introduce the input data and describe where to get additional data from outside sources.  Data validation is done to filter stations based on length and completeness of records, and on the validation of catchment bound delineation as a way of validating catchment attribute representativeness.</p></li>
+<li><p><strong>Methods</strong>: introduce each method of flow duration curve estimation, describe assumptions and additional pre-processing steps to address known problems with different methods.</p></li>
+<li><p><strong>Predict Runoff Statistics</strong>: Use catchment attributes to predict “hydrological signatures” representing the log-normal distribution parameters for the sample of catchments.</p></li>
+<li><p><strong>Computation of reference distributions</strong>: to evaluate the accuracy of estimated FDCs, we first compute a reference distribution on the observed data for each catchment.  This is done by kernel density estimation (KDE).  The pre-processing of reference distribution makes the nearest neighbours experiment more efficient in avoiding duplicate computations.</p></li>
+<li><p><strong>FDC Estimation Validation</strong>: For each catchment in the study region, and bring together the FDC estimates of the different approaches.</p></li>
 <li><p><strong>Results Explorer</strong>: The results are compiled to compare FDC estimation methods over the large sample.</p></li>
 </ol>
 <section id="computational-notes">

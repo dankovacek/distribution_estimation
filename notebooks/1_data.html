@@ -381,16 +381,28 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">1.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#get-input-data-from-outside-sources">1.2. Get input data from outside sources</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">1.1. Introduction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catchment-attributes">1.1.1. Catchment attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-processed-data-files">1.1.2. Pre-processed data files</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-data-from-external-sources">1.1.3. Additional data from external sources</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#view-the-data">1.2. View the data</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-the-study-region-stations">1.2.1. Import the study region stations</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#import-streamflow-timeseries">1.3. Import streamflow timeseries</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamflow-data-basic-validation-for-completeness">1.3. Streamflow data basic validation for completeness</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-streamflow-timeseries">1.3.1. Import streamflow timeseries</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamflow-data-validation">1.4. Streamflow Data Validation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catchment-attributes">1.5. Catchment Attributes</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">1.6. Next steps</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">1.7. Citations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">1.5. Catchment Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#terrain-attributes">1.5.1. Terrain attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#climate-attributes">1.5.2. Climate attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#soil-attributes">1.5.3. Soil attributes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">1.6. Citations</a></li>
 </ul>
             </nav>
         </div>
@@ -410,28 +422,51 @@ document.write(`
 <a class="reference internal image-reference" href="../_images/figure_1_study_region.png"><img alt="Study region polygons and HYSETS monitored catchment polygons." src="../_images/figure_1_study_region.png" style="width: 700px;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 1.1 </span><span class="caption-text">Study region polygons and WSC + USGS active (green triangles) and historical (yellow triangles) streamflow monitoring stations.  The purple dots represent ungauged catchments characterized in the BCUB dataset <span id="id1">[<a class="reference internal" href="#id10" title="Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. Earth System Science Data, 17(1):259–275, 2025.">Kovacek and Weijs, 2025</a>]</span>, but they are not used in this study.</span><a class="headerlink" href="#study-region-fig" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 1.1 </span><span class="caption-text">Study region polygons and WSC + USGS active (green triangles) and historical (yellow triangles) streamflow monitoring stations.  The purple dots represent ungauged catchments characterized in the BCUB dataset <span id="id1">[<a class="reference internal" href="#id17" title="Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. Earth System Science Data, 17(1):259–275, 2025.">Kovacek and Weijs, 2025</a>]</span>, but they are not used in this study.</span><a class="headerlink" href="#study-region-fig" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
+<p>The streamflow data used in this study comes from <em>The Hydrometeorological Sandbox École de Technologie Supérieure</em> (HYSETS) <span id="id2">[<a class="reference internal" href="2_Methods.html#id10" title="Richard Arsenault, François Brissette, Jean-Luc Martel, Magali Troin, Guillaume Lévesque, Jonathan Davidson-Chaput, Mariana Castañeda Gonzalez, Ali Ameli, and Annie Poulin. A comprehensive, multisource database for hydrometeorological modeling of 14,425 north american watersheds. Scientific Data, 7(1):243, 2020.">Arsenault <em>et al.</em>, 2020</a>]</span>.  The HYSETS data, including streamflow time series and attributes for 14,425 catchments can be accessed at <a class="reference external" href="https://osf.io/rpc3w/">https://osf.io/rpc3w/</a> (As of 2025-07-04, the streamflow timeseries and attribute filename is <code class="docutils literal notranslate"><span class="pre">HYSETS_2023_update_QC_stations.nc</span></code>).  We use a subset of approximately 1620 catchments contained in major basins covering and bounding British Columbia, as shown in <a class="reference internal" href="#study-region-fig"><span class="std std-numref">Figure 1.1</span></a>.</p>
+<section id="catchment-attributes">
+<h3><span class="section-number">1.1.1. </span>Catchment attributes<a class="headerlink" href="#catchment-attributes" title="Link to this heading">#</a></h3>
+<p>Catchment attributes are used for all three models, and these are derived from four geospatial data sources:</p>
+<ol class="arabic simple">
+<li><p><strong>Terrain</strong> attributes are derived from 1 arc-second (30m at the equator) digital elevation data from USGS 3D Elevation Program (3DEP) <span id="id3">[<a class="reference internal" href="#id23" title="U.S. Geological Survey. 1 arc-second digital elevation models (dems) usgs national map 3d elevation program. 2022. [Online; accessed 3 March 2022]. URL: https://data.usgs.gov/datacatalog/data/USGS:35f9c4d4-b113-4c8d-8691-47c428c29a5b.">U.S. Geological Survey, 2022</a>]</span>,</p></li>
+<li><p><strong>Land Cover</strong>: classifications are from the North American Land Change Monitoring System dataset (NALCMS) <span id="id4">[<a class="reference internal" href="#id24" title="R Latifovic, C Homer, R Ressl, D Pouliot, SN Hossain, RR Colditz Colditz, I Olthof, C Giri, and A Victoria. North american land change monitoring system (nalcms). Remote sensing of land use and land cover: principles and applications. CRC Press, Boca Raton, 2010.">Latifovic <em>et al.</em>, 2010</a>]</span>.  Here we use attributes from 2010, however they are also processed for 2015 and 2020.</p></li>
+<li><p><strong>Soil</strong> permeability and porosity from the Global Hydrogeological Maps dataset (GlHyMps) <span id="id5">[<a class="reference internal" href="#id25" title="Tom Gleeson, Nils Moosdorf, Jens Hartmann, and LPH Van Beek. A glimpse beneath earth's surface: global hydrogeology maps (glhymps) of permeability and porosity. Geophysical Research Letters, 41(11):3891–3898, 2014.">Gleeson <em>et al.</em>, 2014</a>]</span>, and</p></li>
+<li><p><strong>Climate</strong>: indices were processed from <a class="reference external" href="https://daymet.ornl.gov/">Daymet</a> <span id="id6">[<a class="reference internal" href="#id22" title="MM Thornton, R Shrestha, Y Wei, PE Thornton, S Kao, and BE Wilson. Daymet: monthly climate summaries on a 1-km grid for north america, version 4 r1. ornl daac, oak ridge, tennessee, usa. 2022.">Thornton <em>et al.</em>, 2022</a>]</span>,</p></li>
+</ol>
+<p>For details on the data processing pipeline for the catchment attributes, see <em>BCUB - A large sample ungauged basin attribute dataset for British Columbia, Canada</em> <span id="id7">[<a class="reference internal" href="#id17" title="Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. Earth System Science Data, 17(1):259–275, 2025.">Kovacek and Weijs, 2025</a>]</span> (<a class="reference external" href="https://doi.org/10.5194/essd-2023-508">https://doi.org/10.5194/essd-2023-508</a>).  Pre-processed catchment attributes are provided in the <code class="docutils literal notranslate"><span class="pre">data/</span></code> folder of this repository, and they can be used directly in the notebook.</p>
+</section>
+<section id="pre-processed-data-files">
+<h3><span class="section-number">1.1.2. </span>Pre-processed data files<a class="headerlink" href="#pre-processed-data-files" title="Link to this heading">#</a></h3>
+<p>The following pre-processed files are included in the <code class="docutils literal notranslate"><span class="pre">data/</span></code> folder of the repository at <a class="github reference external" href="https://github.com/dankovacek/distribution_estimation">dankovacek/distribution_estimation</a>:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Before proceeding with the computations in the notebook, the streamflow time series and (optionally) catchment boundaries from the HYSETS dataset must be downloaded from the <a class="reference external" href="https://osf.io/rpc3w/">HYSETS open data repository</a>.  Some data are provided in the <code class="docutils literal notranslate"><span class="pre">data/</span></code> folder as part of this repository.  Data pre-processing can be skipped by downloading the input data files from (add dataset repository link)</p>
 </div>
-<p>The data used in this study comes from <em>The Hydrometeorological Sandbox École de Technologie Supérieure</em> (HYSETS) <span id="id2">[<a class="reference internal" href="#id8" title="Richard Arsenault, François Brissette, Jean-Luc Martel, Magali Troin, Guillaume Lévesque, Jonathan Davidson-Chaput, Mariana Castañeda Gonzalez, Ali Ameli, and Annie Poulin. A comprehensive, multisource database for hydrometeorological modeling of 14,425 north american watersheds. Scientific Data, 7(1):243, 2020.">Arsenault <em>et al.</em>, 2020</a>]</span>.  The HYSETS data, including streamflow time series and attributes for 14,425 catchments can be accessed at <a class="reference external" href="https://osf.io/rpc3w/">https://osf.io/rpc3w/</a>.  We use a subset of approximately 1620 catchments contained in major basins covering and bounding British Columbia, as shown in <a class="reference internal" href="#study-region-fig"><span class="std std-numref">Figure 1.1</span></a>.  Ten climate indices were processed from <a class="reference external" href="https://daymet.ornl.gov/">Daymet</a> for this subset, for details see <em>BCUB - A large sample ungauged basin attribute dataset for British Columbia, Canada</em> <span id="id3">[<a class="reference internal" href="#id10" title="Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. Earth System Science Data, 17(1):259–275, 2025.">Kovacek and Weijs, 2025</a>]</span> (<a class="reference external" href="https://doi.org/10.5194/essd-2023-508">https://doi.org/10.5194/essd-2023-508</a>).</p>
-<p>For this experiment we use the following files:</p>
+</section>
+<section id="additional-data-from-external-sources">
+<h3><span class="section-number">1.1.3. </span>Additional data from external sources<a class="headerlink" href="#additional-data-from-external-sources" title="Link to this heading">#</a></h3>
+<p>Download the following files and update the file paths below to your local file system:</p>
+<p><strong>FDC estimation by log-normal distribution parameter prediction</strong>:</p>
 <ul class="simple">
-<li><p><strong>Daily average streamflow time series</strong>: filenames follow the convention <code class="docutils literal notranslate"><span class="pre">&lt;official_id&gt;.csv</span></code>.  These should be downloaded from the open data repository linked above and saved under <code class="docutils literal notranslate"><span class="pre">data/hysets_streamflow_timeseries/</span></code></p></li>
-<li><p><strong>Catchment attributes</strong>: filename: <code class="docutils literal notranslate"><span class="pre">BCUB_watershed_attributes_updated.csv</span></code>.   This file is provided in the <code class="docutils literal notranslate"><span class="pre">data/</span></code> folder, and it was modified from the original file <code class="docutils literal notranslate"><span class="pre">HYSETS_watershed_properties.txt</span></code> in the HYSETS dataset with ten added climate indices as described in <span id="id4">[<a class="reference internal" href="#id10" title="Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. Earth System Science Data, 17(1):259–275, 2025.">Kovacek and Weijs, 2025</a>]</span>.</p></li>
+<li><p>catchment attributes: <code class="docutils literal notranslate"><span class="pre">data/BCUB_watershed_attributes_updated_20250227.csv</span></code></p></li>
+<li><p>streamflow summary statistics: <code class="docutils literal notranslate"><span class="pre">data/catchment_attributes_with_runoff_stats.csv</span></code></p></li>
+</ul>
+<p><strong>FDC estimation by k-nearest neighbours</strong>:</p>
+<ul class="simple">
+<li><p>catchment attributes as above</p></li>
+<li><p>daily streamflow timeseries: <code class="docutils literal notranslate"><span class="pre">data/HYSETS_2023_update_QC_stations.nc</span></code>.  Must be downloaded from the HYSETS open data repository at <a class="reference external" href="https://osf.io/rpc3w/">https://osf.io/rpc3w/</a>.</p></li>
+</ul>
+<p><strong>FDC estimation by Neural Network (LSTM)</strong>:</p>
+<ul class="simple">
+<li><p>catchment attributes as above are used as conditioning variables</p></li>
+<li><p>The LSTM is done using the <a class="reference external" href="https://neuralhydrology.readthedocs.io/en/latest/">NeuralHydrology</a> python library.  The LSTM model uses daily meteorological timeseries for the HYSETS stations in the study region.  The processing of catchment-average daily timeseries is a computationally intensive process, and the pre-processed timeseries are provided for six meteorological variables (precipitation, min and max daily temperature, shortwave radiation, vapour pressure, snow water equivalent)  These are available at …</p></li>
 </ul>
 </section>
-<section id="get-input-data-from-outside-sources">
-<h2><span class="section-number">1.2. </span>Get input data from outside sources<a class="headerlink" href="#get-input-data-from-outside-sources" title="Link to this heading">#</a></h2>
-<p>The experiments here use data from several sources, including HYSETS, …</p>
-<p>Download the following files and update the file paths below to your local file system:</p>
-<ol class="arabic simple">
-<li><p>HYSETS updated streamflow files: <a class="reference external" href="https://osf.io/rpc3w/files/dropbox/HYSETS_2023_update_QC_stations.nc">HYSETS_2023_update_QC_stations.nc</a> (or if the link changes, see the <a class="reference external" href="https://osf.io/rpc3w/files">OSF site, under files</a>).</p></li>
-</ol>
-<p>The attributes file is small enough to include in this repository.</p>
+</section>
+<section id="view-the-data">
+<h2><span class="section-number">1.2. </span>View the data<a class="headerlink" href="#view-the-data" title="Link to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -864,8 +899,10 @@ function(Bokeh) {
 </div>
 </section>
 </section>
+<section id="streamflow-data-basic-validation-for-completeness">
+<h2><span class="section-number">1.3. </span>Streamflow data basic validation for completeness<a class="headerlink" href="#streamflow-data-basic-validation-for-completeness" title="Link to this heading">#</a></h2>
 <section id="import-streamflow-timeseries">
-<h2><span class="section-number">1.3. </span>Import streamflow timeseries<a class="headerlink" href="#import-streamflow-timeseries" title="Link to this heading">#</a></h2>
+<h3><span class="section-number">1.3.1. </span>Import streamflow timeseries<a class="headerlink" href="#import-streamflow-timeseries" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
@@ -954,6 +991,7 @@ function(Bokeh) {
 </div>
 <p>From the above climate plots, it is clear there is very little information in the last three attributes, <code class="docutils literal notranslate"><span class="pre">low_prcp_freq</span></code>, <code class="docutils literal notranslate"><span class="pre">high_prcp_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">high_prcp_freq</span></code>.</p>
 </section>
+</section>
 <section id="streamflow-data-validation">
 <h2><span class="section-number">1.4. </span>Streamflow Data Validation<a class="headerlink" href="#streamflow-data-validation" title="Link to this heading">#</a></h2>
 <p>Here we set a minimum record length to define a POR flow duration curve.</p>
@@ -1036,8 +1074,9 @@ function(Bokeh) {
 </div>
 </div>
 </section>
-<section id="catchment-attributes">
-<h2><span class="section-number">1.5. </span>Catchment Attributes<a class="headerlink" href="#catchment-attributes" title="Link to this heading">#</a></h2>
+<section id="id8">
+<h2><span class="section-number">1.5. </span>Catchment Attributes<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<p>View the catchment attributes as a distribution across the sample.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rev_date</span> <span class="o">=</span> <span class="s1">&#39;20250227&#39;</span>
@@ -1434,6 +1473,15 @@ function(Bokeh) {
   }
 }(window));</script></div>
 </div>
+<section id="terrain-attributes">
+<h3><span class="section-number">1.5.1. </span>Terrain attributes<a class="headerlink" href="#terrain-attributes" title="Link to this heading">#</a></h3>
+<figure class="align-center" id="id9">
+<a class="reference internal image-reference" href="../_images/terrain_attributes.png"><img alt="Terrain attributes are shown for an example catchment." src="../_images/terrain_attributes.png" style="width: 700px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 1.2 </span><span class="caption-text">Terrain attributes are shown for an example catchment.</span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">figs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1483,6 +1531,16 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
   }
 })(window);</script></div>
 </div>
+</section>
+<section id="climate-attributes">
+<h3><span class="section-number">1.5.2. </span>Climate attributes<a class="headerlink" href="#climate-attributes" title="Link to this heading">#</a></h3>
+<figure class="align-center" id="id10">
+<a class="reference internal image-reference" href="../_images/climate_attributes.png"><img alt="Climate attributes are shown for an example catchment." src="../_images/climate_attributes.png" style="width: 700px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 1.3 </span><span class="caption-text">Climate attributes are shown for an example catchment.</span><a class="headerlink" href="#id10" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">figs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1524,6 +1582,17 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
   }
 })(window);</script></div>
 </div>
+<p>Above, there is a problem with the precision of the derived precipitation frequency attributes.  In particular the high precipitation frequency and duration, which have very few unique values.  As a result, these are not expected to contain much information or be useful for predictive modelling.</p>
+</section>
+<section id="soil-attributes">
+<h3><span class="section-number">1.5.3. </span>Soil attributes<a class="headerlink" href="#soil-attributes" title="Link to this heading">#</a></h3>
+<figure class="align-center" id="id11">
+<a class="reference internal image-reference" href="../_images/soil_attributes.png"><img alt="Soil attributes are shown for an example catchment." src="../_images/soil_attributes.png" style="width: 600px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 1.4 </span><span class="caption-text">Soil attributes are shown for an example catchment.</span><a class="headerlink" href="#id11" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">figs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1565,6 +1634,13 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
   }
 })(window);</script></div>
 </div>
+<figure class="align-center" id="land-cover-classifications">
+<a class="reference internal image-reference" href="../_images/land_cover_attributes.png"><img alt="Land cover classifications are shown for an example catchment." src="../_images/land_cover_attributes.png" style="width: 700px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 1.5 </span><span class="caption-text">Land cover classifications are shown for an example catchment.</span><a class="headerlink" href="#land-cover-classifications" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">figs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1607,22 +1683,35 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
 })(window);</script></div>
 </div>
 </section>
-<section id="next-steps">
-<h2><span class="section-number">1.6. </span>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading">#</a></h2>
-<p>In the subsequent chapters, the monitoring network station catchments are updated, and the catchment attributes are re-extracted and compared against the HYSETS values.  The target variables are then derived from the streamflow time series before training the gradient boosting models to test their predictability from catchment attributes.</p>
 </section>
 <section id="citations">
-<h2><span class="section-number">1.7. </span>Citations<a class="headerlink" href="#citations" title="Link to this heading">#</a></h2>
-<div class="docutils container" id="id5">
+<h2><span class="section-number">1.6. </span>Citations<a class="headerlink" href="#citations" title="Link to this heading">#</a></h2>
+<div class="docutils container" id="id12">
 <div role="list" class="citation-list">
-<div class="citation" id="id8" role="doc-biblioentry">
+<div class="citation" id="id15" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">ABM+20</a><span class="fn-bracket">]</span></span>
 <p>Richard Arsenault, François Brissette, Jean-Luc Martel, Magali Troin, Guillaume Lévesque, Jonathan Davidson-Chaput, Mariana Castañeda Gonzalez, Ali Ameli, and Annie Poulin. A comprehensive, multisource database for hydrometeorological modeling of 14,425 north american watersheds. <em>Scientific Data</em>, 7(1):243, 2020.</p>
 </div>
-<div class="citation" id="id10" role="doc-biblioentry">
+<div class="citation" id="id25" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">GMHVB14</a><span class="fn-bracket">]</span></span>
+<p>Tom Gleeson, Nils Moosdorf, Jens Hartmann, and LPH Van Beek. A glimpse beneath earth's surface: global hydrogeology maps (glhymps) of permeability and porosity. <em>Geophysical Research Letters</em>, 41(11):3891–3898, 2014.</p>
+</div>
+<div class="citation" id="id17" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span>KW25<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id3">2</a>,<a role="doc-backlink" href="#id4">3</a>)</span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id7">2</a>)</span>
 <p>Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. <em>Earth System Science Data</em>, 17(1):259–275, 2025.</p>
+</div>
+<div class="citation" id="id24" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">LHR+10</a><span class="fn-bracket">]</span></span>
+<p>R Latifovic, C Homer, R Ressl, D Pouliot, SN Hossain, RR Colditz Colditz, I Olthof, C Giri, and A Victoria. North american land change monitoring system (nalcms). <em>Remote sensing of land use and land cover: principles and applications. CRC Press, Boca Raton</em>, 2010.</p>
+</div>
+<div class="citation" id="id22" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">TSW+22</a><span class="fn-bracket">]</span></span>
+<p>MM Thornton, R Shrestha, Y Wei, PE Thornton, S Kao, and BE Wilson. Daymet: monthly climate summaries on a 1-km grid for north america, version 4 r1. ornl daac, oak ridge, tennessee, usa. 2022.</p>
+</div>
+<div class="citation" id="id23" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">USGSurvey22</a><span class="fn-bracket">]</span></span>
+<p>U.S. Geological Survey. 1 arc-second digital elevation models (dems) usgs national map 3d elevation program. 2022. [Online; accessed 3 March 2022]. URL: <a class="reference external" href="https://data.usgs.gov/datacatalog/data/USGS:35f9c4d4-b113-4c8d-8691-47c428c29a5b">https://data.usgs.gov/datacatalog/data/USGS:35f9c4d4-b113-4c8d-8691-47c428c29a5b</a>.</p>
 </div>
 </div>
 </div>
@@ -1693,16 +1782,28 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">1.1. Introduction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#get-input-data-from-outside-sources">1.2. Get input data from outside sources</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">1.1. Introduction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catchment-attributes">1.1.1. Catchment attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-processed-data-files">1.1.2. Pre-processed data files</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-data-from-external-sources">1.1.3. Additional data from external sources</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#view-the-data">1.2. View the data</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-the-study-region-stations">1.2.1. Import the study region stations</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#import-streamflow-timeseries">1.3. Import streamflow timeseries</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamflow-data-basic-validation-for-completeness">1.3. Streamflow data basic validation for completeness</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-streamflow-timeseries">1.3.1. Import streamflow timeseries</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamflow-data-validation">1.4. Streamflow Data Validation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catchment-attributes">1.5. Catchment Attributes</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">1.6. Next steps</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">1.7. Citations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">1.5. Catchment Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#terrain-attributes">1.5.1. Terrain attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#climate-attributes">1.5.2. Climate attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#soil-attributes">1.5.3. Soil attributes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">1.6. Citations</a></li>
 </ul>
   </nav></div>
 

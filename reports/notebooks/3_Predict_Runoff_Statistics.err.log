@@ -159,17 +159,17 @@ Processing randomization for target column: uar_median
 [32m    309[39m [38;5;28;01mif[39;00m ret != [32m0[39m:
 [32m--> [39m[32m310[39m     [38;5;28;01mraise[39;00m XGBoostError(py_str(_LIB.XGBGetLastError()))
 
-[31mXGBoostError[39m: [11:31:45] /workspace/src/data/array_interface.cu:44: Check failed: err == cudaGetLastError() (0 vs. 2) : 
+[31mXGBoostError[39m: [00:00:07] /workspace/src/data/array_interface.cu:44: Check failed: err == cudaGetLastError() (0 vs. 2) : 
 Stack trace:
-  [bt] (0) /home/danbot/code/data_analysis/lib/python3.12/site-packages/xgboost/lib/libxgboost.so(+0x2a6ecc) [0x7b1ddeca6ecc]
-  [bt] (1) /home/danbot/code/data_analysis/lib/python3.12/site-packages/xgboost/lib/libxgboost.so(+0xb862dc) [0x7b1ddf5862dc]
-  [bt] (2) /home/danbot/code/data_analysis/lib/python3.12/site-packages/xgboost/lib/libxgboost.so(+0x565ece) [0x7b1ddef65ece]
-  [bt] (3) /home/danbot/code/data_analysis/lib/python3.12/site-packages/xgboost/lib/libxgboost.so(XGDMatrixSetInfoFromInterface+0x10b) [0x7b1ddebb3e5b]
-  [bt] (4) /lib/x86_64-linux-gnu/libffi.so.8(+0x7b16) [0x7b1e8b2d2b16]
-  [bt] (5) /lib/x86_64-linux-gnu/libffi.so.8(+0x43ef) [0x7b1e8b2cf3ef]
-  [bt] (6) /lib/x86_64-linux-gnu/libffi.so.8(ffi_call+0x12e) [0x7b1e8b2d20be]
-  [bt] (7) /usr/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so(+0xe11c) [0x7b1e8d4c111c]
-  [bt] (8) /usr/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so(+0x92af) [0x7b1e8d4bc2af]
+  [bt] (0) /home/danbot/code/data_analysis/lib/python3.12/site-packages/xgboost/lib/libxgboost.so(+0x2a6ecc) [0x71ba378a6ecc]
+  [bt] (1) /home/danbot/code/data_analysis/lib/python3.12/site-packages/xgboost/lib/libxgboost.so(+0xb862dc) [0x71ba381862dc]
+  [bt] (2) /home/danbot/code/data_analysis/lib/python3.12/site-packages/xgboost/lib/libxgboost.so(+0x565ece) [0x71ba37b65ece]
+  [bt] (3) /home/danbot/code/data_analysis/lib/python3.12/site-packages/xgboost/lib/libxgboost.so(XGDMatrixSetInfoFromInterface+0x10b) [0x71ba377b3e5b]
+  [bt] (4) /lib/x86_64-linux-gnu/libffi.so.8(+0x7b16) [0x71bae5b1cb16]
+  [bt] (5) /lib/x86_64-linux-gnu/libffi.so.8(+0x43ef) [0x71bae5b193ef]
+  [bt] (6) /lib/x86_64-linux-gnu/libffi.so.8(ffi_call+0x12e) [0x71bae5b1c0be]
+  [bt] (7) /usr/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so(+0xe11c) [0x71bae5b8a11c]
+  [bt] (8) /usr/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so(+0x92af) [0x71bae5b852af]
 
 
 

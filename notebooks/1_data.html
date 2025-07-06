@@ -447,19 +447,19 @@ document.write(`
 </tr>
 <tr class="row-odd"><td><p>Terrain</p></td>
 <td><p>USGS 1 arc-second Digital Elevation Data (3DEP)</p></td>
-<td><p><span id="id4">[<a class="reference internal" href="#id27" title="U.S. Geological Survey. 1 arc-second digital elevation models (dems) usgs national map 3d elevation program. 2022. [Online; accessed 3 March 2022]. URL: https://data.usgs.gov/datacatalog/data/USGS:35f9c4d4-b113-4c8d-8691-47c428c29a5b.">U.S. Geological Survey, 2022</a>]</span></p></td>
+<td><p><span id="id4">[<a class="reference internal" href="#id28" title="U.S. Geological Survey. 1 arc-second digital elevation models (dems) usgs national map 3d elevation program. 2022. [Online; accessed 3 March 2022]. URL: https://data.usgs.gov/datacatalog/data/USGS:35f9c4d4-b113-4c8d-8691-47c428c29a5b.">U.S. Geological Survey, 2022</a>]</span></p></td>
 </tr>
 <tr class="row-even"><td><p>Land cover</p></td>
 <td><p>North American Land Change Monitoring System (NALCMS)</p></td>
-<td><p><span id="id5">[<a class="reference internal" href="#id28" title="R Latifovic, C Homer, R Ressl, D Pouliot, SN Hossain, RR Colditz Colditz, I Olthof, C Giri, and A Victoria. North american land change monitoring system (nalcms). Remote sensing of land use and land cover: principles and applications. CRC Press, Boca Raton, 2010.">Latifovic <em>et al.</em>, 2010</a>]</span></p></td>
+<td><p><span id="id5">[<a class="reference internal" href="#id29" title="R Latifovic, C Homer, R Ressl, D Pouliot, SN Hossain, RR Colditz Colditz, I Olthof, C Giri, and A Victoria. North american land change monitoring system (nalcms). Remote sensing of land use and land cover: principles and applications. CRC Press, Boca Raton, 2010.">Latifovic <em>et al.</em>, 2010</a>]</span></p></td>
 </tr>
 <tr class="row-odd"><td><p>Soil properties</p></td>
 <td><p>Global hydrogeological dataset (GLHYMPS)</p></td>
-<td><p><span id="id6">[<a class="reference internal" href="#id29" title="Tom Gleeson, Nils Moosdorf, Jens Hartmann, and LPH Van Beek. A glimpse beneath earth's surface: global hydrogeology maps (glhymps) of permeability and porosity. Geophysical Research Letters, 41(11):3891–3898, 2014.">Gleeson <em>et al.</em>, 2014</a>]</span></p></td>
+<td><p><span id="id6">[<a class="reference internal" href="#id30" title="Tom Gleeson, Nils Moosdorf, Jens Hartmann, and LPH Van Beek. A glimpse beneath earth's surface: global hydrogeology maps (glhymps) of permeability and porosity. Geophysical Research Letters, 41(11):3891–3898, 2014.">Gleeson <em>et al.</em>, 2014</a>]</span></p></td>
 </tr>
 <tr class="row-even"><td><p>Meteorological forcings</p></td>
 <td><p>Daily surface weather and climatological summaries (<a class="reference external" href="https://daymet.ornl.gov/">Daymet</a>)</p></td>
-<td><p><span id="id7">[<a class="reference internal" href="#id25" title="MM Thornton, R Shrestha, Y Wei, PE Thornton, S Kao, and BE Wilson. Daymet: monthly climate summaries on a 1-km grid for north america, version 4 r1. ornl daac, oak ridge, tennessee, usa. 2022.">Thornton <em>et al.</em>, 2022</a>]</span></p></td>
+<td><p><span id="id7">[<a class="reference internal" href="#id26" title="MM Thornton, R Shrestha, Y Wei, PE Thornton, S Kao, and BE Wilson. Daymet: monthly climate summaries on a 1-km grid for north america, version 4 r1. ornl daac, oak ridge, tennessee, usa. 2022.">Thornton <em>et al.</em>, 2022</a>]</span></p></td>
 </tr>
 </tbody>
 </table>
@@ -468,7 +468,7 @@ document.write(`
 </section>
 <section id="daily-meteorological-forcings">
 <h3><span class="section-number">1.1.2. </span>Daily Meteorological Forcings<a class="headerlink" href="#daily-meteorological-forcings" title="Link to this heading">#</a></h3>
-<p>The catchment attributes related to meteorological forcings represent single catchment indices of each variable, however the LSTM neural network model requires daily meteorological forcings to train the model for the catchments in the study region.  These are derived from the Daymet dataset <span id="id9">[<a class="reference internal" href="#id25" title="MM Thornton, R Shrestha, Y Wei, PE Thornton, S Kao, and BE Wilson. Daymet: monthly climate summaries on a 1-km grid for north america, version 4 r1. ornl daac, oak ridge, tennessee, usa. 2022.">Thornton <em>et al.</em>, 2022</a>]</span>, which provides daily meteorological data at a 1km resolution.  The forcings include:</p>
+<p>The catchment attributes related to meteorological forcings represent single catchment indices of each variable, however the LSTM neural network model requires daily meteorological forcings to train the model for the catchments in the study region.  These are derived from the Daymet dataset <span id="id9">[<a class="reference internal" href="#id26" title="MM Thornton, R Shrestha, Y Wei, PE Thornton, S Kao, and BE Wilson. Daymet: monthly climate summaries on a 1-km grid for north america, version 4 r1. ornl daac, oak ridge, tennessee, usa. 2022.">Thornton <em>et al.</em>, 2022</a>]</span>, which provides daily meteorological data at a 1km resolution.  The forcings include:</p>
 <ul class="simple">
 <li><p><strong>Precipitation</strong>: total daily precipitation in mm</p></li>
 <li><p><strong>Minimum daily temperature</strong>: minimum daily temperature in degrees Celsius</p></li>
@@ -946,7 +946,7 @@ function(Bokeh) {
 <h2><span class="section-number">1.3. </span>Streamflow data validation<a class="headerlink" href="#streamflow-data-validation" title="Link to this heading">#</a></h2>
 <p>Given the range of environmental conditions and the dynamic nature of rivers, streamflow monitoring is a challenging task.  It is common for stations to be damaged by high flows, affected by ice, or erosion or deposition of sediment.  Streamflow monitoring stations require periodic maintenance, and gaps in records are common.  The figure below illustrates a critical issue underlying hydrological studies, the continuity of streamflow records.</p>
 <figure class="align-center" id="data-continuity-fig">
-<a class="reference internal image-reference" href="images/weekly_data_availability.png"><img alt="A visualization of weekly data availablity for the streamflow monitoring stations in the study region shows many gaps in the records." src="images/weekly_data_availability.png" style="width: 800px;" />
+<a class="reference internal image-reference" href="../_images/weekly_data_availability.png"><img alt="A visualization of weekly data availablity for the streamflow monitoring stations in the study region shows many gaps in the records." src="../_images/weekly_data_availability.png" style="width: 800px;" />
 </a>
 <figcaption>
 <p><span class="caption-number">Fig. 1.2 </span><span class="caption-text">Discontinuous and non-overlapping records is a problem underlying any hydrological analysis, and the problem is compounded for large sample studies..</span><a class="headerlink" href="#data-continuity-fig" title="Link to this image">#</a></p>
@@ -1776,7 +1776,7 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">ABM+20</a><span class="fn-bracket">]</span></span>
 <p>Richard Arsenault, François Brissette, Jean-Luc Martel, Magali Troin, Guillaume Lévesque, Jonathan Davidson-Chaput, Mariana Castañeda Gonzalez, Ali Ameli, and Annie Poulin. A comprehensive, multisource database for hydrometeorological modeling of 14,425 north american watersheds. <em>Scientific Data</em>, 7(1):243, 2020.</p>
 </div>
-<div class="citation" id="id29" role="doc-biblioentry">
+<div class="citation" id="id30" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">GMHVB14</a><span class="fn-bracket">]</span></span>
 <p>Tom Gleeson, Nils Moosdorf, Jens Hartmann, and LPH Van Beek. A glimpse beneath earth's surface: global hydrogeology maps (glhymps) of permeability and porosity. <em>Geophysical Research Letters</em>, 41(11):3891–3898, 2014.</p>
 </div>
@@ -1785,16 +1785,16 @@ log_drainage_area_km2 - 5.32 [0.53, 12.52]
 <span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id8">2</a>)</span>
 <p>Daniel Kovacek and Steven Weijs. Bcub–a large-sample ungauged basin attribute dataset for british columbia, canada. <em>Earth System Science Data</em>, 17(1):259–275, 2025.</p>
 </div>
-<div class="citation" id="id28" role="doc-biblioentry">
+<div class="citation" id="id29" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">LHR+10</a><span class="fn-bracket">]</span></span>
 <p>R Latifovic, C Homer, R Ressl, D Pouliot, SN Hossain, RR Colditz Colditz, I Olthof, C Giri, and A Victoria. North american land change monitoring system (nalcms). <em>Remote sensing of land use and land cover: principles and applications. CRC Press, Boca Raton</em>, 2010.</p>
 </div>
-<div class="citation" id="id25" role="doc-biblioentry">
+<div class="citation" id="id26" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span>TSW+22<span class="fn-bracket">]</span></span>
 <span class="backrefs">(<a role="doc-backlink" href="#id7">1</a>,<a role="doc-backlink" href="#id9">2</a>)</span>
 <p>MM Thornton, R Shrestha, Y Wei, PE Thornton, S Kao, and BE Wilson. Daymet: monthly climate summaries on a 1-km grid for north america, version 4 r1. ornl daac, oak ridge, tennessee, usa. 2022.</p>
 </div>
-<div class="citation" id="id27" role="doc-biblioentry">
+<div class="citation" id="id28" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">USGSurvey22</a><span class="fn-bracket">]</span></span>
 <p>U.S. Geological Survey. 1 arc-second digital elevation models (dems) usgs national map 3d elevation program. 2022. [Online; accessed 3 March 2022]. URL: <a class="reference external" href="https://data.usgs.gov/datacatalog/data/USGS:35f9c4d4-b113-4c8d-8691-47c428c29a5b">https://data.usgs.gov/datacatalog/data/USGS:35f9c4d4-b113-4c8d-8691-47c428c29a5b</a>.</p>
 </div>

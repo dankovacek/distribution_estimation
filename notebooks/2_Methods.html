@@ -393,11 +393,13 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#map-colouring-partition">2.3.5. Map Colouring Partition</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#experiment-2-neural-network-for-daily-runoff-prediction">2.4. Experiment 2: Neural Network for Daily Runoff Prediction</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#assignment-of-random-seeds">2.4.1. Assignment of random seeds</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#experiment-2-k-nearest-neighbours-for-daily-runoff-prediction">2.4. Experiment 2: k Nearest Neighbours for Daily Runoff Prediction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#experiment-3-lstm-neural-network-for-daily-runoff-prediction">2.5. Experiment 3: LSTM Neural Network for Daily Runoff Prediction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#assignment-of-random-seeds">2.5.1. Assignment of random seeds</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">2.5. Citations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation-metrics">2.6. Evaluation Metrics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">2.7. Citations</a></li>
 </ul>
             </nav>
         </div>
@@ -1536,9 +1538,24 @@ function(Bokeh) {
 </div>
 </section>
 </section>
-<section id="experiment-2-neural-network-for-daily-runoff-prediction">
-<h2><span class="section-number">2.4. </span>Experiment 2: Neural Network for Daily Runoff Prediction<a class="headerlink" href="#experiment-2-neural-network-for-daily-runoff-prediction" title="Link to this heading">#</a></h2>
-<p>In experiment 2, daily meteorological inputs are used to predict daily runoff at out-of-sample locations.  Cross validation is similarly used in this experiment, however 12 folds are used to a) ensure a large and diverse sample of catchments for training and b) to follow the methods used in the original experiments <span id="id6">[<a class="reference internal" href="#id16" title="Frederik Kratzert, Daniel Klotz, Guy Shalev, Günter Klambauer, Sepp Hochreiter, and Grey Nearing. Towards learning universal, regional, and local hydrological behaviors via machine learning applied to large-sample datasets. Hydrology and Earth System Sciences, 23(12):5089–5110, 2019.">Kratzert <em>et al.</em>, 2019</a>]</span>.  The <a class="reference external" href="https://neuralhydrology.readthedocs.io/en/latest/">NeuralHydrology</a> <span id="id7">[<a class="reference internal" href="#id15" title="Frederik Kratzert, Martin Gauch, Grey Nearing, and Daniel Klotz. Neuralhydrology — a python library for deep learning research in hydrology. Journal of Open Source Software, 7(71):4050, 2022. URL: https://doi.org/10.21105/joss.04050, doi:10.21105/joss.04050.">Kratzert <em>et al.</em>, 2022</a>]</span> is used with default settings wherever possible, and otherwise detailed here or in the code in Notebook 5.</p>
+<section id="experiment-2-k-nearest-neighbours-for-daily-runoff-prediction">
+<h2><span class="section-number">2.4. </span>Experiment 2: k Nearest Neighbours for Daily Runoff Prediction<a class="headerlink" href="#experiment-2-k-nearest-neighbours-for-daily-runoff-prediction" title="Link to this heading">#</a></h2>
+<p>The second experiment tests the existing (and historical) streamflow monitoring network for its capacity to provide information about ungauged locations.  Each monitored location is in turn used as an “ungauged” location, and the nearest monitored locations are used to derive estimates of daily (unit area) runoff.  The period of record (POR) runoff distribution is computed from these estimates by kernel density estimation (KDE).</p>
+<p>We test ensembles of 1 to 10 nearest neighbours to see the effect of the ensemble size on the accuracy of the FDC estimate.  We test different ensemble member selection criteria (spatial distance and hydrological similarity) and different ensemble weightings (inverse distance and inverse square distance weighting) to control the influence of each member on the final estimate.  The final ensemble estimate is compared ot the reference (period of record) distribution (pre-processed in Notebook 4) by several evaluation metrics, described later in this notebook.</p>
+<p>The estimated distribution of runoff is computed from k contributing neighbours in two ways: 1) is by temporal ensemble of the daily runoff values and estimating the distribution from the temporally averaged ensemble, and 2) is by computing distributions on individual ensemble members and then averaging the resulting distributions in the frequency domain.</p>
+<figure class="align-center" id="data-continuity-fig">
+<a class="reference internal image-reference" href="images/weekly_data_availability.png"><img alt="A visualization of weekly data availablity for the streamflow monitoring stations in the study region shows many gaps in the records." src="images/weekly_data_availability.png" style="width: 800px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.2 </span><span class="caption-text">Discontinuous and non-overlapping records is a problem underlying any hydrological analysis, and the problem is compounded for large sample studies..</span><a class="headerlink" href="#data-continuity-fig" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>The figure above illustrates key problem in k-nearest neighbour streamflow estimation. The discontinuity of streamflow records changes the interpretation of ‘k’, and studies either infill by similar k-means (the interpretation is then “at least k nearest”) or use what is available (with the corresponding interpretation of “at most k-nearest”).  The figure above shows the weekly data availability for the streamflow monitoring stations in the study region, and illustrates the problem of non-overlapping records.  The problem is compounded for large sample studies, where the number of stations is large and the probability of overlap is sufficiently low to cause problems in interpreting results.</p>
+<p>In this study, we are interested in estimating the POR at an ungauged location because it resembles the question of predicting water availability for a period we do not have data for for simplicity we use the interpretation of “at most k nearest”.</p>
+</section>
+<section id="experiment-3-lstm-neural-network-for-daily-runoff-prediction">
+<h2><span class="section-number">2.5. </span>Experiment 3: LSTM Neural Network for Daily Runoff Prediction<a class="headerlink" href="#experiment-3-lstm-neural-network-for-daily-runoff-prediction" title="Link to this heading">#</a></h2>
+<p>For the last FDC estimation approach, daily meteorological inputs are used to predict daily runoff at out-of-sample locations.  Cross validation is similarly used in this experiment, however 12 folds are used to a) ensure a large and diverse sample of catchments for training and b) to follow the methods used in the original experiments <span id="id6">[<a class="reference internal" href="#id16" title="Frederik Kratzert, Daniel Klotz, Guy Shalev, Günter Klambauer, Sepp Hochreiter, and Grey Nearing. Towards learning universal, regional, and local hydrological behaviors via machine learning applied to large-sample datasets. Hydrology and Earth System Sciences, 23(12):5089–5110, 2019.">Kratzert <em>et al.</em>, 2019</a>]</span>.  The <a class="reference external" href="https://neuralhydrology.readthedocs.io/en/latest/">NeuralHydrology</a> <span id="id7">[<a class="reference internal" href="#id15" title="Frederik Kratzert, Martin Gauch, Grey Nearing, and Daniel Klotz. Neuralhydrology — a python library for deep learning research in hydrology. Journal of Open Source Software, 7(71):4050, 2022. URL: https://doi.org/10.21105/joss.04050, doi:10.21105/joss.04050.">Kratzert <em>et al.</em>, 2022</a>]</span> is used with default settings wherever possible, and otherwise detailed here or in the code in Notebook 5.</p>
 <p>There are several components of the model setup that for conciseness were left out of the accompanying paper, but we include them here for completeness.</p>
 <ol class="arabic simple">
 <li><p><strong>Adding a new dataset</strong>: we want to use the large sample of monitored catchments covering British Columbia for our experiments, so we followed the <a class="reference external" href="https://neuralhydrology.readthedocs.io/en/latest/tutorials/add-dataset.html">documentation</a> in adding a new <code class="docutils literal notranslate"><span class="pre">GenericDataset</span></code>.</p></li>
@@ -1546,7 +1563,7 @@ function(Bokeh) {
 <li><p><strong>Model Training, Validation, and Testing</strong>: The training stations must have a minimum 5 years of data.  We specify 60/40 training/validation split for <em>training stations</em>.  The LSTM is trained (over 30 epochs) on 11/12 (folds) of the total sample for one experiment.  The remaining fold is held out for testing, and there is no training/validation, or fine-tuning on the test set, the trained model is simply applied to the held-out test fold.  This is repeated ten times using different random seeds to ensure robustness of the results and to better understand the variability in the results.  The entire process is repeated for each of the 12 folds, such that each fold is used as a test set once, and the remaining folds are used for training.  The results are then averaged across all folds to obtain an ensemble prediction, but we keep the individual ensemble predictions to explore the variability among them.</p></li>
 </ol>
 <section id="assignment-of-random-seeds">
-<h3><span class="section-number">2.4.1. </span>Assignment of random seeds<a class="headerlink" href="#assignment-of-random-seeds" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">2.5.1. </span>Assignment of random seeds<a class="headerlink" href="#assignment-of-random-seeds" title="Link to this heading">#</a></h3>
 <p>For replicability, we specify the seed for the random number generator in a shell script that calls the training script on each ensemble simulation. This way, the same set of random seeds is used for the ensemble of 10 simulations for the 12 folds.  The shell script is provide below:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
 
@@ -1581,8 +1598,21 @@ function(Bokeh) {
 </div>
 </section>
 </section>
+<section id="evaluation-metrics">
+<h2><span class="section-number">2.6. </span>Evaluation Metrics<a class="headerlink" href="#evaluation-metrics" title="Link to this heading">#</a></h2>
+<p>The evaluation metrics used to assess the performance of the FDC estimation methods are as follows:</p>
+<ol class="arabic simple">
+<li><p><strong>RMSE</strong>: Root Mean Square Error, a measure of the average magnitude of the errors between predicted and observed values.</p></li>
+<li><p><strong>RE</strong>: Relative Error, a measure of the average error relative to the observed values, expressed as a percentage. It is calculated as the absolute error divided by the observed value, multiplied by 100.</p></li>
+<li><p><strong>NSE</strong>: Nash-Sutcliffe Efficiency, a normalized statistic that compares the variance of the residuals to the variance of the observed data. It ranges from -1 to 1, where 1 indicates perfect prediction, 0 indicates that the model is as good as the mean of the observed data, and negative values indicate worse than the mean.</p></li>
+<li><p><strong>KGE</strong>: Kling-Gupta Efficiency, a multi-objective metric that combines correlation, bias, and variability into a single score. It ranges from <span class="math notranslate nohighlight">\(-\infty\)</span> to 1, where 1 indicates perfect prediction, 0 indicates no skill, and negative values indicate worse than the mean.</p></li>
+<li><p><strong>KLD</strong>: Kullback-Leibler Divergence, a measure of how one probability distribution differs from a second, reference probability distribution. It emphasizes differences where probability mass is concentrated, meaning states that are more frequently observed.</p></li>
+<li><p><strong>EMD</strong>: Earth Mover’s Distance, a measure of the distance between two probability distributions. It focuses on the “work” needed to move probability mass from one distribution to another, and is particularly useful for comparing distributions with different shapes in the units of the target variable.</p></li>
+</ol>
+<p>The first four evaluation metrics are commonly used in hydrological model evaluation, and we follow convention from the literature in calculating them on the set of runoff values corresponding to the 1st to 99th percentiles of the FDC.  The KLD and EMD metrics are evaluated over a global evaluation grid such that they provide a consistent basis of support, since this is not known <em>a priori</em> and adjusting it <em>post-hoc</em> represents data leakage. The implementation of these computations is nuanced and care has been taken to be explicit about assumptions and limitations of the methodology.</p>
+</section>
 <section id="citations">
-<h2><span class="section-number">2.5. </span>Citations<a class="headerlink" href="#citations" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">2.7. </span>Citations<a class="headerlink" href="#citations" title="Link to this heading">#</a></h2>
 <div class="docutils container" id="id8">
 <div role="list" class="citation-list">
 <div class="citation" id="id14" role="doc-biblioentry">
@@ -1689,11 +1719,13 @@ function(Bokeh) {
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#map-colouring-partition">2.3.5. Map Colouring Partition</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#experiment-2-neural-network-for-daily-runoff-prediction">2.4. Experiment 2: Neural Network for Daily Runoff Prediction</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#assignment-of-random-seeds">2.4.1. Assignment of random seeds</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#experiment-2-k-nearest-neighbours-for-daily-runoff-prediction">2.4. Experiment 2: k Nearest Neighbours for Daily Runoff Prediction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#experiment-3-lstm-neural-network-for-daily-runoff-prediction">2.5. Experiment 3: LSTM Neural Network for Daily Runoff Prediction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#assignment-of-random-seeds">2.5.1. Assignment of random seeds</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">2.5. Citations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation-metrics">2.6. Evaluation Metrics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#citations">2.7. Citations</a></li>
 </ul>
   </nav></div>
 

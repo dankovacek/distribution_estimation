@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 from pathlib import Path
+import json
 from scipy.stats import entropy, wasserstein_distance, linregress
 # from sklearn.metrics import (
 #     root_mean_squared_error,
@@ -108,6 +109,32 @@ def load_study_region_stations(study_region_station_fpath):
     bcub_gdf = gpd.read_file(study_region_station_fpath)    # get the number of unique stations in the dataset
     return bcub_gdf
 
+def load_results(args):
+    """Load FDC estimation results for a single station and method."""
+    stn, result_folder, method = args
+    fpath = Path(result_folder) / f"{stn}_fdc_results.json"
+    
+    with open(fpath) as f:
+        data = json.load(f)           
+
+        result_list = [pd.DataFrame(
+            {'Official_ID': stn, 'Label': label,
+             'KLD': d['eval'].get('kld'), 
+             'EMD': d['eval'].get('emd'), 
+             'RMSE': d['eval'].get('rmse'),
+             'RE': d['eval'].get('relative_error'), 
+             'TVB': d['eval'].get('tot_vol_bias'),
+             'MARE': d['eval'].get('mean_abs_rel_error'), 
+             'NSE': d['eval'].get('nse'), 
+             'KGE': d['eval'].get('kge'),
+             'VE': d['eval'].get('ve'), 
+             'VB_PMF': d['eval'].get('vb_fdc'),
+             'VB_FDC': d['eval'].get('vb_fdc'), 
+             'MEAN_FRAC_DIFF': d['eval'].get('mean_frac_diff'), 
+        }, index=[0]) for label, d in data.items()]
+        df = pd.concat(result_list)
+        df.reset_index(drop=True, inplace=True)
+        return df
 
 
 def format_fig_fonts(fig, font_size=20, font='Bitstream Charter', legend=True):
@@ -119,7 +146,7 @@ def format_fig_fonts(fig, font_size=20, font='Bitstream Charter', legend=True):
     fig.xaxis.axis_label_text_font = font
     fig.xaxis.major_label_text_font = font
     fig.yaxis.major_label_text_font = font
-    if fig.legend == True:
+    if len(fig.legend) > 0:
         fig.legend.label_text_font_size = f'{font_size-2}pt'
         fig.legend.label_text_font = font
     return fig

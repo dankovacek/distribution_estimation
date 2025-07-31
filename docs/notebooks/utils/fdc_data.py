@@ -26,7 +26,7 @@ class StationData:
 
         self.target_da = float(self.attr_gdf[self.attr_gdf['official_id'] == stn]['drainage_area_km2'].values[0])
         self._initialize_target_streamflow_data()
-        self._set_grid()
+        # self._set_grid()
         # self.eval_metrics = EvaluationMetrics(self.baseline_log_grid, self.log_dx)
         # self._set_divergence_measure_functions()
         self._load_baseline_distribution()
@@ -73,7 +73,8 @@ class StationData:
         # regardless of whether the INPUT data is clipped to 
         # match the LSTM input data, the target data should be clipped
         # such that the target distribution is held constant
-        df = df[df.index >= pd.to_datetime(self.ctx.daymet_start_date)]
+        df['zero_flow_flag'] = df['discharge'] == 0
+        df = df[df.index >= pd.to_datetime(self.ctx.global_start_date)]
         df.dropna(inplace=True)
         # clip minimum flow to 1e-4
         df['discharge'] = np.clip(df['discharge'], self.ctx.min_flow, None)
@@ -89,13 +90,13 @@ class StationData:
         self.n_observations = len(self.stn_df[self.uar_label].dropna())  
     
 
-    def _set_grid(self):        
+    # def _set_grid(self):        
         # self.baseline_log_grid = np.linspace(np.log(adjusted_min_uar), np.log(max_uar), self.n_grid_points)
-        min_q, max_q = 1e-7, 1e4
-        log_min, log_max = np.log(min_q), np.log(max_q)
-        self.baseline_log_grid = np.linspace(log_min, log_max, self.n_grid_points)
-        self.baseline_lin_grid = np.exp(self.baseline_log_grid)
-        self.log_dx = np.gradient(self.baseline_log_grid)
+        # min_q, max_q = 1e1, 1e6
+        # log_min, log_max = np.log(min_q), np.log(max_q)
+        # self.baseline_log_grid = np.linspace(log_min, log_max, self.n_grid_points)
+        # self.baseline_lin_grid = np.exp(self.baseline_log_grid)
+        # self.log_dx = np.gradient(self.baseline_log_grid)
         # max_step_size = self.baseline_lin_grid[-1] - self.baseline_lin_grid[-2]
         # print(f'    max step size = {max_step_size:.1f} L/s/km^2 for n={self.n_grid_points:.1e} grid points')        
             
@@ -171,8 +172,8 @@ class StationData:
         return prior_pdf * self.log_dx
         
     
-    def _compute_posterior_with_laplace_prior(self, kde_pmf):
-        """Compute the posterior distribution using a Laplace prior.
+    def _compute_adjusted_distribution_with_laplace_prior(self, kde_pmf):
+        """Compute the adjusted simulated distribution using a Laplace prior.
         Ensure that the prior is not too strong by checking the
         evaluation metrics against the specified thresholds.
         If the prior has too much influence in terms of any of the metrics tested, 
@@ -183,16 +184,16 @@ class StationData:
         pseudo_counts = self.n_observations * (kde_pmf + prior_pmf * self.prior_strength)
 
         # re-normalize the pmf
-        posterior_pmf = pseudo_counts / np.sum(pseudo_counts)
-        posterior_pdf = posterior_pmf / self.log_dx
+        adjusted_pmf = pseudo_counts / np.sum(pseudo_counts)
+        adjusted_pdf = adjusted_pmf / self.log_dx
 
-        pdf_check = np.trapezoid(posterior_pdf, x=self.baseline_log_grid)
-        posterior_pdf /= pdf_check
+        pdf_check = np.trapezoid(adjusted_pdf, x=self.baseline_log_grid)
+        adjusted_pdf /= pdf_check
         
         # we are testing the prior influence, which means 
-        # the kde_pmf is the "baseline_pmf" and the posterior_pmf is the "pmf_est"
+        # the kde_pmf is the "baseline_pmf" and the adjusted_pmf is the "pmf_est"
         # this will tell us how far the prior has shifted the posterior from the baseline 
-        metrics = self.eval_metrics._evaluate_fdc_metrics_from_pmf(posterior_pmf, kde_pmf)
+        metrics = self.eval_metrics._evaluate_fdc_metrics_from_pmf(adjusted_pmf, kde_pmf)
         # check nse and kge for values LESS THAN the specified threshold
 
         less_than_metrics = [metrics[k] < self.eval_metrics.metric_limits[k] for k in ['nse', 'kge']]
@@ -205,7 +206,7 @@ class StationData:
             #     if bias > self.EvalMetrics.metric_limits[metric_label]:
             #         print(f'    Prior too strong: {metric_label} bias is > 10^-2: {bias:.2e}, adjusting prior strength to {self.prior_strength:.5e}')
             self.prior_strength *= 0.5 * self.prior_strength
-            return self._compute_posterior_with_laplace_prior(kde_pmf)
+            return self._compute_adjusted_distribution_with_laplace_prior(kde_pmf)
         
-        return posterior_pdf, posterior_pmf
+        return adjusted_pdf, adjusted_pmf
     

@@ -19,7 +19,8 @@ class EvaluationMetrics:
         log_dx : float
             Logarithmic step size for the grid.
         """
-        self.baseline_log_grid = baseline_log_grid
+        self.log_grid = baseline_log_grid
+        self.lin_grid = np.exp(baseline_log_grid)
         self.log_dx = log_dx
         self.metric_limits = {
             'kld': 0.001,
@@ -59,17 +60,55 @@ class EvaluationMetrics:
     def _compute_emd(self, p, q):
         assert np.isclose(np.sum(p), 1, atol=1e-3), f'sum P = {np.sum(p)}'
         assert np.all(q >= 0), f'min q_i < 0: {np.min(q)}'
-        linear_grid = np.exp(self.baseline_log_grid)
+        linear_grid = np.exp(self.log_grid)
         emd = wasserstein_distance(linear_grid, linear_grid, p, q)
         return float(round(emd, 4))#, {'bias': None, 'unsupported_mass': None, 'pct_of_signal': None}
     
+
+    def _compute_volumetric_pct_bias_from_fdc(self, p, q):
+        """
+        Compute volumetric bias between two PMFs p (observed) and q (simulated),
+        defined over discrete support (flow) x.
+        
+        Parameters:
+        - p: observed PMF (sum to 1)
+        - q: simulated PMF (sum to 1)
+        - x: bin centers corresponding to flow magnitudes
+        
+        Returns:
+        - Relative bias in expected flow volume
+        """
+        # if p is a cdf over 1 to 99 percentiles, then compute the expected volume of p
+        E_p = np.sum(p * 0.01)
+        E_q = np.sum(q * 0.01)
+        return (E_p - E_q) / E_p, E_p
+    
+
+    def _compute_volumetric_pct_bias_from_pmfs(self, baseline_pmf, pmf_est):
+        """
+        Compute volumetric bias between two PMFs p (observed) and q (simulated),
+        defined over discrete support (flow) x.
+        
+        Parameters:
+        - obs: observed flow values
+        - sim: simulated flow values
+
+        Returns:
+        - Relative bias in expected flow volume
+        """
+        assert np.isclose(np.sum(baseline_pmf), 1), f"baseline_pmf does not sum to 1: {np.sum(baseline_pmf)}"
+        assert np.isclose(np.sum(pmf_est), 1), f"pmf_est does not sum to 1: {np.sum(pmf_est)}"
+        x = np.exp(self.log_grid)
+        E_p = np.sum(x * baseline_pmf)
+        E_q = np.sum(x * pmf_est)
+
+        return (E_p - E_q) / E_p, E_p
+
 
     def _compute_nse(self, obs, sim):
         """Compute the Nash-Sutcliffe Efficiency (NSE) between observed and simulated values."""
         assert not np.isnan(obs).any(), f'NaN values in obs: {obs}'
         assert not np.isnan(sim).any(), f'NaN values in sim: {sim}'
-        assert (obs >= 0).all(), f'Negative values in obs: {obs}'
-        assert (sim >= 0).all(), f'Negative values in sim: {sim}'
         # Compute the NSE
         numerator = np.sum((obs - sim) ** 2)
         denominator = np.sum((obs - obs.mean()) ** 2)
@@ -77,22 +116,10 @@ class EvaluationMetrics:
         return nse
 
 
-    def _compute_relative_error(self, obs, sim):
-        """Compute the relative error between observed and simulated values."""
-        assert not np.isnan(obs).any(), f'NaN values in obs: {obs}'
-        assert not np.isnan(sim).any(), f'NaN values in sim: {sim}'
-        assert (obs >= 0).all(), f'Negative values in obs: {obs}'
-        assert (sim >= 0).all(), f'Negative values in sim: {sim}'
-        # Compute the relative error
-        return (obs - sim) / obs
-
-
     def _compute_RMSE(self, obs, sim):
         """Compute the Root Mean Square Error (RMSE) between observed and simulated values."""
         assert not np.isnan(obs).any(), f'NaN values in obs: {obs}'
         assert not np.isnan(sim).any(), f'NaN values in sim: {sim}'
-        assert (obs >= 0).all(), f'Negative values in obs: {obs}'
-        assert (sim >= 0).all(), f'Negative values in sim: {sim}'
         # Compute the RMSE
         return np.sqrt(np.mean((obs - sim) ** 2))
 
@@ -101,8 +128,6 @@ class EvaluationMetrics:
         """Compute the Kling-Gupta Efficiency (KGE) between observed and simulated values."""
         assert not np.isnan(obs).any(), f"NaN values in obs: {obs}"
         assert not np.isnan(sim).any(), f"NaN values in sim: {sim}"
-        assert (obs >= 0).all(), f"Negative values in obs: {obs}"
-        assert (sim >= 0).all(), f"Negative values in sim: {sim}"
         if obs.size == 0:
             return np.nan
         # Compute the KGE
@@ -130,11 +155,13 @@ class EvaluationMetrics:
             Dictionary of RMSE, RelativeError, NSE, and KGE computed over p=1,...,99 quantiles.
         """
         assert (
-            len(baseline_pmf) == len(pmf_est) == len(self.baseline_log_grid)
+            len(baseline_pmf) == len(pmf_est) == len(self.log_grid)
         ), "Array length mismatch"
 
         # Convert log flow grid back to linear runoff space
-        linear_grid = np.exp(self.baseline_log_grid)
+        # linear_grid = np.exp(self.log_grid)
+        log_grid = self.log_grid
+        linear_grid = np.exp(log_grid)
 
         # Compute CDFs
         cdf_true = np.cumsum(baseline_pmf)
@@ -148,33 +175,50 @@ class EvaluationMetrics:
         # Percentiles (1 to 99)
         probs = np.linspace(0.01, 0.99, 99)
 
-        # Interpolate inverse CDF (flow values at given probabilities)
-        q_true = np.interp(
+        # Interpolate inverse CDF (log-flow values at given probabilities)
+        log_q_true = np.interp(
+            probs, cdf_true, log_grid, left=log_grid[0], right=log_grid[-1]
+        )
+        log_q_est = np.interp(
+            probs, cdf_est, log_grid, left=log_grid[0], right=log_grid[-1]
+        )
+        linear_q_true = np.interp(
             probs, cdf_true, linear_grid, left=linear_grid[0], right=linear_grid[-1]
         )
-        q_est = np.interp(
+        linear_q_est = np.interp(
             probs, cdf_est, linear_grid, left=linear_grid[0], right=linear_grid[-1]
         )
-        assert np.all(q_true > 0), "Zero or negative values in q_true — invalid for relative error"
-        assert np.all(q_est > 0),  "Zero or negative values in q_est — unexpected for flow"
+        assert np.all(linear_q_true > 0), "Zero or negative values in q_true — invalid for relative error"
+        assert np.all(linear_q_est > 0),  "Zero or negative values in q_est — unexpected for flow"
 
         # Metrics
-        rmse = np.sqrt(np.mean((q_true - q_est) ** 2))
-        rel_error = np.mean(np.abs((q_est - q_true) / q_true))
-        nse = self._compute_nse(q_true, q_est)
-        kge = self._compute_KGE(q_true, q_est)
-
+        tot_vol_bias = np.sum(linear_q_est - linear_q_true) / np.sum(linear_q_true) # p
+        rel_error = np.mean((linear_q_est - linear_q_true) / linear_q_true) # p        
+        mean_abs_rel_error = np.mean(np.abs(linear_q_est - linear_q_true) / linear_q_true)
+        rmse = np.sqrt(np.mean((log_q_true - log_q_est) ** 2))        
+        nse = self._compute_nse(log_q_true, log_q_est)
+        kge = self._compute_KGE(log_q_true, log_q_est)
+        # volume efficiencies should be computed on linear flow values
+        ve = 1 - np.sum(np.abs(linear_q_est - linear_q_true)) / np.sum(linear_q_true)
+        vol_pct_bias_pmf, pmf_est_mean = self._compute_volumetric_pct_bias_from_pmfs(baseline_pmf, pmf_est)
+        vol_pct_bias_fdc, cdf_est_mean = self._compute_volumetric_pct_bias_from_fdc(linear_q_true, linear_q_est)
+        # assert np.isclose(pmf_est_mean, cdf_est_mean, atol=0.01), f'Estimated mean Q from PMF {pmf_est_mean:.3f} does not match CDF {cdf_est_mean:.3f}'
         kld = self._compute_kl_divergence(baseline_pmf, pmf_est)
         emd = self._compute_emd(baseline_pmf, pmf_est)
 
+        mean_frac_diff = (pmf_est_mean - cdf_est_mean) / pmf_est_mean
+        # print(f'     PMF mean: {pmf_est_mean:.2f}, CDF mean: {cdf_est_mean:.2f} Mean frac diff: {100*mean_frac_diff:.0f}% (should be close to 0) ')
         return {
-            "rmse": float(rmse), 
+            "tot_vol_bias": float(tot_vol_bias),
             "relative_error": float(rel_error), 
+            "mean_abs_rel_error": float(mean_abs_rel_error), 
+            "rmse": float(rmse), 
             "nse": float(nse), 
             "kge": float(kge),
+            "ve": float(ve),
+            "vb_pmf": float(vol_pct_bias_pmf),
+            "vb_fdc": float(vol_pct_bias_fdc),
             "kld": float(kld),
             "emd": float(emd),
+            "mean_frac_diff": float(mean_frac_diff)
         }
-
-
-  

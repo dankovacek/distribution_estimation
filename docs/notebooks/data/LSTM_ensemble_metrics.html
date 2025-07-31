@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>LSTM Ensemble Metrics</title>
+    <style>
+      html, body {
+        box-sizing: border-box;
+        display: flow-root;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-3.7.3.min.js"></script>
+    <script type="text/javascript">
+        Bokeh.set_log_level("info");
+    </script>
+  </head>
+  <body>
+    <div id="ab6c3afa-7bfc-4d81-9247-03a9c8d800d9" data-root-id="p305301" style="display: contents;"></div>
+  
+    <script type="application/json" id="b9315250-6131-4002-aff3-203df241f563">
+      {"b47bfad5-79fd-4baf-b99e-37f9bd44db49":{"version":"3.7.3","title":"Bokeh Application","roots":[{"type":"object","name":"GridPlot","id":"p305301","attributes":{"rows":null,"cols":null,"toolbar":{"type":"object","name":"Toolbar","id":"p305300"}}}]}}
+    </script>
+    <script type="text/javascript">
+      (function() {
+        const fn = function() {
+          Bokeh.safely(function() {
+            (function(root) {
+              function embed_document(root) {
+              const docs_json = document.getElementById('b9315250-6131-4002-aff3-203df241f563').textContent;
+              const render_items = [{"docid":"b47bfad5-79fd-4baf-b99e-37f9bd44db49","roots":{"p305301":"ab6c3afa-7bfc-4d81-9247-03a9c8d800d9"},"root_ids":["p305301"]}];
+              root.Bokeh.embed.embed_items(docs_json, render_items);
+              }
+              if (root.Bokeh !== undefined) {
+                embed_document(root);
+              } else {
+                let attempts = 0;
+                const timer = setInterval(function(root) {
+                  if (root.Bokeh !== undefined) {
+                    clearInterval(timer);
+                    embed_document(root);
+                  } else {
+                    attempts++;
+                    if (attempts > 100) {
+                      clearInterval(timer);
+                      console.log("Bokeh: ERROR: Unable to run BokehJS code because BokehJS library is missing");
+                    }
+                  }
+                }, 10, root)
+              }
+            })(window);
+          });
+        };
+        if (document.readyState != "loading") fn();
+        else document.addEventListener("DOMContentLoaded", fn);
+      })();
+    </script>
+  </body>
+</html>

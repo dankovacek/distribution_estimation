@@ -69,10 +69,10 @@ class FDCEstimationContext:
     
     def _load_and_filter_hysets_data(self):
         hs_df = pd.read_csv('data/HYSETS_watershed_properties.txt', sep=';')
-        if self.LSTM_concurrent_network == True:
-            self.global_start_date = pd.to_datetime('1980-01-01') # Daymet starts 1980-01-01
+        if self.include_pre_1980_data == True:
+            self.global_start_date = pd.to_datetime('1950-01-01') # Daymet starts 1980-01-01
         else:            
-            self.global_start_date = pd.to_datetime('1950-01-01') # Hysets streamflow starts 1950-01-01
+            self.global_start_date = pd.to_datetime('1980-01-01') # Hysets streamflow starts 1950-01-01
         
         hs_df = hs_df[hs_df['Official_ID'].isin(self.official_ids)]
         self.hs_df = hs_df
@@ -114,14 +114,14 @@ class FDCEstimationContext:
         # lstm_result_folder = '/home/danbot/code/neuralhydrology/data/ensemble_results'
         # lstm_result_files = os.listdir(lstm_result_folder)
         # lstm_result_stns = [e.split('_')[0] for e in lstm_result_files]
-
+    
         # filter for the common stations between BCUB region and LSTM-compatible (i.e. 1980-)
-        if self.LSTM_concurrent_network == True:
+        if self.include_pre_1980_data == True:
+            self.official_ids = self.all_station_ids
+            print(f'    Using all stations in the catchment data with a baseline PMF (validated): {len(self.official_ids)}')
+        else:
             self.official_ids = self.daymet_concurrent_stations
             print(f'   Using only stations with Daymet concurrency: {len(self.official_ids)}')
-        else:
-            self.official_ids = self.baseline_pmf_stations
-            print(f'    Using all stations in the catchment data with a baseline PMF (validated): {len(self.official_ids)}')
 
         df = df[df['official_id'].isin(self.official_ids)]
         # import the license water extraction points

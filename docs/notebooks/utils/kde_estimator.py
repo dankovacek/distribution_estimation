@@ -61,16 +61,17 @@ def adaptive_bandwidths(uar: jnp.ndarray, da: float) -> jnp.ndarray:
     right_mirror = unique_UAR[-1] + (unique_UAR[-1] - log_midpoints[-1])
     log_midpoints = jnp.concatenate((jnp.array([left_mirror]), log_midpoints, jnp.array([right_mirror])))
     log_diffs = jnp.diff(log_midpoints) / 2 #/ 1.15
-
+    # the window widths (bandwidths) are determined by (half)
+    # the assumed measurement error or the unique value spacing, whichever is greater
     bw_vals = jnp.where(log_diffs > err_widths_UAR, log_diffs, err_widths_UAR)
     idx = jnp.searchsorted(unique_UAR, uar)
     return bw_vals[idx]
 
 
 def kde_kernel(log_data, bw_values, log_grid):
-    H = bw_values[:, None]  # (N, 1)
+    H = bw_values[:, None]  # (N, 1) 
     U = (log_grid[None, :] - log_data) / H  # (N, M)
-    K = jnp.exp(-0.5 * U**2) / (H * jnp.sqrt(2 * jnp.pi))
+    K = jnp.exp(-0.5 * U**2) / (H * jnp.sqrt(2 * jnp.pi)) # Gaussian kernel with variable bandwidth H
     return K.sum(axis=0) / log_data.shape[0]
 
 
@@ -87,7 +88,7 @@ class KDEEstimator:
     cache : dict
         Optional cache to store previously computed KDE results.
     """
-    def __init__(self, log_grid, dx, cache=None):
+    def __init__(self, log_grid, dx):
         self.log_grid = jnp.asarray(log_grid, dtype=jnp.float32)
         self.dx = jnp.asarray(dx, dtype=jnp.float32)
 
@@ -109,5 +110,6 @@ class KDEEstimator:
         pmf /= jnp.sum(pmf)
         
         return pmf, pdf
+    
     
     

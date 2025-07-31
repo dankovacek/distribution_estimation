@@ -26,11 +26,11 @@ class kNNEstimator:
         # Query the k+1 nearest neighbors because the first neighbor is the target point itself
         target_idx = self.ctx.id_to_idx[self.target_stn]
         if tree_type == 'spatial_dist':
-            distances, indices = self.ctx.spatial_tree.query(self.ctx.coords[target_idx], k=max_to_check)
+            distances, indices = self.ctx.spatial_tree.query(self.ctx.coords[target_idx], k=max_to_check, workers=-1)
             distances *= 1 / 1000
         elif tree_type == 'attribute_dist':
             # Example query: Find the nearest neighbors for the first point
-            distances, indices = self.ctx.attribute_tree.query(self.ctx.normalized_attr_values[target_idx], k=max_to_check)
+            distances, indices = self.ctx.attribute_tree.query(self.ctx.normalized_attr_values[target_idx], k=max_to_check, workers=-1)
         else:
             raise Exception('tree type not identified, must be one of spatial_dist, or attribute_dist.')
         
@@ -198,54 +198,9 @@ class kNNEstimator:
         pmf_est /= jnp.sum(pmf_est)
 
         return pmf_est, pdf_est
-
-
-    # def _compute_ensemble_member_distribution_estimates(self, df):
-    #     """
-    #     Compute the ensemble distribution estimates based on the KNN dataframe.
-    #     """    
-    #     pdfs, prior_biases = pd.DataFrame(), {}
-    #     # initialize a kde estimator object
-    #     kde = KDEEstimator(self.data.baseline_log_grid, self.data.log_dx)
-    #     for c in df.columns: 
-    #         # evaluate the laplace on the prediction as a prior
-    #         # drop the nan values
-    #         values = df[c].dropna().values
-    #         obs_count = len(values)
-    #         assert len(values) > 0, f'0 values for {c}'
-
-    #         # compute the pdf and pmf using kde
-    #         assert sum(np.isnan(values)) == 0, f'NaN values in {c} {values[:5]}'
-
-    #         kde_pmf, _ = kde.compute(
-    #             values, self.data.target_da
-    #         )
-
-    #         prior = self.data._compute_prior_from_laplace_fit(values, n_cols=1) # priors are expressed in pseudo-counts
-    #         # convert the pdf to counts and apply the prior
-    #         counts = kde_pmf * obs_count + prior
-
-    #         # re-normalize the pmf
-    #         pmf = counts / jnp.sum(counts)
-    #         pdf = pmf / self.data.log_dx
-
-    #         pdf_check = jnp.trapezoid(pdf, x=self.data.baseline_log_grid)
-    #         pdf /= pdf_check
-    #         # pdf /= pdf_check
-    #         assert jnp.isclose(jnp.trapezoid(pdf, x=self.data.baseline_log_grid), 1.0, atol=0.001), f'pdf does not integrate to 1 in compute_ensemble_member_distribution_estimates: {pdf_check:.4f}'
-    #         pdfs[c] = pdf
-
-    #         # convert the pdf to pmf
-    #         pmf = pdf * self.data.log_dx
-    #         pmf /= jnp.sum(pmf)
-    #         # assert np.isclose(np.sum(pmf), 1, atol=1e-4), f'pmf does not sum to 1 in compute_ensemble_member_distribution_estimates: {np.sum(pmf):.5f}'
-            
-    #         # compute the bias added by the prior
-    #         prior_biases[c.split('_')[0]] = {'DKL': self.data._compute_kld(kde_pmf, pmf), 'EMD': self.data._compute_emd(kde_pmf, pmf)}
-    #     return pdfs, prior_biases
     
     
-    def _compute_frequency_ensemble_distributions(self, nbr_df, nbr_data, distance_type):
+    def _compute_ensemble_distributions(self, nbr_df, nbr_data, distance_type):
         """
         For asynchronous comparisons, we estimate pdfs for ensemble members, then compute the mean in the time domain
         to represent the FDC simulation.  We do not do temporal averaging in this case.
@@ -274,7 +229,7 @@ class kNNEstimator:
                 mean_obs_per_timestep = knn_df_all.iloc[:, :k].notna().sum(axis=1).mean()
                 mean_obs_per_proxy = knn_df_all.iloc[:, :k].notna().sum(axis=0).mean()
 
-                _, pmf_posterior = self.data._compute_posterior_with_laplace_prior(pmf_est)
+                _, pmf_posterior = self.data._compute_adjusted_distribution_with_laplace_prior(pmf_est)
                 eval = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_posterior, self.data.baseline_pmf)
                 bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_posterior, pmf_est)
       
@@ -317,28 +272,7 @@ class kNNEstimator:
         pdf = pmf / dx  # assign all mass to one bin
 
         return pmf, pdf
-
-    
-    # def _compute_ensemble_contribution_metrics(self, df: pd.DataFrame, weights: np.ndarray):
-    #     mask = ~df.isna()
-        
-    #     # Mean number of valid values per row
-    #     mean_valid_per_row = mask.sum(axis=1).mean()
-
-    #     # Normalized weights per row, masking NaNs
-    #     X = df.to_numpy()
-    #     W = np.broadcast_to(weights, X.shape)
-    #     masked_weights = np.where(mask, W, 0.0)
-    #     weight_sums = masked_weights.sum(axis=1)
-    #     weight_sums[weight_sums == 0] = np.nan
-    #     normalized_weights = masked_weights / weight_sums[:, None]
-
-    #     # Average contribution per column across all rows
-    #     mean_w = np.nanmean(normalized_weights, axis=0)
-    #     effective_n = 1.0 / np.nansum(mean_w ** 2)
-
-    #     return mean_valid_per_row, effective_n
-    
+   
 
     def _weighted_row_mean_ignore_nan(self, df: pd.DataFrame, weights: np.ndarray):
         """
@@ -346,14 +280,17 @@ class kNNEstimator:
         weights are re-normalized based on valid values only. Returns a Series aligned
         with df.index, as well as ensemble stats.
         """
+        # drop rows with all NaNs
+        df = df.dropna(how='all')
+        assert not df.empty, 'DataFrame is empty after dropping all-NaN rows.'
         X = df.to_numpy()
-        mask = ~np.isnan(X)
+        mask = ~np.isnan(X) # boolean mask for valid values in the matrix
 
-        W = np.broadcast_to(weights, X.shape)
-        masked_weights = np.where(mask, W, 0.0)
+        W = np.broadcast_to(weights, X.shape) # broadcast weights to match the shape of X
+        masked_weights = np.where(mask, W, 0.0) # apply mask to weights, setting weight to 0 where X is NaN
 
-        row_weight_sums = masked_weights.sum(axis=1)
-        row_weight_sums[row_weight_sums == 0] = np.nan
+        row_weight_sums = masked_weights.sum(axis=1) # sum weights across each row
+        row_weight_sums[row_weight_sums == 0] = np.nan # avoid division by zero by setting sums to NaN where they are zero
 
         normalized_weights = masked_weights / row_weight_sums[:, None]
         estimated = np.nansum(X * normalized_weights, axis=1)
@@ -375,13 +312,15 @@ class kNNEstimator:
             ):
 
         # Clip to prevent zero runoff issues
-        temporal_ensemble_mean = np.clip(
-            temporal_ensemble_mean, 1000 * 1e-4 / self.data.target_da, None
-        )
+        assert np.min(temporal_ensemble_mean.values) > 0, f'min value in temporal_ensemble_mean is {np.min(temporal_ensemble_mean.values)} for {label}'
+        # temporal_ensemble_mean = np.clip(
+        #     temporal_ensemble_mean, 1000 * 1e-4 / self.data.target_da, None
+        # )
 
         # Estimate PDF/PMF using KDE or 
         # add small amount of random noise if there is no variance
         if len(jnp.unique(temporal_ensemble_mean.values)) == 1:
+            print('    only one unique value in temporal ensemble mean, adding noise to avoid 0 variance.')
             est_pmf, est_pdf = self._delta_spike_pmf_pdf(
                 temporal_ensemble_mean.values[0], self.data.baseline_log_grid
             )
@@ -392,7 +331,7 @@ class kNNEstimator:
 
         assert est_pmf is not None, f'pmf is None for {label}'
 
-        _, pmf_posterior = self.data._compute_posterior_with_laplace_prior(est_pmf)
+        _, pmf_posterior = self.data._compute_adjusted_distribution_with_laplace_prior(est_pmf)
 
         estimation_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_posterior, self.data.baseline_pmf)
         bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_posterior, est_pmf)
@@ -416,7 +355,7 @@ class kNNEstimator:
         distances = nbr_data['distance'].values
         for k in range(1, self.k_nearest + 1):
             knn_df = nbr_df.iloc[:, :k].copy()
-            label = f'{self.target_stn}_{k}_NN_{distance_type}_ID{wm}_timeEnsemble'            
+            label = f'{self.target_stn}_{k}_NN_{distance_type}_ID{wm}_timeEnsemble'
             weights = self._compute_weights(wm, k, distances[:k])
             temporal_ensemble_mean, mean_valid_per_row, effective_k = self._weighted_row_mean_ignore_nan(knn_df, weights)
             nbrs_used = [c.split('_')[0] for c in knn_df.columns]
@@ -436,8 +375,8 @@ class kNNEstimator:
             t0 = time()
             self._compute_temporal_ensemble_distributions(distance_type, wm, nbr_df, nbr_data,)
             t1 = time()
-            # compute the frequency average ensemble pdfs
-            self._compute_frequency_ensemble_distributions(nbr_df, nbr_data, distance_type)
+            # compute the distribution average ensemble pdfs
+            self._compute_ensemble_distributions(nbr_df, nbr_data, distance_type)
             t2 = time()
             print(f'    ...{distance_type} ID{wm} took {t1 - t0:.2f}s for temporal ensemble, {t2 - t1:.2f}s for frequency ensemble.')
 

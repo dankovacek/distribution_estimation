@@ -29,7 +29,7 @@ def generate_js_search(station_data):
     for d in station_data.values():
         src = d["source_code"]
         oid = d["official_id"]
-        folder = f'{src}-{oid}/{d["official_id"]}.html'
+        folder = f'{oid}/{d["official_id"]}.html'
         lines.append(
             f'  {{id: "{oid}", source: "{src}", name: "{d["name"]}", folder: "stations/{folder}"}},'
         )

@@ -229,9 +229,9 @@ class kNNEstimator:
                 mean_obs_per_timestep = knn_df_all.iloc[:, :k].notna().sum(axis=1).mean()
                 mean_obs_per_proxy = knn_df_all.iloc[:, :k].notna().sum(axis=0).mean()
 
-                _, pmf_posterior = self.data._compute_adjusted_distribution_with_laplace_prior(pmf_est)
-                eval = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_posterior, self.data.baseline_pmf)
-                bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_posterior, pmf_est)
+                _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(pmf_est)
+                eval = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_pmf)
+                bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, pmf_est)
       
                 # compute the frequency-based ensemble pdf estimate
                 self.knn_simulation_data[label] = {
@@ -331,10 +331,10 @@ class kNNEstimator:
 
         assert est_pmf is not None, f'pmf is None for {label}'
 
-        _, pmf_posterior = self.data._compute_adjusted_distribution_with_laplace_prior(est_pmf)
+        _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(est_pmf)
 
-        estimation_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_posterior, self.data.baseline_pmf)
-        bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_posterior, est_pmf)
+        estimation_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_pmf)
+        bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, est_pmf)
 
         # Store simulation outputs and metadata
         self.knn_pdfs[label] = est_pdf
@@ -343,7 +343,7 @@ class kNNEstimator:
             'nbrs': nbrs_used,
             'k': k,
             'n_obs': len(temporal_ensemble_mean),
-            'mean_': mean_valid_per_row,
+            'mean_valid_per_row': mean_valid_per_row,
             'mean_nbrs_per_timestep': effective_k,  # rename if clearer
             'effective_k': effective_k,
             'eval': estimation_metrics,

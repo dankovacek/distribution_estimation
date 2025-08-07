@@ -109,21 +109,21 @@ def load_study_region_stations(study_region_station_fpath):
     bcub_gdf = gpd.read_file(study_region_station_fpath)    # get the number of unique stations in the dataset
     return bcub_gdf
 
+
 def load_results(args):
     """Load FDC estimation results for a single station and method."""
     stn, result_folder, method = args
     fpath = Path(result_folder) / f"{stn}_fdc_results.json"
     
     with open(fpath) as f:
-        data = json.load(f)           
-
+        data = json.load(f)       
         result_list = [pd.DataFrame(
             {'Official_ID': stn, 'Label': label,
              'KLD': d['eval'].get('kld'), 
              'EMD': d['eval'].get('emd'), 
              'RMSE': d['eval'].get('rmse'),
-             'RE': d['eval'].get('relative_error'), 
-             'TVB': d['eval'].get('tot_vol_bias'),
+             'MB': d['eval'].get('mean_error'), 
+             'RB': d['eval'].get('pct_vol_bias'), # relative bias (0 --> 1)
              'MARE': d['eval'].get('mean_abs_rel_error'), 
              'NSE': d['eval'].get('nse'), 
              'KGE': d['eval'].get('kge'),

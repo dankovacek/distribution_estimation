@@ -4,7 +4,7 @@ notes_html = """
 <h3>Methods:</h3>
 <strong>timeEnsemble</strong>: Temporally-averaged LSTM ensemble.<br><br>
 <strong>distEnsemble</strong>: Distribution-averaged LSTM ensemble.<br><br>
-<strong>LN<sub>MLE</sub></strong>: Log-normal distribution fitted by maximum likelihood to observed data; parameters are estimated from the posterior using full time series.<br><br>
+<strong>LN<sub>MLE</sub></strong>: Log-normal distribution fitted by maximum likelihood to observed data<br><br>
 <strong>LN<sub>PredictedLog</sub></strong>: Log-normal distribution using predicted log-mean \( \mu \) and log-standard deviation \( \sigma \), i.e., parameters of \( \log Q \sim \mathcal{N}(\mu, \sigma^2) \).<br><br>
 <strong>LN<sub>PredictedMOM</sub></strong>: Log-normal distribution using predicted mean and standard deviation of \( Q \), with parameters estimated by method of moments.<br><br>
 <strong>KNN</strong>: Attribute-based ensemble estimate using average distribution from the 2 and 8 nearest neighbors (2/8-NN) selected by similarity in catchment attributes.<br><br>

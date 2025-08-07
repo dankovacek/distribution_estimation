@@ -27,10 +27,11 @@ class EvaluationMetrics:
             'emd': 0.05,  # this is L/s/km^2, 0.05 is very small.
             'nse': 1 - 0.001, # flipped because 1.0 is perfect
             'kge': 1 - 0.001, # flipped because 1.0 is perfect
-            'rmse': 0.01,
-            'relative_error': 0.01,
+            'mean_error': 0.01,
+            'pct_vol_bias': 0.01,
+            "mean_abs_rel_error": 0.01,
+            'rmse': 0.01,            
         }
-        
 
     def _compute_kl_divergence(self, p, q):
         """Compute the KL divergence between two probability distributions."""
@@ -192,10 +193,10 @@ class EvaluationMetrics:
         assert np.all(linear_q_est > 0),  "Zero or negative values in q_est — unexpected for flow"
 
         # Metrics
-        tot_vol_bias = np.sum(linear_q_est - linear_q_true) / np.sum(linear_q_true) # p
-        rel_error = np.mean((linear_q_est - linear_q_true) / linear_q_true) # p        
+        pct_vol_bias = np.sum((linear_q_est - linear_q_true) / np.sum(linear_q_true)) # p
+        mean_error = np.mean(linear_q_est - linear_q_true) #
         mean_abs_rel_error = np.mean(np.abs(linear_q_est - linear_q_true) / linear_q_true)
-        rmse = np.sqrt(np.mean((log_q_true - log_q_est) ** 2))        
+        rmse = np.sqrt(np.mean((log_q_true - log_q_est) ** 2))
         nse = self._compute_nse(log_q_true, log_q_est)
         kge = self._compute_KGE(log_q_true, log_q_est)
         # volume efficiencies should be computed on linear flow values
@@ -209,8 +210,8 @@ class EvaluationMetrics:
         mean_frac_diff = (pmf_est_mean - cdf_est_mean) / pmf_est_mean
         # print(f'     PMF mean: {pmf_est_mean:.2f}, CDF mean: {cdf_est_mean:.2f} Mean frac diff: {100*mean_frac_diff:.0f}% (should be close to 0) ')
         return {
-            "tot_vol_bias": float(tot_vol_bias),
-            "relative_error": float(rel_error), 
+            "pct_vol_bias": float(pct_vol_bias),
+            "mean_error": float(mean_error), 
             "mean_abs_rel_error": float(mean_abs_rel_error), 
             "rmse": float(rmse), 
             "nse": float(nse), 

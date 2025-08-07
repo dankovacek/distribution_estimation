@@ -3,8 +3,6 @@ from collections import defaultdict
 from scipy.stats import laplace
 import json
 
-# from utils.evaluation_metrics import EvaluationMetrics
-
 import numpy as np
 import pandas as pd
 import jax.numpy as jnp
@@ -34,6 +32,8 @@ class StationData:
         self.location = self.ctx.laplace_param_dict['median'][stn]
         self.scale = self.ctx.laplace_param_dict['mad'][stn]
         self.prior_strength = self.ctx.prior_strength
+        # set the measures to check for excessive influence
+        self.error_check_metrics = ['mean_error', 'pct_vol_bias', 'kld', 'rmse']
 
 
 
@@ -104,7 +104,7 @@ class StationData:
     def _adjust_Q_pdf_with_prior(self, Q, label):
         """
         Adjusts the simulated PDF Q(x), originally defined on x_sim, by incorporating a Dirichlet prior,
-        to produce an adjusted (posterior) PDF Q_mod on x_target.
+        to produce an adjusted PDF Q_mod on x_target.
 
         """
         # Ensure the target grid lies within the global range.
@@ -192,13 +192,12 @@ class StationData:
         
         # we are testing the prior influence, which means 
         # the kde_pmf is the "baseline_pmf" and the adjusted_pmf is the "pmf_est"
-        # this will tell us how far the prior has shifted the posterior from the baseline 
+        # this will tell us how far the prior has shifted the pdf from the baseline 
         metrics = self.eval_metrics._evaluate_fdc_metrics_from_pmf(adjusted_pmf, kde_pmf)
         # check nse and kge for values LESS THAN the specified threshold
-
-        less_than_metrics = [metrics[k] < self.eval_metrics.metric_limits[k] for k in ['nse', 'kge']]
-        greater_than_metrics = [metrics[k] > self.eval_metrics.metric_limits[k] for k in ['rmse', 'relative_error', 'kld', 'emd']]
-        combined_thresholds = greater_than_metrics + less_than_metrics
+        # less_than_metrics = [metrics[k] < self.eval_metrics.metric_limits[k] for k in ['nse', 'kge']]
+        greater_than_metrics = [metrics[k] > self.eval_metrics.metric_limits[k] for k in self.error_check_metrics]
+        combined_thresholds = greater_than_metrics #+ less_than_metrics
 
         if np.any(combined_thresholds):
             # find which biases are greater than 1.0e-2

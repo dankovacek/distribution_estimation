@@ -33,7 +33,7 @@ function filterStations() {
     c.id.toLowerCase().includes(input) ||
     c.name.toLowerCase().includes(input) ||
     c.source.toLowerCase().includes(input) ||
-    `${c.source}-${c.id}`.toLowerCase().includes(input)
+    `$${c.id}`.toLowerCase().includes(input)
   );
 
   // Display results (max 10)
@@ -41,7 +41,7 @@ function filterStations() {
   limitedMatches.forEach(c => {
     const div = document.createElement('div');
     div.className = 'search-result';
-    div.innerHTML = `<a href='${c.folder}'>${c.source}-${c.id}: ${c.name}</a>`;
+    div.innerHTML = `<a href='${c.folder}'>$${c.id}: ${c.name}</a>`;
     results.appendChild(div);
   });
 

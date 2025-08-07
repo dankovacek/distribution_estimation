@@ -5,12 +5,17 @@ format: jb-book
 root: intro
 options: 
   numbered: True
-chapters:
-- file: notebooks/1_data
-- file: notebooks/2_Methods
-- file: notebooks/3_Predict_Runoff_Statistics
-- file: notebooks/4_Reference_Distributions
-- file: notebooks/5_FDC_Estimation
-- file: notebooks/6_Large_Sample_Results_Comparison
+parts:
+  - caption: FDC Estimation in Ungauged Basins
+    chapters:
+    - file: notebooks/1_data
+    - file: notebooks/2_Methods
+    - file: notebooks/3_Predict_Runoff_Statistics
+    - file: notebooks/4_Reference_Distributions
+    - file: notebooks/5_FDC_Estimation
+    - file: notebooks/6_Large_Sample_Results_Comparison
+  - caption: FDC Estimation Results Archive
+    chapters:
+    - glob: stations/**/*
 
 

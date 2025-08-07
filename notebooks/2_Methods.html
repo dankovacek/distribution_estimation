@@ -35,6 +35,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=192faf86" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -60,6 +61,7 @@
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/2_Methods';</script>
+    <script src="../_static/searchindex.js?v=c3f0b3c6"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="3. Predict Runoff Statistics from Catchment Attributes" href="3_Predict_Runoff_Statistics.html" />
@@ -177,7 +179,7 @@
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="../intro.html">
-                    Introduction
+                    FDC Estimation Results Archive
                 </a>
             </li>
         </ul>
@@ -429,7 +431,7 @@ document.write(`
 <h2><span class="section-number">2.2. </span>Introduction &amp; Motivation: discrete representation of continuous streamflow<a class="headerlink" href="#introduction-motivation-discrete-representation-of-continuous-streamflow" title="Link to this heading">#</a></h2>
 <p>The Water Survey of Canada (WSC) publishes the <a class="reference external" href="https://www.canada.ca/en/environment-climate-change/services/water-overview/quantity/monitoring/survey/data-products-services/national-archive-hydat.html">HYDAT</a> database of estimated daily (and in some cases hourly) streamflow at over 1000 stations in Canada.  Mean daily streamflow series from the HYDAT dataset uses 3 decimal precision  Given an example range of 0.1 to 100 <span class="math notranslate nohighlight">\(m^3/s\)</span>, three decimal precision suggests <span class="math notranslate nohighlight">\((100-0.1) / 0.001 = 99900\)</span> unique states, or roughly 17 bits (<span class="math notranslate nohighlight">\(2^{17} = 131,072\)</span>) to represent the data.</p>
 <p>It is natural to think of water flowing in a stream as a continuous quantity.  Water level in a stream rises and falls tracing a smooth line in time as opposed to stepping up and down abruptly at fixed time intervals.  When recording streamflow observations quantitatively, the continuous values representing streamflow at a moment in time are converted to a discrete form and stored on a computer in 32 or 64-bit floating point format.  These two formats can represent approximately <span class="math notranslate nohighlight">\(4.3\times 10^9\)</span> and <span class="math notranslate nohighlight">\(1.8 \times 10^{19}\)</span> distinct states, or 7 and 16 decimal precision respectively.  This level of precision is much more than can be justified by actual streamflow observation because of measurement uncertainty.  The uncertainty in streamflow measurement is multiplicative, meaning the uncertainty varies <em>in proportion to the magnitude</em>.</p>
-<p>We cannot escape this discrete representation of natural phenomena, and we run against its implications no matter which way we approach the analysis.  The “computational boundedness” <span id="id2">[<a class="reference internal" href="#id22" title="Stephen Wolfram. The Second Law: Resolving the Mystery of the Second Law of Thermodynamics. Wolfram Media, Incorporated, 2023.">Wolfram, 2023</a>]</span> of our observation of the natural world is a fundamental limitation of our ability to make informed decisions from uncertain data.  In the case of streamflow, the challenge is to find a balance between the precision of the representation, the uncertainty in the measurements, and the questions we ask of the data.</p>
+<p>We cannot escape this discrete representation of natural phenomena, and we run against its implications no matter which way we approach the analysis.  The “computational boundedness” <span id="id2">[<a class="reference internal" href="#id23" title="Stephen Wolfram. The Second Law: Resolving the Mystery of the Second Law of Thermodynamics. Wolfram Media, Incorporated, 2023.">Wolfram, 2023</a>]</span> of our observation of the natural world is a fundamental limitation of our ability to make informed decisions from uncertain data.  In the case of streamflow, the challenge is to find a balance between the precision of the representation, the uncertainty in the measurements, and the questions we ask of the data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -1662,7 +1664,7 @@ function(Bokeh) {
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">Sha56</a><span class="fn-bracket">]</span></span>
 <p>Claude E Shannon. The bandwagon. <em>IRE transactions on Information Theory</em>, 2(1):3, 1956.</p>
 </div>
-<div class="citation" id="id22" role="doc-biblioentry">
+<div class="citation" id="id23" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Wol23</a><span class="fn-bracket">]</span></span>
 <p>Stephen Wolfram. <em>The Second Law: Resolving the Mystery of the Second Law of Thermodynamics</em>. Wolfram Media, Incorporated, 2023.</p>
 </div>

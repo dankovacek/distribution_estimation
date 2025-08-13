@@ -112,7 +112,7 @@ def generate_searchindex_js():
         "  limitedMatches.forEach(c => {\n"
         "    const div = document.createElement('div');\n"
         "    div.className = 'search-result';\n"
-        "    div.innerHTML = `<a href='${c.folder}'>$${c.id}: ${c.name}</a>`;\n"
+        "    div.innerHTML = `<a href='${c.folder}'>${c.id}: ${c.name}</a>`;\n"
         "    results.appendChild(div);\n"
         "  });\n"
         "\n"

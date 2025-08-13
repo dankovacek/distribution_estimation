@@ -551,6 +551,7 @@ const stations = [
   {id: "15109048", source: "USGS", name: "PETERSON C BL NF NR AUKE BAY AK", folder: "stations/15109048/15109048.html"},
   {id: "08EE012", source: "HYDAT", name: "SIMPSON CREEK AT THE MOUTH", folder: "stations/08EE012/08EE012.html"},
   {id: "07EA004", source: "HYDAT", name: "INGENIKA RIVER ABOVE SWANNELL RIVER", folder: "stations/07EA004/07EA004.html"},
+  {id: "10AA002", source: "HYDAT", name: "TOM CREEK AT KILOMETRE 34.9 ROBERT CAMPBELL HIGHWAY", folder: "stations/10AA002/10AA002.html"},
   {id: "05DA007", source: "HYDAT", name: "MISTAYA RIVER NEAR SASKATCHEWAN CROSSING", folder: "stations/05DA007/05DA007.html"},
   {id: "08KH022", source: "HYDAT", name: "MACKAY RIVER AT THE MOUTH", folder: "stations/08KH022/08KH022.html"},
   {id: "08NK022", source: "HYDAT", name: "LINE CREEK AT THE MOUTH", folder: "stations/08NK022/08NK022.html"},

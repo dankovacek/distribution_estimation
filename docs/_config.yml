@@ -1,7 +1,7 @@
 # Book settings
 # Learn more at https://jupyterbook.org/customize/config.html
 
-title: Streamflow Distribution Estimation
+title: FDC Estimation in Ungauged Basins
 author: Dan Kovacek
 logo: images/logo.png
 
@@ -42,6 +42,8 @@ html:
     - _static/searchindex.js
   extra_css:
     - _static/custom.css
+  extrafiles:
+    - _static/
 
 only_build_toc_files: true
 exclude_patterns: [ss/*, superseded/*, __pycache__/* .ipynb_checkpoints/*]

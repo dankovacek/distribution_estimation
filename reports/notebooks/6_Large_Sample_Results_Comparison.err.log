@@ -31,8 +31,8 @@ nbclient.exceptions.CellTimeoutError: A cell timed out while it was being execut
 The message was: Cell execution timed out.
 Here is a preview of the cell contents:
 -------------------
-['plot_dfs = []', "units = ['[-]', '[L/s/km²]', '[L/s/km²]', '[bits/sample]']", 'for m, unit in zip(all_metrics, units):', '    cols = list(sorted([c for c in LN_method_labels if m in c]))', '    dfs = []']
+['plot_dfs = []', "units = ['[%]', '[L/s/km²]', '[%]', '[bits/sample]']", 'for m, unit in zip(all_metrics, units):', '    cols = list(sorted([c for c in LN_method_labels if m in c]))', '    dfs = []']
 ...
-['', 'figs = plot_all_matplotlib(all_metrics, plot_dfs, units)', '# figs.savefig("LN_mom_vs_direct_plots.png", dpi=150, bbox_inches=\'tight\')', '', 'plt.show()']
+['', 'figs = plot_all_matplotlib(all_metrics, plot_dfs, units)', 'figs.savefig("LN_mom_vs_direct_plots.png", dpi=150, bbox_inches=\'tight\')', '', 'plt.show()']
 -------------------
 

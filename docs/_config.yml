@@ -25,8 +25,8 @@ sphinx:
    mathjax_path: https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js
    html_static_path:
      - _static
-   html_extra_path:
-     - _static/stations
+  #  html_extra_path:
+  #    - _static/stations
 
 # Information about where the book exists on the web
 repository:
@@ -46,8 +46,6 @@ html:
     - _static/searchindex.js
   extra_css:
     - _static/custom.css
-  extrafiles:
-    - _static/
 
 only_build_toc_files: true
 exclude_patterns: [ss/*, superseded/*, __pycache__/* .ipynb_checkpoints/*]

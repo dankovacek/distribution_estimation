@@ -64,13 +64,12 @@ def get_station_folders():
 def process_static_station_page_html(
     folder: str,
     official_id: str ="",
-    site_url_prefix: str = "",
+    site_url_prefix: str = "/",
     stn_data: dict = {},
 ):
 
     station_name = stn_data.get("Name", "Unknown Station")
     source_code = stn_data.get("Source", "Unknown Source")
-    station_name = stn_data.get("Name", "Unknown Station")
 
     # HTML template
     template_path = BASE_DIR / ".." / "templates" / "station_page_template.md.j2"
@@ -78,7 +77,7 @@ def process_static_station_page_html(
         md_template = Template(f.read())
 
     iframe_src = (
-        f"{site_url_prefix}/_static/stations/{official_id}_fdc.html"
+        f"{site_url_prefix}_static/stations/{official_id}_fdc.html"
     )
 
     rendered_md = md_template.render(

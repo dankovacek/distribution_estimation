@@ -21,7 +21,7 @@ parser.add_argument(
     help="Specify 'dev' for development mode or 'prod' for production mode.",
 )
 args = parser.parse_args()
-site_url_prefix = "" if args.mode == "dev" else "/distribution_estimation"
+site_url_prefix = "/" if args.mode == "dev" else "/distribution_estimation/"
 
 station_data = update_station_pages(site_url_prefix=site_url_prefix)
 

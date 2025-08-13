@@ -23,6 +23,10 @@ sphinx:
  config:
    bibtex_reference_style: author_year
    mathjax_path: https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js
+   html_static_path:
+     - _static
+   html_extra_path:
+     - _static/stations
 
 # Information about where the book exists on the web
 repository:

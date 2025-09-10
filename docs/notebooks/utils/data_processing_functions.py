@@ -23,30 +23,30 @@ import jax.numpy as jnp
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
-
-def count_complete_years(df, date_column, value_column):
+def count_complete_years(df, date_column, value_column, min_days_threshold=20):
     # Convert to datetime only if necessary
     if not np.issubdtype(df[date_column].dtype, np.datetime64):
         df = df.copy()
         df[date_column] = pd.to_datetime(df[date_column])
 
     # Filter out missing values first
-    valid_data = df[df[value_column].notna()]
-    
-    # Extract year and month
+    valid_data = df[df[value_column].notna()].copy()
+
+    # Extract year, month, and day
     valid_data['year'] = valid_data[date_column].dt.year
     valid_data['month'] = valid_data[date_column].dt.month
     valid_data['day'] = valid_data[date_column].dt.day
-    
-    # Count total and missing days per year-month group
-    month_counts = valid_data.groupby(['year', 'month'])['day'].nunique()
-    
-    # Identify complete months (assuming a month has up to 31 days)
-    complete_months = (month_counts >= (0.9 * month_counts.groupby(level=0).transform('max')))
 
-    # Count years where all 12 months are complete
-    complete_years = complete_months.groupby(level=0).sum()
-    return (complete_years == 12).sum()
+    # Count unique days per year-month
+    days_count = valid_data.groupby(['year', 'month'])['day'].nunique().reset_index(name='count')
+    # A month is complete if count equals days_in_month
+    days_count['is_complete_month'] = days_count['count'] >= min_days_threshold
+
+    # Count complete months per year
+    complete_months_per_year = days_count.groupby('year')['is_complete_month'].sum()
+
+    # A year is complete if it has 12 complete months
+    return (complete_months_per_year == 12).sum()
 
 
 def load_and_filter_streamflow_timeseries(station_ids, hs_df, HYSETS_DIR):

@@ -1,25 +1,21 @@
 # import data_processing_functions as dpf
 # from concurrent.futures import ThreadPoolExecutor
 import os
-import jax
-import jax.numpy as jnp
 import numpy as np
 import pandas as pd
-from .kde_estimator import KDEEstimator
 
 class LSTMFDCEstimator:
-    def __init__(self, ctx, target_stn, data, *args, **kwargs):
+    def __init__(self, ctx, data, *args, **kwargs):
         # super().__init__(*args, **kwargs)
         self.ctx = ctx
-        self.target_stn = target_stn
         self.data = data
+        self.target_stn = self.data.target_stn
         # self.data = data
         self.LSTM_forcings_folder = self.ctx.LSTM_forcings_folder
         self.LSTM_ensemble_result_folder = self.ctx.LSTM_ensemble_result_folder
         self.df = self._load_ensemble_result()
         self.df = self._filter_for_complete_years()
         self.sim_cols = sorted([c for c in self.df.columns if c.startswith('streamflow_sim_')])
-        self.kde = KDEEstimator(self.data.baseline_log_grid, self.data.log_dx)
 
 
     def _load_ensemble_result(self):
@@ -81,28 +77,13 @@ class LSTMFDCEstimator:
         return ldf
 
     
-    def _plot_pmfs(self, pmf_time, pmf_freq, line_dash='solid'):
-        # plot using bokeh
-        f = figure(title=self.target_stn, width=600, height=400)
-        f.line(self.data.baseline_log_grid, pmf_time, line_width=2, color='blue', legend_label='Time Ensemble', line_dash=line_dash)
-        # f.line(self.data.baseline_log_grid, pmf1, line_width=2, color='red', legend_label='T_MeanLinEns PMF', line_dash=line_dash)
-        f.line(self.data.baseline_log_grid, pmf_freq, line_width=2, color='purple', legend_label='Frequency Ensemble', line_dash=line_dash)
-        f.line(self.data.baseline_log_grid, self.ctx.baseline_pmf, line_width=2, color='green', legend_label='Observed', line_dash=line_dash)
-        f.xaxis.axis_label = 'Log UAR (L/s/km2)'
-        f.yaxis.axis_label = 'PMF'
-        f.legend.location = 'top_left'
-        f.legend.background_fill_alpha = 0.25
-        f.legend.click_policy = 'hide'
-        f = dpf.format_fig_fonts(f, font_size=14)
-        show(f)
-
-
     def _compute_time_ensemble_pmf(self):
         data = self.df[self.sim_cols].copy()
         temporal_ensemble_log = data.mean(axis=1) # this is still in log space
         self.temporal_ensemble = np.exp(temporal_ensemble_log.values)
-        pmf, _ = self.kde.compute(self.temporal_ensemble, self.data.target_da)
-        _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_laplace_prior(pmf)
+        pmf, _ = self.data.kde_estimator.compute(self.temporal_ensemble, self.data.target_da)
+        # _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_laplace_prior(pmf)
+        _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf)
         return (pmf, prior_adjusted_pmf)
 
 
@@ -112,13 +93,15 @@ class LSTMFDCEstimator:
         # compute the frequency ensemble PMF
         # initialize a len(data) x n_sim_cols array
         pmfs = np.column_stack([
-            self.kde.compute(np.exp(data[c].values), self.data.target_da)[0]
+            self.data.kde_estimator.compute(np.exp(data[c].values), self.data.target_da)[0]
             for c in self.sim_cols
         ])
         # average the pmfs over the ensemble 
         pmf = pmfs.mean(axis=1)
-        assert len(pmf) == len(self.data.baseline_log_grid), f'len(pmfs) = {len(pmfs)} != len(baseline_log_grid) = {len(self.data.baseline_log_grid)}' 
-        _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_laplace_prior(pmf)
+        assert len(pmf) == len(self.data.log_x), f'len(pmfs) = {len(pmfs)} != len(log_x) = {len(self.data.log_x)}' 
+        # _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_laplace_prior(pmf)
+        _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf)
+        
         return (pmf, prior_adjusted_pmf)
 
 
@@ -134,7 +117,7 @@ class LSTMFDCEstimator:
         result = {}
         result['pmf'] = pmf.tolist()
         result['prior_adjusted_pmf'] = prior_adjusted_pmf.tolist()
-        result['eval'] = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(prior_adjusted_pmf, self.data.baseline_pmf)
+        result['eval'] = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(prior_adjusted_pmf, self.data.baseline_obs_pmf)
         result['bias'] = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(prior_adjusted_pmf, pmf)
         return result
 
@@ -147,3 +130,20 @@ class LSTMFDCEstimator:
             result = self._compute_ensemble_distribution_estimate(ensemble_type)
             results[ensemble_type] = result
         return results
+    
+
+    # def _plot_pmfs(self, pmf_time, pmf_freq, line_dash='solid'):
+        # plot using bokeh
+        # f = figure(title=self.target_stn, width=600, height=400)
+        # f.line(self.data.log_x, pmf_time, line_width=2, color='blue', legend_label='Time Ensemble', line_dash=line_dash)
+        # # f.line(self.data.log_x, pmf1, line_width=2, color='red', legend_label='T_MeanLinEns PMF', line_dash=line_dash)
+        # f.line(self.data.log_x, pmf_freq, line_width=2, color='purple', legend_label='Frequency Ensemble', line_dash=line_dash)
+        # f.line(self.data.log_x, self.ctx.baseline_obs_pmf, line_width=2, color='green', legend_label='Observed', line_dash=line_dash)
+        # f.xaxis.axis_label = 'Log UAR (L/s/km2)'
+        # f.yaxis.axis_label = 'PMF'
+        # f.legend.location = 'top_left'
+        # f.legend.background_fill_alpha = 0.25
+        # f.legend.click_policy = 'hide'
+        # f = dpf.format_fig_fonts(f, font_size=14)
+        # show(f)
+

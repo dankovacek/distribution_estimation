@@ -4,7 +4,7 @@ import numpy as np
 
 
 class EvaluationMetrics:
-    def __init__(self, baseline_log_grid, log_dx):
+    def __init__(self, data):
         """
         Initialize the EvaluationMetrics class with station data and configuration.
         
@@ -14,14 +14,14 @@ class EvaluationMetrics:
             Station identifier.
         df : pd.DataFrame
             DataFrame containing observed discharge data.
-        baseline_log_grid : np.ndarray
+        baseline_log_x : np.ndarray
             Log-transformed grid of flow values.
-        log_dx : float
+        log_w : float
             Logarithmic step size for the grid.
         """
-        self.log_grid = baseline_log_grid
-        self.lin_grid = np.exp(baseline_log_grid)
-        self.log_dx = log_dx
+        for k, v in data.__dict__.items():
+            setattr(self, k, v)
+
         self.metric_limits = {
             'kld': 0.001,
             'emd': 0.05,  # this is L/s/km^2, 0.05 is very small.
@@ -61,7 +61,7 @@ class EvaluationMetrics:
     def _compute_emd(self, p, q):
         assert np.isclose(np.sum(p), 1, atol=1e-3), f'sum P = {np.sum(p)}'
         assert np.all(q >= 0), f'min q_i < 0: {np.min(q)}'
-        linear_grid = np.exp(self.log_grid)
+        linear_grid = np.exp(self.log_x)
         emd = wasserstein_distance(linear_grid, linear_grid, p, q)
         return float(round(emd, 4))#, {'bias': None, 'unsupported_mass': None, 'pct_of_signal': None}
     
@@ -99,7 +99,7 @@ class EvaluationMetrics:
         """
         assert np.isclose(np.sum(baseline_pmf), 1), f"baseline_pmf does not sum to 1: {np.sum(baseline_pmf)}"
         assert np.isclose(np.sum(pmf_est), 1), f"pmf_est does not sum to 1: {np.sum(pmf_est)}"
-        x = np.exp(self.log_grid)
+        x = np.exp(self.log_x)
         E_p = np.sum(x * baseline_pmf)
         E_q = np.sum(x * pmf_est)
 
@@ -136,18 +136,18 @@ class EvaluationMetrics:
         alpha = sim.mean() / obs.mean()
         beta = sim.std() / obs.std()
         return 1 - np.sqrt((r - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+        
 
-
-    def _evaluate_fdc_metrics_from_pmf(self, pmf_est, baseline_pmf):
+    def _evaluate_fdc_metrics_from_pmf(self, pmf_est, baseline_obs_pmf):
         """
         Evaluate RMSE, relative error, NSE, and KGE between two FDCs represented by discrete PMFs.
-        Note these are evaluated over the log_grid which is set in the context.
+        Note these are evaluated over the log_x which is set in the context.
 
         Parameters
         ----------
         pmf_est : np.ndarray
-            Discrete PMF representing the estimated FDC, over `log_grid`.
-        log_grid : np.ndarray
+            Discrete PMF representing the estimated FDC, over `log_x`.
+        log_x : np.ndarray
             Grid of log-transformed flow values corresponding to PMF bins.
 
         Returns
@@ -156,16 +156,16 @@ class EvaluationMetrics:
             Dictionary of RMSE, RelativeError, NSE, and KGE computed over p=1,...,99 quantiles.
         """
         assert (
-            len(baseline_pmf) == len(pmf_est) == len(self.log_grid)
+            len(baseline_obs_pmf) == len(pmf_est) == len(self.log_x)
         ), "Array length mismatch"
 
         # Convert log flow grid back to linear runoff space
-        # linear_grid = np.exp(self.log_grid)
-        log_grid = self.log_grid
-        linear_grid = np.exp(log_grid)
+        # linear_grid = np.exp(self.log_x)
+        log_x = self.log_x
+        linear_grid = np.exp(log_x)
 
         # Compute CDFs
-        cdf_true = np.cumsum(baseline_pmf)
+        cdf_true = np.cumsum(baseline_obs_pmf)
         cdf_true /= cdf_true[-1]
         cdf_est = np.cumsum(pmf_est)
         cdf_est /= cdf_est[-1]
@@ -178,10 +178,10 @@ class EvaluationMetrics:
 
         # Interpolate inverse CDF (log-flow values at given probabilities)
         log_q_true = np.interp(
-            probs, cdf_true, log_grid, left=log_grid[0], right=log_grid[-1]
+            probs, cdf_true, log_x, left=log_x[0], right=log_x[-1]
         )
         log_q_est = np.interp(
-            probs, cdf_est, log_grid, left=log_grid[0], right=log_grid[-1]
+            probs, cdf_est, log_x, left=log_x[0], right=log_x[-1]
         )
         linear_q_true = np.interp(
             probs, cdf_true, linear_grid, left=linear_grid[0], right=linear_grid[-1]
@@ -201,11 +201,11 @@ class EvaluationMetrics:
         kge = self._compute_KGE(log_q_true, log_q_est)
         # volume efficiencies should be computed on linear flow values
         ve = 1 - np.sum(np.abs(linear_q_est - linear_q_true)) / np.sum(linear_q_true)
-        vol_pct_bias_pmf, pmf_est_mean = self._compute_volumetric_pct_bias_from_pmfs(baseline_pmf, pmf_est)
+        vol_pct_bias_pmf, pmf_est_mean = self._compute_volumetric_pct_bias_from_pmfs(baseline_obs_pmf, pmf_est)
         vol_pct_bias_fdc, cdf_est_mean = self._compute_volumetric_pct_bias_from_fdc(linear_q_true, linear_q_est)
         # assert np.isclose(pmf_est_mean, cdf_est_mean, atol=0.01), f'Estimated mean Q from PMF {pmf_est_mean:.3f} does not match CDF {cdf_est_mean:.3f}'
-        kld = self._compute_kl_divergence(baseline_pmf, pmf_est)
-        emd = self._compute_emd(baseline_pmf, pmf_est)
+        kld = self._compute_kl_divergence(baseline_obs_pmf, pmf_est)
+        emd = self._compute_emd(baseline_obs_pmf, pmf_est)
 
         mean_frac_diff = (pmf_est_mean - cdf_est_mean) / pmf_est_mean
         # print(f'     PMF mean: {pmf_est_mean:.2f}, CDF mean: {cdf_est_mean:.2f} Mean frac diff: {100*mean_frac_diff:.0f}% (should be close to 0) ')

@@ -4,15 +4,14 @@ import pandas as pd
 from collections import defaultdict
 # from concurrent.futures import ThreadPoolExecutor
 from jax import numpy as jnp
-from .kde_estimator import KDEEstimator
 from time import time
 
 
 class kNNEstimator:
-    def __init__(self, ctx, target_stn, data, *args, **kwargs):
+    def __init__(self, ctx, data, *args, **kwargs):
         self.ctx = ctx
-        self.target_stn = target_stn
         self.data = data
+        self.target_stn = self.data.target_stn
         self.k_nearest = data.k_nearest
         # self.max_to_check_start = data.max_to_check
         # self.max_to_check = data.max_to_check
@@ -189,12 +188,12 @@ class kNNEstimator:
 
 
         # Check integral before normalization
-        pdf_check = jnp.trapezoid(pdf_est, x=self.data.baseline_log_grid)
+        pdf_check = jnp.trapezoid(pdf_est, x=self.data.log_x)
         normalized_pdf = pdf_est / pdf_check
-        assert jnp.isclose(jnp.trapezoid(normalized_pdf, x=self.data.baseline_log_grid), 1), f'ensemble pdf does not integrate to 1: {pdf_check:.4f}'
-                
+        assert jnp.isclose(jnp.trapezoid(normalized_pdf, x=self.data.log_x), 1), f'ensemble pdf does not integrate to 1: {pdf_check:.4f}'
+
         # Compute PMF
-        pmf_est = normalized_pdf * self.data.log_dx
+        pmf_est = normalized_pdf * self.data.log_w
         pmf_est /= jnp.sum(pmf_est)
 
         return pmf_est, pdf_est
@@ -208,7 +207,8 @@ class kNNEstimator:
         knn_df_all = nbr_df.iloc[:, :self.k_nearest].copy()
         knn_data_all = nbr_data.iloc[:, :self.k_nearest].copy()
         proxy_ids = [c.split('_')[0] for c in knn_df_all.columns.tolist()]
-        frequency_ensemble_pdfs = self.ctx.baseline_pmf_df[proxy_ids].copy()
+        # load the kde PMFs to serve as the proxies to ensure complete support coverage
+        frequency_ensemble_pdfs = self.ctx.baseline_kde_pmf_df[proxy_ids].copy()
 
         labels, pdfs, pmfs = [], [], []
         all_distances = knn_data_all['distance'].values
@@ -229,8 +229,9 @@ class kNNEstimator:
                 mean_obs_per_timestep = knn_df_all.iloc[:, :k].notna().sum(axis=1).mean()
                 mean_obs_per_proxy = knn_df_all.iloc[:, :k].notna().sum(axis=0).mean()
 
-                _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(pmf_est)
-                eval = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_pmf)
+                # _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(pmf_est)
+                _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf_est)
+                eval = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_obs_pmf)
                 bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, pmf_est)
       
                 # compute the frequency-based ensemble pdf estimate
@@ -268,8 +269,7 @@ class kNNEstimator:
         pmf = jnp.zeros_like(log_grid)
         pmf = pmf.at[spike_idx].set(1.0)
 
-        dx = jnp.gradient(log_grid)
-        pdf = pmf / dx  # assign all mass to one bin
+        pdf = pmf / self.data.log_w 
 
         return pmf, pdf
    
@@ -313,27 +313,26 @@ class kNNEstimator:
 
         # Clip to prevent zero runoff issues
         assert np.min(temporal_ensemble_mean.values) > 0, f'min value in temporal_ensemble_mean is {np.min(temporal_ensemble_mean.values)} for {label}'
-        # temporal_ensemble_mean = np.clip(
-        #     temporal_ensemble_mean, 1000 * 1e-4 / self.data.target_da, None
-        # )
 
         # Estimate PDF/PMF using KDE or 
         # add small amount of random noise if there is no variance
         if len(jnp.unique(temporal_ensemble_mean.values)) == 1:
             print('    only one unique value in temporal ensemble mean, adding noise to avoid 0 variance.')
-            est_pmf, est_pdf = self._delta_spike_pmf_pdf(
-                temporal_ensemble_mean.values[0], self.data.baseline_log_grid
-            )
+            # est_pmf, est_pdf = self._delta_spike_pmf_pdf(
+            #     temporal_ensemble_mean.values[0], self.data.log_x
+            # )
+            raise Exception(f'    ....only one unique value in temporal ensemble mean {label}, cannot proceed.')
         else:
-            est_pmf, est_pdf = self.target_kde.compute(
+            est_pmf, est_pdf = self.data.kde_estimator.compute(
                 temporal_ensemble_mean.values, self.data.target_da
             )
 
         assert est_pmf is not None, f'pmf is None for {label}'
 
-        _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(est_pmf)
+        # _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(est_pmf)
+        _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(est_pmf)
 
-        estimation_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_pmf)
+        estimation_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_obs_pmf)
         bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, est_pmf)
 
         # Store simulation outputs and metadata
@@ -389,7 +388,6 @@ class kNNEstimator:
     def run_estimators(self):              
         self._initialize_nearest_neighbour_data()
         # set the baseline pdf by kde
-        self.target_kde = KDEEstimator(self.data.baseline_log_grid, self.data.log_dx)
         for dist in ['spatial_dist', 'attribute_dist']:        
             self._compute_distribution_estimates(dist)
         return self._format_results()

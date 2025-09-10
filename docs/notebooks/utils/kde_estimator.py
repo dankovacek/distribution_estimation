@@ -35,7 +35,8 @@ def measurement_error_bandwidth_function(x: jnp.ndarray) -> jnp.ndarray:
 
 def adaptive_bandwidths(uar: jnp.ndarray, da: float) -> jnp.ndarray:
     flow_data = uar * da / 1000
-    unique_q = jnp.unique(flow_data)
+    # Use numpy instead of jax.numpy for unique to avoid concretization error
+    unique_q = np.unique(np.array(flow_data))
     
     # compute the measurement error informed bandwidth
     # units must be volumetric flow
@@ -52,7 +53,7 @@ def adaptive_bandwidths(uar: jnp.ndarray, da: float) -> jnp.ndarray:
         print(f'    not enough unique values in runoff data ({len(unique_UAR)}), adding noise to the data according to the measurement error model.')
         noise_bounds = (unique_UAR * (1 - error_model), unique_UAR * (1 + error_model))
         flow_data += np.random.uniform(*noise_bounds, size=flow_data.shape)
-        unique_q = jnp.unique(flow_data)
+        unique_q = np.unique(np.array(flow_data))
         unique_UAR = (1000 / da) * unique_q
 
     # compute the log midpoints and bandwidths to address the issue
@@ -69,11 +70,27 @@ def adaptive_bandwidths(uar: jnp.ndarray, da: float) -> jnp.ndarray:
     return bw_vals[idx]
 
 
+
+@jax.jit
 def kde_kernel(log_data, bw_values, log_grid):
-    H = bw_values[:, None]  # (N, 1) 
+    H = bw_values[:, None]  # (N, 1)
     U = (log_grid[None, :] - log_data) / H  # (N, M)
-    K = jnp.exp(-0.5 * U**2) / (H * jnp.sqrt(2 * jnp.pi)) # Gaussian kernel with variable bandwidth H
+    K = jnp.exp(-0.5 * U**2) / (H * jnp.sqrt(2 * jnp.pi))
     return K.sum(axis=0) / log_data.shape[0]
+
+
+# Partially JIT the KDE pipeline (except for the parts that use np.unique)
+def kde_full(uar_data, da, log_x, log_w):
+    # Not JITed: Calculate bandwidths (uses np.unique)
+    bw_values = adaptive_bandwidths(uar_data, da)
+    log_data = jnp.log(uar_data)[:, None]
+    
+    # Use the JITed kernel function
+    pdf = kde_kernel(log_data, bw_values, log_x)
+    pdf /= jnp.trapezoid(pdf, x=log_x)
+    pmf = pdf * log_w
+    pmf /= jnp.sum(pmf)
+    return pmf, pdf
 
 
 class KDEEstimator:
@@ -89,28 +106,25 @@ class KDEEstimator:
     cache : dict
         Optional cache to store previously computed KDE results.
     """
-    def __init__(self, log_grid, dx):
-        self.log_grid = jnp.asarray(log_grid, dtype=jnp.float32)
-        self.dx = jnp.asarray(dx, dtype=jnp.float32)
+    def __init__(self, log_edges):
+        self.log_edges = jnp.asarray(log_edges, dtype=jnp.float32)
+        # get the midpoints in log space
+        self.log_x = 0.5 * (log_edges[:-1] + log_edges[1:])
+        self.lin_x = np.exp(self.log_x)
+        self.log_w = np.diff(log_edges) # widths of each bin in log space
+        self.left_log_edges = log_edges[:-1]
+        self.right_log_edges = log_edges[1:]
+        self.left_lin_edges = np.exp(self.left_log_edges)
+        self.right_lin_edges = np.exp(self.right_log_edges)
+        pct_diff = 100 * (np.exp((self.log_x[1:] - self.log_x[:-1]) / 2) - 1)
+        # print(f'Bin edges are +/- {pct_diff.max():.3f}% from the bin midpoints.')
 
 
     def compute(self, uar_data, da):
-        """Compute the adaptive KDE and PMF for given unit area runoff data."""
-        uar_data = jnp.asarray(uar_data)
+        uar_data = jnp.asarray(uar_data, dtype=jnp.float32)
         da = float(da)
-
-        bw_values = adaptive_bandwidths(uar_data, da)
-        log_data = jnp.log(uar_data)[:, None]
-        pdf = kde_kernel(log_data, bw_values, self.log_grid)
-
-        # Normalize PDF
-        pdf /= jnp.trapezoid(pdf, x=self.log_grid)
-
-        # Convert to PMF
-        pmf = pdf * self.dx
-        pmf /= jnp.sum(pmf)
-        
+        pmf, pdf = kde_full(uar_data, da, self.log_x, self.log_w)
         return pmf, pdf
     
-    
+
     

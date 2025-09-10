@@ -6,20 +6,20 @@ import jax.numpy as jnp
 from scipy.stats import norm, laplace, genextreme
 
 class ParametricFDCEstimator:
-    def __init__(self, ctx, target_stn, data, *args, **kwargs):
+    def __init__(self, ctx, data, *args, **kwargs):
         # super().__init__(*args, **kwargs)
         self.ctx = ctx
-        self.target_stn = target_stn
         self.data = data
+        self.target_stn = self.data.target_stn
         # self.data = data
         self.predicted_param_dict = self.ctx.predicted_param_dict
         self.predicted_param_df = pd.DataFrame(self.predicted_param_dict).T
 
     
     def _compute_lognorm_pmf(self, mu, sigma):
-        pdf = norm.pdf(self.data.baseline_log_grid, loc=mu, scale=sigma)
-        pdf /= jnp.trapezoid(pdf, x=self.data.baseline_log_grid)
-        pmf = pdf * self.data.log_dx
+        pdf = norm.pdf(self.data.log_x, loc=mu, scale=sigma)
+        pdf /= jnp.trapezoid(pdf, x=self.data.log_x)
+        pmf = pdf * self.data.log_w
         pmf /= pmf.sum()
         return pmf, pdf
     
@@ -28,9 +28,9 @@ class ParametricFDCEstimator:
         # assert values are within the valid range for GEV
         xi = max(xi, -0.5 + 1e-12)  # clip xi to avoid numerical issues
         sigma = max(sigma, 1e-12)  # ensure sigma is positive
-        pdf = genextreme.pdf(self.data.baseline_log_grid, xi, loc=mu, scale=sigma)
-        pdf /= jnp.trapezoid(pdf, x=self.data.baseline_log_grid)
-        pmf = pdf * self.data.log_dx
+        pdf = genextreme.pdf(self.data.log_x, xi, loc=mu, scale=sigma)
+        pdf /= jnp.trapezoid(pdf, x=self.data.log_x)
+        pmf = pdf * self.data.log_w
         pmf /= pmf.sum()  # normalize raw PMF
         return pmf, pdf
 
@@ -80,13 +80,14 @@ class ParametricFDCEstimator:
                   ]
         for fn, label in zip(fns, labels):
             pmf, pdf = fn()
-            _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_laplace_prior(pmf)
+            # _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_laplace_prior(pmf)
+            _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf)
             if 'Moments' in label:
                 # assert no nan values in the pmf
                 assert not np.any(np.isnan(pmf)), f'PMF contains NaN values for {label}: {pmf[:10]}'
 
             results[label] = {'prior_adjusted_pmf': prior_adjusted_pmf.tolist(), 'pmf': pmf.tolist()}
-            estimation_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(prior_adjusted_pmf, self.data.baseline_pmf)
+            estimation_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(prior_adjusted_pmf, self.data.baseline_obs_pmf)
             results[label]['eval'] = estimation_metrics
 
             # compute the bias

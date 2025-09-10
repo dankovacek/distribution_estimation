@@ -35,7 +35,7 @@ class FDCEstimationContext:
         self._set_attribute_indexers()
         self.overlap_dict = self._compute_concurrent_overlap_dict()
         self._load_baseline_distributions()
-        self._load_laplace_prior_params()
+        # self._load_laplace_prior_params()
 
     
     def _load_laplace_prior_params(self):
@@ -55,18 +55,17 @@ class FDCEstimationContext:
             raise FileNotFoundError(f"Baseline distribution folder {self.baseline_distribution_folder} does not exist.")
         
         # Load the baseline distributions
-        self.baseline_distributions = {}
-        for file in [e for e in os.listdir(self.baseline_distribution_folder) if e.endswith('.csv')]:
-            fpath = os.path.join(self.baseline_distribution_folder, file)
-            if 'pmf' in file:
-                self.baseline_pmf_df = pd.read_csv(fpath, index_col='q')
-            elif 'pdf' in file:
-                self.baseline_pdf_df = pd.read_csv(fpath, index_col='q')
-            else:
-                raise Exception(f"Unexpected file format in {self.baseline_distribution_folder}: {file.name}")
+        obs_pmf_fpath = self.baseline_distribution_folder / f'pmf_obs.csv'
+        self.baseline_obs_pmf_df = pd.read_csv(obs_pmf_fpath, index_col='lin_x')
+        kde_pmf_fpath = self.baseline_distribution_folder / f'pmf_kde.csv'
+        self.baseline_kde_pmf_df = pd.read_csv(kde_pmf_fpath, index_col='lin_x')
+        
+        obs_pdf_fpath = self.baseline_distribution_folder / f'pdf_obs.csv'
+        self.baseline_obs_pdf_df = pd.read_csv(obs_pdf_fpath, index_col='lin_x')
+        kde_pdf_fpath = self.baseline_distribution_folder / f'pdf_kde.csv'
+        self.baseline_kde_pdf_df = pd.read_csv(kde_pdf_fpath, index_col='lin_x')
         
         
-    
     def _load_and_filter_hysets_data(self):
         hs_df = pd.read_csv('data/HYSETS_watershed_properties.txt', sep=';')
         if self.include_pre_1980_data == True:
@@ -109,11 +108,6 @@ class FDCEstimationContext:
         df['geometry'] = df.apply(lambda row: Point(row['centroid_lon_deg_e'], row['centroid_lat_deg_n']), axis=1)
         df = gpd.GeoDataFrame(df, geometry='geometry', crs='EPSG:4326')  # Ensure the CRS is WGS84
         df = df.to_crs(epsg=3005)  # Ensure the CRS is BC Albers for distance calculations
-
-        # LSTM ensemble predictions
-        # lstm_result_folder = '/home/danbot/code/neuralhydrology/data/ensemble_results'
-        # lstm_result_files = os.listdir(lstm_result_folder)
-        # lstm_result_stns = [e.split('_')[0] for e in lstm_result_files]
     
         # filter for the common stations between BCUB region and LSTM-compatible (i.e. 1980-)
         if self.include_pre_1980_data == True:
@@ -124,26 +118,9 @@ class FDCEstimationContext:
             print(f'   Using only stations with Daymet concurrency: {len(self.official_ids)}')
 
         df = df[df['official_id'].isin(self.official_ids)]
-        # import the license water extraction points
-        # dam_gdf = gpd.read_file('data/Dam_Points_20240103.gpkg')
-        # assert gdf.crs == dam_gdf.crs, "CRS of catchment and dam dataframes do not match"
-        # joined = gpd.sjoin(gdf, dam_gdf, how="inner", predicate="contains")
-        # joined = joined[joined['official_id'].isin(self.official_ids)]
-        # Create a new boolean column 'contains_dam' in catchment_gdf.
-        # If a polygon's index appears in the joined result, it means it contains at least one point.
-        # regulated = joined['official_id'].values
-            # N = len(df)
-            # print(f'{len(regulated)}/{N} catchments contain withdrawal licenses')
                 
         # create dict structures for easier access of attributes and geometries
         self.da_dict = df[['official_id', 'drainage_area_km2']].set_index('official_id').to_dict()['drainage_area_km2']
-        # self.polygon_dict = df[['official_id', 'geometry']].set_index('official_id').to_dict()['geometry']
-
-        # centroids = gdf.apply(lambda x: self.polygon_dict[x['official_id']].centroid, axis=1)
-        # attr_gdf = gpd.GeoDataFrame(gdf, geometry=centroids, crs=gdf.crs)
-        # print(len(attr_gdf))
-        # attr_gdf["contains_dam"] = attr_gdf['official_id'].apply(lambda x: x in regulated)
-        # attr_gdf.reset_index(inplace=True, drop=True)
         df['tmean'] = (df['tmin'].astype(float) + df['tmax'].astype(float)) / 2.0
         df['log_drainage_area_km2'] = np.log(df['drainage_area_km2'].astype(float))
         self.attr_gdf = df
@@ -192,33 +169,7 @@ class FDCEstimationContext:
         rdf.columns = ['_'.join(c.split('_')[:-1]) for c in rdf.columns]
         return rdf.to_dict(orient='index')
     
-
-    def _generate_12_month_windows(self, index):
-        months = pd.date_range(index.min(), index.max(), freq='MS')
-        windows = [(start, start + pd.DateOffset(months=12) - pd.Timedelta(days=1)) for start in months]
-        return [w for w in windows if w[1] <= index.max()]
-    
-    
-    def _is_window_valid(self, ts, start, end):
-        window = ts.loc[start:end]
-        if window.empty:
-            return False
-        grouped = window.groupby(window.index.month).size()
-        if set(grouped.index) != set(range(1, 13)):
-            return False
-        if grouped.min() < 10:
-            return False
-        return True
-    
-    
-    def _compute_station_valid_windows(self, ts, windows):
-        return [self._is_window_valid(ts, start, end) for (start, end) in windows]
-    
-    
-    def _count_valid_shared_windows(self, valid_i, valid_j):
-        return sum(np.logical_and(valid_i, valid_j))
-    
-       
+ 
     def _compute_concurrent_overlap_dict(self, variable='discharge'):
         """
         Compute the concurrent overlap of monitored watersheds in the dataset.
@@ -288,3 +239,29 @@ class FDCEstimationContext:
         return overlap_dict
         
         
+    # def _generate_12_month_windows(self, index):
+    #     months = pd.date_range(index.min(), index.max(), freq='MS')
+    #     windows = [(start, start + pd.DateOffset(months=12) - pd.Timedelta(days=1)) for start in months]
+    #     return [w for w in windows if w[1] <= index.max()]
+    
+    
+    # def _is_window_valid(self, ts, start, end):
+    #     window = ts.loc[start:end]
+    #     if window.empty:
+    #         return False
+    #     grouped = window.groupby(window.index.month).size()
+    #     if set(grouped.index) != set(range(1, 13)):
+    #         return False
+    #     if grouped.min() < 10:
+    #         return False
+    #     return True
+    
+    
+    # def _compute_station_valid_windows(self, ts, windows):
+    #     return [self._is_window_valid(ts, start, end) for (start, end) in windows]
+    
+    
+    # def _count_valid_shared_windows(self, valid_i, valid_j):
+    #     return sum(np.logical_and(valid_i, valid_j))
+    
+ 

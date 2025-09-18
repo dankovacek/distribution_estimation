@@ -4,7 +4,7 @@ import numpy as np
 
 
 class EvaluationMetrics:
-    def __init__(self, data):
+    def __init__(self, log_x=None, log_w=None, data=None):
         """
         Initialize the EvaluationMetrics class with station data and configuration.
         
@@ -19,8 +19,12 @@ class EvaluationMetrics:
         log_w : float
             Logarithmic step size for the grid.
         """
-        for k, v in data.__dict__.items():
-            setattr(self, k, v)
+        if data is not None:
+            for k, v in data.__dict__.items():
+                setattr(self, k, v)
+        else:
+            self.log_x = log_x
+            self.log_w = log_w
 
         self.metric_limits = {
             'kld': 0.001,
@@ -138,6 +142,15 @@ class EvaluationMetrics:
         return 1 - np.sqrt((r - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
         
 
+    def _compute_pinball_loss(self, p, q, quantile=0.5):
+        """Compute the Pinball Loss for a given quantile between observed and simulated values."""
+        assert not np.isnan(p).any(), f"NaN values in obs"
+        assert not np.isnan(q).any(), f"NaN values in sim"
+        errors = p - q
+        loss = np.where(errors >= 0, quantile * errors, (quantile - 1) * errors)
+        return np.nanmean(loss) 
+    
+
     def _evaluate_fdc_metrics_from_pmf(self, pmf_est, baseline_obs_pmf):
         """
         Evaluate RMSE, relative error, NSE, and KGE between two FDCs represented by discrete PMFs.
@@ -203,6 +216,8 @@ class EvaluationMetrics:
         ve = 1 - np.sum(np.abs(linear_q_est - linear_q_true)) / np.sum(linear_q_true)
         vol_pct_bias_pmf, pmf_est_mean = self._compute_volumetric_pct_bias_from_pmfs(baseline_obs_pmf, pmf_est)
         vol_pct_bias_fdc, cdf_est_mean = self._compute_volumetric_pct_bias_from_fdc(linear_q_true, linear_q_est)
+
+        pinball_loss_50 = self._compute_pinball_loss(linear_q_true, linear_q_est, quantile=0.5)
         # assert np.isclose(pmf_est_mean, cdf_est_mean, atol=0.01), f'Estimated mean Q from PMF {pmf_est_mean:.3f} does not match CDF {cdf_est_mean:.3f}'
         kld = self._compute_kl_divergence(baseline_obs_pmf, pmf_est)
         emd = self._compute_emd(baseline_obs_pmf, pmf_est)
@@ -217,6 +232,7 @@ class EvaluationMetrics:
             "nse": float(nse), 
             "kge": float(kge),
             "ve": float(ve),
+            "pb_50": float(pinball_loss_50),
             "vb_pmf": float(vol_pct_bias_pmf),
             "vb_fdc": float(vol_pct_bias_fdc),
             "kld": float(kld),

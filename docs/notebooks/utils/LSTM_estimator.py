@@ -80,25 +80,49 @@ class LSTMFDCEstimator:
     def _compute_time_ensemble_pmf(self):
         data = self.df[self.sim_cols].copy()
         temporal_ensemble_log = data.mean(axis=1) # this is still in log space
-        self.temporal_ensemble = np.exp(temporal_ensemble_log.values)
-        pmf, _ = self.data.kde_estimator.compute(self.temporal_ensemble, self.data.target_da)
+        # self.temporal_ensemble = np.exp(temporal_ensemble_log.values)
+        # pmf, _ = self.data.kde_estimator.compute(self.temporal_ensemble, self.data.target_da)
+        pmf, _ = np.histogram(temporal_ensemble_log, bins=self.data.log_edges, density=True)
+        # normalize the pmf sum to 1
+        pmf = pmf / pmf.sum()
         # _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_laplace_prior(pmf)
         _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf)
         return (pmf, prior_adjusted_pmf)
+    
+
+    def compute_ensemble_pmf_by_bincount(self, df, cols, edges):
+        """Faster computation of ensemble PMF by bin counting."""
+        X = df[cols].to_numpy(copy=False); edges = np.asarray(edges); n = edges.size - 1
+        b = np.searchsorted(edges, X, 'right') - 1
+        v = (b >= 0) & (b < n) & np.isfinite(X)
+        flat = b[v] + n * np.nonzero(v)[1]
+        C = np.bincount(flat, minlength=n * X.shape[1]).reshape(X.shape[1], n).T
+        pmf = C / np.clip(C.sum(0, keepdims=True), 1, None)
+        m = pmf.mean(1)
+        return m / m.sum() if m.sum() else m
+
 
 
     def _compute_frequency_ensemble_pmf(self):
-        data = self.df[self.sim_cols].copy()
-        data.dropna(inplace=True)
+        df = self.df[self.sim_cols].copy()
+        df.dropna(inplace=True)
         # compute the frequency ensemble PMF
         # initialize a len(data) x n_sim_cols array
-        pmfs = np.column_stack([
-            self.data.kde_estimator.compute(np.exp(data[c].values), self.data.target_da)[0]
-            for c in self.sim_cols
-        ])
+        # pmfs = np.column_stack([
+        #     self.data.kde_estimator.compute(np.exp(data[c].values), self.data.target_da)[0]
+        #     for c in self.sim_cols
+        # ])
+        # compute the pmfs by bin counting over the 
         # average the pmfs over the ensemble 
-        pmf = pmfs.mean(axis=1)
-        assert len(pmf) == len(self.data.log_x), f'len(pmfs) = {len(pmfs)} != len(log_x) = {len(self.data.log_x)}' 
+        # pmfs = np.column_stack([
+        #     np.histogram(df[c].values, bins=self.data.log_edges, density=True)[0]
+        #     for c in self.sim_cols
+        # ])
+        # pmf = pmfs.mean(axis=1)
+        # pmf /= pmf.sum()
+        pmf = self.compute_ensemble_pmf_by_bincount(df, self.sim_cols, self.data.log_edges)
+
+        assert len(pmf) == len(self.data.log_x), f'len(pmf) = {len(pmf)} != len(log_x) = {len(self.data.log_x)}' 
         # _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_laplace_prior(pmf)
         _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf)
         
@@ -113,7 +137,6 @@ class LSTMFDCEstimator:
         else:
             raise ValueError(f'Unknown ensemble type: {ensemble_type}')
         
-        # compute the divergence measures
         result = {}
         result['pmf'] = pmf.tolist()
         result['prior_adjusted_pmf'] = prior_adjusted_pmf.tolist()

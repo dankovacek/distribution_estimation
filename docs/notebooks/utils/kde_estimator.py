@@ -116,8 +116,6 @@ class KDEEstimator:
         self.right_log_edges = log_edges[1:]
         self.left_lin_edges = np.exp(self.left_log_edges)
         self.right_lin_edges = np.exp(self.right_log_edges)
-        pct_diff = 100 * (np.exp((self.log_x[1:] - self.log_x[:-1]) / 2) - 1)
-        # print(f'Bin edges are +/- {pct_diff.max():.3f}% from the bin midpoints.')
 
 
     def compute(self, uar_data, da):

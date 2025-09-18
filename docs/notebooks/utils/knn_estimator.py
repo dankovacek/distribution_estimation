@@ -352,10 +352,11 @@ class kNNEstimator:
 
     def _compute_temporal_ensemble_distributions(self, distance_type, wm, nbr_df, nbr_data):
         distances = nbr_data['distance'].values
+        weights_10NN = self._compute_weights(wm, 10, distances[:10])
         for k in range(1, self.k_nearest + 1):
             knn_df = nbr_df.iloc[:, :k].copy()
             label = f'{self.target_stn}_{k}_NN_{distance_type}_ID{wm}_timeEnsemble'
-            weights = self._compute_weights(wm, k, distances[:k])
+            weights = weights_10NN[:k]
             temporal_ensemble_mean, mean_valid_per_row, effective_k = self._weighted_row_mean_ignore_nan(knn_df, weights)
             nbrs_used = [c.split('_')[0] for c in knn_df.columns]
             self._finalize_temporal_ensemble(

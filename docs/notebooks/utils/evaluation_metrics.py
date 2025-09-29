@@ -170,7 +170,7 @@ class EvaluationMetrics:
         """
         assert (
             len(baseline_obs_pmf) == len(pmf_est) == len(self.log_x)
-        ), "Array length mismatch"
+        ), f"Array length mismatch, {len(baseline_obs_pmf)}, {len(pmf_est)}, {len(self.log_x)}"
 
         # Convert log flow grid back to linear runoff space
         # linear_grid = np.exp(self.log_x)
@@ -186,8 +186,10 @@ class EvaluationMetrics:
         assert np.isfinite(cdf_true).all(), "Non-finite values in cdf_true"
         assert np.diff(cdf_true).sum() > 0, "cdf_true has no spread"
 
-        # Percentiles (1 to 99)
-        probs = np.linspace(0.01, 0.99, 99)
+        # Equal-spaced probabilities for quantile function interpolation
+        probs = np.arange(0.01, 1.0, 0.01)
+        epsilon = 1e-2
+        probs = np.linspace(epsilon, 1 - epsilon, 2**10)
 
         # Interpolate inverse CDF (log-flow values at given probabilities)
         log_q_true = np.interp(
@@ -202,40 +204,49 @@ class EvaluationMetrics:
         linear_q_est = np.interp(
             probs, cdf_est, linear_grid, left=linear_grid[0], right=linear_grid[-1]
         )
-        assert np.all(linear_q_true > 0), "Zero or negative values in q_true — invalid for relative error"
-        assert np.all(linear_q_est > 0),  "Zero or negative values in q_est — unexpected for flow"
+        # set a small minimum flow value to avoid issues with zero flows
+        linear_q_true = np.clip(linear_q_true, a_min=1e-4, a_max=None)
+        linear_q_est = np.clip(linear_q_est, a_min=1e-4, a_max=None)
+
+        if np.any(linear_q_est <= 0):
+            print("Min:", np.nanmin(linear_q_est))
+            print("Any negative?", np.any(linear_q_est < 0))
+            print("Any NaN?", np.any(np.isnan(linear_q_est)))
+            print("dtype:", linear_q_est.dtype)
+        assert np.all(linear_q_true >= 0), "Zero or negative values in q_true — invalid for relative error"
+        assert np.all(linear_q_est >= 0),  "Zero or negative values in q_est — unexpected for flow"
 
         # Metrics
-        pct_vol_bias = np.sum((linear_q_est - linear_q_true) / np.sum(linear_q_true)) # p
-        mean_error = np.mean(linear_q_est - linear_q_true) #
-        mean_abs_rel_error = np.mean(np.abs(linear_q_est - linear_q_true) / linear_q_true)
+        pct_vol_bias = np.sum((linear_q_true - linear_q_est) / np.sum(linear_q_true)) # p
+        mean_error = np.mean(linear_q_true - linear_q_est) #
+        mean_abs_rel_error = np.mean(np.abs(linear_q_true - linear_q_est) / linear_q_true)  # this is PBIAS
         rmse = np.sqrt(np.mean((log_q_true - log_q_est) ** 2))
         nse = self._compute_nse(log_q_true, log_q_est)
         kge = self._compute_KGE(log_q_true, log_q_est)
         # volume efficiencies should be computed on linear flow values
-        ve = 1 - np.sum(np.abs(linear_q_est - linear_q_true)) / np.sum(linear_q_true)
-        vol_pct_bias_pmf, pmf_est_mean = self._compute_volumetric_pct_bias_from_pmfs(baseline_obs_pmf, pmf_est)
-        vol_pct_bias_fdc, cdf_est_mean = self._compute_volumetric_pct_bias_from_fdc(linear_q_true, linear_q_est)
+        ve = 1 - np.sum(np.abs(linear_q_true - linear_q_est)) / np.sum(linear_q_true)
+        # vol_pct_bias_pmf, pmf_est_mean = self._compute_volumetric_pct_bias_from_pmfs(baseline_obs_pmf, pmf_est)
+        # vol_pct_bias_fdc, cdf_est_mean = self._compute_volumetric_pct_bias_from_fdc(linear_q_true, linear_q_est)
 
         pinball_loss_50 = self._compute_pinball_loss(linear_q_true, linear_q_est, quantile=0.5)
         # assert np.isclose(pmf_est_mean, cdf_est_mean, atol=0.01), f'Estimated mean Q from PMF {pmf_est_mean:.3f} does not match CDF {cdf_est_mean:.3f}'
         kld = self._compute_kl_divergence(baseline_obs_pmf, pmf_est)
         emd = self._compute_emd(baseline_obs_pmf, pmf_est)
 
-        mean_frac_diff = (pmf_est_mean - cdf_est_mean) / pmf_est_mean
+        # mean_frac_diff = (pmf_est_mean - cdf_est_mean) / pmf_est_mean
         # print(f'     PMF mean: {pmf_est_mean:.2f}, CDF mean: {cdf_est_mean:.2f} Mean frac diff: {100*mean_frac_diff:.0f}% (should be close to 0) ')
         return {
-            "pct_vol_bias": float(pct_vol_bias),
+            "pct_vol_bias": float(pct_vol_bias), # this is PBIAS (labeled RB in some notebooks)
             "mean_error": float(mean_error), 
-            "mean_abs_rel_error": float(mean_abs_rel_error), 
+            "mean_abs_rel_error": float(mean_abs_rel_error), # this is MARE
             "rmse": float(rmse), 
             "nse": float(nse), 
             "kge": float(kge),
             "ve": float(ve),
             "pb_50": float(pinball_loss_50),
-            "vb_pmf": float(vol_pct_bias_pmf),
-            "vb_fdc": float(vol_pct_bias_fdc),
+            # "vb_pmf": float(vol_pct_bias_pmf),
+            # "vb_fdc": float(vol_pct_bias_fdc),
             "kld": float(kld),
             "emd": float(emd),
-            "mean_frac_diff": float(mean_frac_diff)
+            # "mean_frac_diff": float(mean_frac_diff)
         }

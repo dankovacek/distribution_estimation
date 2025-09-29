@@ -14,9 +14,11 @@ class ParametricFDCEstimator:
         # self.data = data
         self.predicted_param_dict = self.ctx.predicted_param_dict
         self.predicted_param_df = pd.DataFrame(self.predicted_param_dict).T
+        self.include_random_test = True
 
     
     def _compute_lognorm_pmf(self, mu, sigma):
+        mu = max(mu, 1e-4)  # ensure mu is non-negative
         pdf = norm.pdf(self.data.log_x, loc=mu, scale=sigma)
         pdf /= jnp.trapezoid(pdf, x=self.data.log_x)
         pmf = pdf * self.data.log_w
@@ -42,15 +44,16 @@ class ParametricFDCEstimator:
     
 
     def _estimate_from_predicted_log_params(self):
-        mu = self.predicted_param_dict[self.target_stn]['log_uar_mean_mean_predicted']
-        sigma = self.predicted_param_dict[self.target_stn]['log_uar_std_mean_predicted']
+        mu = self.predicted_param_dict[self.target_stn]['log_uar_mean_predicted']
+        sigma = self.predicted_param_dict[self.target_stn]['log_uar_std_predicted']
         return self._compute_lognorm_pmf(mu, sigma)
         
     
     def _estimate_from_predicted_linear_mom(self):
-        mean_x = self.predicted_param_dict[self.target_stn]['uar_mean_mean_predicted']
-        sd_x = self.predicted_param_dict[self.target_stn]['uar_std_mean_predicted']
+        mean_x = max(self.predicted_param_dict[self.target_stn]['uar_mean_predicted'], 1e-4)
+        sd_x = self.predicted_param_dict[self.target_stn]['uar_std_predicted']
         v = np.log(1 + (sd_x / mean_x) ** 2)
+        assert mean_x > 0, f'Mean must be positive for lognormal distribution, got {mean_x}'
         mu = np.log(mean_x) - 0.5 * v
         return self._compute_lognorm_pmf(mu, np.sqrt(v))
     
@@ -59,8 +62,8 @@ class ParametricFDCEstimator:
         # randomly draw from the predicted parameters
         random_idx = np.random.choice(len(self.predicted_param_df))
         random_stn_idx = self.predicted_param_df.index[random_idx]
-        mu_random =self.predicted_param_dict[random_stn_idx]['log_uar_mean_mean_predicted']
-        sigma_random = self.predicted_param_dict[random_stn_idx]['log_uar_std_mean_predicted']
+        mu_random =self.predicted_param_dict[random_stn_idx]['log_uar_mean_predicted']
+        sigma_random = self.predicted_param_dict[random_stn_idx]['log_uar_std_predicted']
         return self._compute_lognorm_pmf(mu_random, sigma_random)
 
 
@@ -75,10 +78,14 @@ class ParametricFDCEstimator:
             # self._estimate_from_predicted_lmoments_gev, 
             # self._estimate_LMOM_gev_from_randomly_drawn_params
             ]
-        labels = ['MLE', 'PredictedLog', 'PredictedMOM', 'RandomDraw', 
+        
+        labels = ['MLE', 'PredictedLog', 'PredictedMOM', 
                   #'ObsLMomentsGEV', 'PredictedLMomentsGEV', 'LMomentsGEVRandomDraw',
                   ]
+        if self.include_random_test:
+            labels += ['RandomDraw']
         for fn, label in zip(fns, labels):
+            
             pmf, pdf = fn()
             # _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_laplace_prior(pmf)
             _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf)

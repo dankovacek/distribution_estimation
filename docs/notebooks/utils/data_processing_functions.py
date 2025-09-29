@@ -15,6 +15,8 @@ import xarray as xr
 from sklearn.model_selection import StratifiedKFold
 from shapely.geometry import Point
 
+from bokeh.io import export_png
+
 import xgboost as xgb
 import multiprocessing as mp
 import jax
@@ -123,7 +125,7 @@ def load_results(args):
              'EMD': d['eval'].get('emd'), 
              'RMSE': d['eval'].get('rmse'),
              'MB': d['eval'].get('mean_error'), 
-             'RB': d['eval'].get('pct_vol_bias'), # relative bias (0 --> 1)
+             'RB': d['eval'].get('pct_vol_bias'), # 
              'MARE': d['eval'].get('mean_abs_rel_error'), 
              'NSE': d['eval'].get('nse'), 
              'KGE': d['eval'].get('kge'),
@@ -135,6 +137,16 @@ def load_results(args):
         df = pd.concat(result_list)
         df.reset_index(drop=True, inplace=True)
         return df
+    
+
+def save_fig(fig, filename, output_dir='images', fmt='png'):
+    """Save a Bokeh figure to a file."""
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    filepath = output_path / f"{filename}.{fmt}"
+    export_png(fig, filename=str(filepath))
+    print(f"Figure saved to {filepath}")
+    return filepath
 
 
 def format_fig_fonts(fig, font_size=20, font='Bitstream Charter', legend=True):

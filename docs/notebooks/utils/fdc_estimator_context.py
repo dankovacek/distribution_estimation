@@ -29,7 +29,8 @@ class FDCEstimationContext:
 
         self._load_catchment_data()
         self._load_and_filter_hysets_data()
-        self.LN_param_dict = self._load_predicted_ln_params()
+        # self.LN_param_dict = self._load_predicted_ln_params()
+        self.LN_param_dict = self.predicted_param_dict
         self._set_tree_idx_mappers()
         self._build_network_trees()
         self._set_attribute_indexers()
@@ -38,14 +39,14 @@ class FDCEstimationContext:
         # self._load_laplace_prior_params()
 
     
-    def _load_laplace_prior_params(self):
-        predicted_params = pd.read_csv('data/results/parameter_prediction_results/mean_parameter_predictions.csv', index_col=0)
-        self.laplace_param_dict = {
-            'mean': predicted_params['log_uar_mean_mean_predicted'].to_dict(),
-            'sd': predicted_params['log_uar_std_mean_predicted'].to_dict(),
-            'median': predicted_params['log_uar_median_mean_predicted'].to_dict(),
-            'mad': predicted_params['log_uar_mad_mean_predicted'].to_dict(),
-        }
+    # def _load_laplace_prior_params(self):
+    #     predicted_params = pd.read_csv('data/results/parameter_prediction_results/OOS_parameter_predictions.csv', index_col=0)
+    #     self.laplace_param_dict = {
+    #         'mean': predicted_params['log_uar_mean_mean_predicted'].to_dict(),
+    #         'sd': predicted_params['log_uar_std_mean_predicted'].to_dict(),
+    #         'median': predicted_params['log_uar_median_mean_predicted'].to_dict(),
+    #         'mad': predicted_params['log_uar_mad_mean_predicted'].to_dict(),
+    #     }
 
     
     def _load_baseline_distributions(self):
@@ -164,7 +165,7 @@ class FDCEstimationContext:
     def _load_predicted_ln_params(self):
         """Retrieve log-normal parameters for a station."""
         parameter_prediction_results_folder = os.path.join('data', 'results', 'parameter_prediction_results', )
-        predicted_params_fpath   = os.path.join(parameter_prediction_results_folder, 'mean_parameter_predictions.csv')
+        predicted_params_fpath   = os.path.join(parameter_prediction_results_folder, 'OOS_parameter_predictions.csv')
         rdf = pd.read_csv(predicted_params_fpath, index_col=['official_id'], dtype={'official_id': str})
         rdf.columns = ['_'.join(c.split('_')[:-1]) for c in rdf.columns]
         return rdf.to_dict(orient='index')

@@ -1,7 +1,6 @@
 # main_runner.py
 import os, sys
 from pathlib import Path
-from tests.test_precheck import find_geometry_files, load_file_config
 from book_docs.setup_scripts.precheck_utils import build_geometry_registry
 from integration import run_integration_workflow, run_update_workflow, run_change_summary_workflow
 
@@ -40,5 +39,4 @@ run_integration_workflow(registry, config, output_dir)
 run_update_workflow(site_url_prefix=site_url_prefix)
 run_change_summary_workflow(site_url_prefix=site_url_prefix)
 
-# create a summary page to demonstrate the validity of the static land cover assumption
 

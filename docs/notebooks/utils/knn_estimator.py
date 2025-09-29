@@ -174,6 +174,18 @@ class kNNEstimator:
             return inv_weights / jnp.sum(inv_weights)
     
       
+    def _compute_empirical_pmf(self, log_edges, data):
+        """Compute the empirical PMF set of observations."""
+        log_runoff = np.log(data)
+        pdf, _ = np.histogram(log_runoff, bins=log_edges, density=True)
+        # Convert to PMF
+        w = np.diff(log_edges)
+        pmf = pdf * w
+        pmf /= np.sum(pmf)
+        assert np.isclose(pmf.sum(), 1.0), f'Empirical PMF does not sum to 1, sum={pmf.sum():.4f}'
+        return pmf, pdf
+    
+    
     def _compute_frequency_ensemble_mean(self, pdfs, weights):
         """
         This function computes the weighted ensemble distribution estimates.
@@ -199,7 +211,7 @@ class kNNEstimator:
         return pmf_est, pdf_est
     
     
-    def _compute_ensemble_distributions(self, nbr_df, nbr_data, distance_type):
+    def _compute_ensemble_distributions(self, wm, nbr_df, nbr_data, distance_type):
         """
         For asynchronous comparisons, we estimate pdfs for ensemble members, then compute the mean in the time domain
         to represent the FDC simulation.  We do not do temporal averaging in this case.
@@ -208,44 +220,46 @@ class kNNEstimator:
         knn_data_all = nbr_data.iloc[:, :self.k_nearest].copy()
         proxy_ids = [c.split('_')[0] for c in knn_df_all.columns.tolist()]
         # load the kde PMFs to serve as the proxies to ensure complete support coverage
-        frequency_ensemble_pdfs = self.ctx.baseline_kde_pmf_df[proxy_ids].copy()
+        # if self.baseline_pmf_type == 'kde':
+        #     frequency_ensemble_pdfs = self.ctx.baseline_kde_pmf_df[proxy_ids].copy()
+        # else:
+        frequency_ensemble_pdfs = self.ctx.baseline_obs_pmf_df[proxy_ids].copy()
 
         labels, pdfs, pmfs = [], [], []
         all_distances = knn_data_all['distance'].values
         all_ids = knn_data_all['official_id'].values
-        # prior_bias_df = pd.DataFrame(prior_bias_dict)
-        for wm in self.weight_schemes:
-            for k in range(1, self.k_nearest + 1):
-                distances = all_distances[:k]
-                nbr_ids = all_ids[:k]
-                knn_pdfs = frequency_ensemble_pdfs.iloc[:, :k].copy()
 
-                label = f'{self.target_stn}_{k}_NN_{distance_type}_ID{wm}_freqEnsemble'
-                weights = self._compute_weights(wm, k, distances)
-                pmf_est, pdf_est = self._compute_frequency_ensemble_mean(knn_pdfs, weights)
-                assert pmf_est is not None, f'pmf_est is None for {label}'
+        for k in range(1, self.k_nearest + 1):
+            distances = all_distances[:k]
+            nbr_ids = all_ids[:k]
+            knn_pdfs = frequency_ensemble_pdfs.iloc[:, :k].copy()
+
+            label = f'{self.target_stn}_{k}_NN_{distance_type}_ID{wm}_freqEnsemble'
+            weights = self._compute_weights(wm, k, distances)
+            pmf_est, pdf_est = self._compute_frequency_ensemble_mean(knn_pdfs, weights)
+            assert pmf_est is not None, f'pmf_est is None for {label}'
+        
+            # compute the mean number of observations (non-nan values) per row
+            mean_obs_per_timestep = knn_df_all.iloc[:, :k].notna().sum(axis=1).mean()
+            mean_obs_per_proxy = knn_df_all.iloc[:, :k].notna().sum(axis=0).mean()
+
+            # _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(pmf_est)
+            _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf_est)
+            eval = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_obs_pmf)
+            bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, pmf_est)
+    
+            # compute the frequency-based ensemble pdf estimate
+            self.knn_simulation_data[label] = {
+                'k': k, 'n_obs': mean_obs_per_proxy,
+                'mean_obs_per_timestep': mean_obs_per_timestep,
+                'nbrs': ','.join(nbr_ids),
+                'eval': eval,
+                'bias': bias,
+                }
             
-                # compute the mean number of observations (non-nan values) per row
-                mean_obs_per_timestep = knn_df_all.iloc[:, :k].notna().sum(axis=1).mean()
-                mean_obs_per_proxy = knn_df_all.iloc[:, :k].notna().sum(axis=0).mean()
-
-                # _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(pmf_est)
-                _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf_est)
-                eval = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_obs_pmf)
-                bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, pmf_est)
-      
-                # compute the frequency-based ensemble pdf estimate
-                self.knn_simulation_data[label] = {
-                    'k': k, 'n_obs': mean_obs_per_proxy,
-                    'mean_obs_per_timestep': mean_obs_per_timestep,
-                    'nbrs': ','.join(nbr_ids),
-                    'eval': eval,
-                    'bias': bias,
-                    }
-                
-                pdfs.append(np.asarray(pdf_est))
-                pmfs.append(np.asarray(pmf_est))
-                labels.append(label)
+            pdfs.append(np.asarray(pdf_est))
+            pmfs.append(np.asarray(pmf_est))
+            labels.append(label)
 
         # create a dataframe of labels(columns) for each pdf
         knn_pdfs = pd.DataFrame(pdfs, index=labels).T
@@ -256,6 +270,75 @@ class kNNEstimator:
         # Concat only new columns
         self.knn_pdfs = pd.concat([self.knn_pdfs, knn_pdfs[new_pdf_cols]], axis=1)
         self.knn_pmfs = pd.concat([self.knn_pmfs, knn_pmfs[new_pmf_cols]], axis=1)
+
+
+    def _compare_bootstrap_P_to_ensemble_distributions(self, wm, nbr_df, nbr_data, bootstrap_P, distance_type):
+        """
+        For asynchronous comparisons, we estimate pdfs for ensemble members, then compute the mean in the time domain
+        to represent the FDC simulation.  We do not do temporal averaging in this case.
+        """
+        knn_df_all = nbr_df.iloc[:, :self.k_nearest].copy()
+        knn_data_all = nbr_data.iloc[:, :self.k_nearest].copy()
+        proxy_ids = [c.split('_')[0] for c in knn_df_all.columns.tolist()]
+        # load the kde PMFs to serve as the proxies to ensure complete support coverage
+        # if self.baseline_pmf_type == 'kde':
+        #     frequency_ensemble_pdfs = self.ctx.baseline_kde_pmf_df[proxy_ids].copy()
+        # else:
+        frequency_ensemble_pdfs = self.ctx.baseline_obs_pmf_df[proxy_ids].copy()
+
+        labels, pdfs, pmfs = [], [], []
+        all_distances = knn_data_all['distance'].values
+        all_ids = knn_data_all['official_id'].values
+        eval_dict = {}
+        for k in range(1, self.k_nearest + 1):
+            distances = all_distances[:k]
+            nbr_ids = all_ids[:k]
+            knn_pdfs = frequency_ensemble_pdfs.iloc[:, :k].copy()
+
+            label = f'{self.target_stn}_{k}_NN_{distance_type}_ID{wm}_freqEnsemble'
+            weights = self._compute_weights(wm, k, distances)
+            pmf_est, pdf_est = self._compute_frequency_ensemble_mean(knn_pdfs, weights)
+            assert pmf_est is not None, f'pmf_est is None for {label}'
+        
+            # compute the mean number of observations (non-nan values) per row
+            mean_obs_per_timestep = knn_df_all.iloc[:, :k].notna().sum(axis=1).mean()
+            mean_obs_per_proxy = knn_df_all.iloc[:, :k].notna().sum(axis=0).mean()
+
+            # _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(pmf_est)
+            _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf_est)
+
+            sample_evals = []
+            for bootstrap_pmf in bootstrap_P.T:
+                assert bootstrap_pmf.shape == pmf_prior_adjusted.shape, f' shapes not equal {bootstrap_pmf.shape} != {pmf_prior_adjusted.shape} '
+                
+                eval = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, bootstrap_pmf)
+                sample_evals.append(eval)
+            eval_dict[k] = sample_evals
+        return eval_dict
+
+    
+        #     # compute the frequency-based ensemble pdf estimate
+        #     self.knn_simulation_data[label] = {
+        #         'k': k, 'n_obs': mean_obs_per_proxy,
+        #         'mean_obs_per_timestep': mean_obs_per_timestep,
+        #         'nbrs': ','.join(nbr_ids),
+        #         'eval': eval,
+        #         'bias': bias,
+        #         }
+            
+        #     pdfs.append(np.asarray(pdf_est))
+        #     pmfs.append(np.asarray(pmf_est))
+        #     labels.append(label)
+
+        # # create a dataframe of labels(columns) for each pdf
+        # knn_pdfs = pd.DataFrame(pdfs, index=labels).T
+        # knn_pmfs = pd.DataFrame(pmfs, index=labels).T
+        # # Filter out already existing columns to avoid duplication
+        # new_pdf_cols = knn_pdfs.columns.difference(self.knn_pdfs.columns)
+        # new_pmf_cols = knn_pmfs.columns.difference(self.knn_pmfs.columns)
+        # # Concat only new columns
+        # self.knn_pdfs = pd.concat([self.knn_pdfs, knn_pdfs[new_pdf_cols]], axis=1)
+        # self.knn_pmfs = pd.concat([self.knn_pmfs, knn_pmfs[new_pmf_cols]], axis=1)
     
     
     def _delta_spike_pmf_pdf(self, single_val, log_grid):
@@ -323,9 +406,11 @@ class kNNEstimator:
             # )
             raise Exception(f'    ....only one unique value in temporal ensemble mean {label}, cannot proceed.')
         else:
-            est_pmf, est_pdf = self.data.kde_estimator.compute(
-                temporal_ensemble_mean.values, self.data.target_da
-            )
+            # est_pmf, est_pdf = self.data.kde_estimator.compute(
+            #     temporal_ensemble_mean.values, self.data.target_da
+            # )
+            assert np.all(temporal_ensemble_mean.values > 0), f'non-positive values in temporal ensemble mean for {label}'
+            est_pmf, est_pdf = self._compute_empirical_pmf(self.data.log_edges, temporal_ensemble_mean.values)
 
         assert est_pmf is not None, f'pmf is None for {label}'
 
@@ -373,10 +458,10 @@ class kNNEstimator:
         for wm in self.weight_schemes:
             # compute the FDC estimate by temporal ensemble mean
             t0 = time()
-            self._compute_temporal_ensemble_distributions(distance_type, wm, nbr_df, nbr_data,)
+            self._compute_temporal_ensemble_distributions(distance_type, wm, nbr_df, nbr_data)
             t1 = time()
             # compute the distribution average ensemble pdfs
-            self._compute_ensemble_distributions(nbr_df, nbr_data, distance_type)
+            self._compute_ensemble_distributions(wm, nbr_df, nbr_data, distance_type)
             t2 = time()
             print(f'    ...{distance_type} ID{wm} took {t1 - t0:.2f}s for temporal ensemble, {t2 - t1:.2f}s for frequency ensemble.')
 
@@ -388,7 +473,7 @@ class kNNEstimator:
     
     def run_estimators(self):              
         self._initialize_nearest_neighbour_data()
-        # set the baseline pdf by kde
+        # set the baseline pdf by
         for dist in ['spatial_dist', 'attribute_dist']:        
             self._compute_distribution_estimates(dist)
         return self._format_results()

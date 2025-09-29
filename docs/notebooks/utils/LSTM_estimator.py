@@ -102,24 +102,10 @@ class LSTMFDCEstimator:
         return m / m.sum() if m.sum() else m
 
 
-
     def _compute_frequency_ensemble_pmf(self):
         df = self.df[self.sim_cols].copy()
         df.dropna(inplace=True)
-        # compute the frequency ensemble PMF
-        # initialize a len(data) x n_sim_cols array
-        # pmfs = np.column_stack([
-        #     self.data.kde_estimator.compute(np.exp(data[c].values), self.data.target_da)[0]
-        #     for c in self.sim_cols
-        # ])
-        # compute the pmfs by bin counting over the 
-        # average the pmfs over the ensemble 
-        # pmfs = np.column_stack([
-        #     np.histogram(df[c].values, bins=self.data.log_edges, density=True)[0]
-        #     for c in self.sim_cols
-        # ])
-        # pmf = pmfs.mean(axis=1)
-        # pmf /= pmf.sum()
+
         pmf = self.compute_ensemble_pmf_by_bincount(df, self.sim_cols, self.data.log_edges)
 
         assert len(pmf) == len(self.data.log_x), f'len(pmf) = {len(pmf)} != len(log_x) = {len(self.data.log_x)}' 

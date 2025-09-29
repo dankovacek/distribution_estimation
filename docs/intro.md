@@ -13,10 +13,8 @@ Each station folder contains an html file with a summary of the results.
 
 ### HYSETS Dataset
 
-The active and historical monitoring stations examined in this dataset are a subset of the HYSETS dataset (Arsenault et al., 2020).  
+The active and historical monitoring stations examined in this dataset are a subset of the HYSETS dataset {cite}`arsenault2020comprehensive`.  
 
-```{admonition} Arsenault (2020)
-```
 
 ### Meteorological Inputs
 
@@ -93,7 +91,6 @@ const stations = [
   {id: "08NL070", source: "HYDAT", name: "SIMILKAMEEN RIVER ABOVE GOODFELLOW CREEK", folder: "stations/08NL070/08NL070.html"},
   {id: "08GD008", source: "HYDAT", name: "HOMATHKO RIVER AT INLET TO TATLAYOKO LAKE", folder: "stations/08GD008/08GD008.html"},
   {id: "08ED002", source: "HYDAT", name: "MORICE RIVER NEAR HOUSTON", folder: "stations/08ED002/08ED002.html"},
-  {id: "12137800", source: "USGS", name: "SULTAN RIVER BELOW DIVERSION DAM NEAR SULTAN, WA", folder: "stations/12137800/12137800.html"},
   {id: "08KD007", source: "HYDAT", name: "BOWRON RIVER BELOW BOX CANYON", folder: "stations/08KD007/08KD007.html"},
   {id: "08LE077", source: "HYDAT", name: "CORNING CREEK NEAR SQUILAX", folder: "stations/08LE077/08LE077.html"},
   {id: "12113347", source: "USGS", name: "MILL CREEK AT EARTHWORKS PARK AT KENT, WA", folder: "stations/12113347/12113347.html"},
@@ -361,7 +358,6 @@ const stations = [
   {id: "12115800", source: "USGS", name: "RACK CREEK NEAR CEDAR FALLS, WA", folder: "stations/12115800/12115800.html"},
   {id: "08NE087", source: "HYDAT", name: "DEER CREEK AT DEER PARK", folder: "stations/08NE087/08NE087.html"},
   {id: "08ME023", source: "HYDAT", name: "BRIDGE RIVER (SOUTH BRANCH) BELOW BRIDGE GLACIER", folder: "stations/08ME023/08ME023.html"},
-  {id: "12100000", source: "USGS", name: "WHITE RIVER AT BUCKLEY, WA", folder: "stations/12100000/12100000.html"},
   {id: "08EE013", source: "HYDAT", name: "BUCK CREEK AT THE MOUTH", folder: "stations/08EE013/08EE013.html"},
   {id: "08NB016", source: "HYDAT", name: "SPLIT CREEK AT THE MOUTH", folder: "stations/08NB016/08NB016.html"},
   {id: "08AA009", source: "HYDAT", name: "GILTANA CREEK NEAR THE MOUTH", folder: "stations/08AA009/08AA009.html"},
@@ -493,7 +489,6 @@ const stations = [
   {id: "08GD007", source: "HYDAT", name: "MOSLEY CREEK NEAR DUMBELL LAKE", folder: "stations/08GD007/08GD007.html"},
   {id: "12044900", source: "USGS", name: "ELWHA RIVER ABOVE LAKE MILLS NR PORT ANGELES, WA", folder: "stations/12044900/12044900.html"},
   {id: "08CE001", source: "HYDAT", name: "STIKINE RIVER AT TELEGRAPH CREEK", folder: "stations/08CE001/08CE001.html"},
-  {id: "12143900", source: "USGS", name: "BOXLEY CREEK NEAR EDGEWICK, WA", folder: "stations/12143900/12143900.html"},
   {id: "07FB008", source: "HYDAT", name: "MOBERLY RIVER NEAR FORT ST. JOHN", folder: "stations/07FB008/07FB008.html"},
   {id: "12457000", source: "USGS", name: "WENATCHEE RIVER AT PLAIN, WA", folder: "stations/12457000/12457000.html"},
   {id: "12458000", source: "USGS", name: "ICICLE CREEK ABOVE SNOW CREEK NEAR LEAVENWORTH, WA", folder: "stations/12458000/12458000.html"},

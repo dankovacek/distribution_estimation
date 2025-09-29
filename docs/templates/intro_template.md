@@ -13,10 +13,8 @@ Each station folder contains an html file with a summary of the results.
 
 ### HYSETS Dataset
 
-The active and historical monitoring stations examined in this dataset are a subset of the HYSETS dataset (Arsenault et al., 2020).  
+The active and historical monitoring stations examined in this dataset are a subset of the HYSETS dataset {cite}`arsenault2020comprehensive`.  
 
-```{admonition} Arsenault (2020)
-```
 
 ### Meteorological Inputs
 

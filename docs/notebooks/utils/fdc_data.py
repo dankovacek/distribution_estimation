@@ -39,7 +39,6 @@ class StationData:
         self.delta = context.delta
 
 
-
     def _load_complete_year_dict(self):
         """
         Load the complete year dictionary for the target station.

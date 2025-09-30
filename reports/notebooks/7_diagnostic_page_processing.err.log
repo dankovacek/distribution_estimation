@@ -1,0 +1,197 @@
+Traceback (most recent call last):
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_core/utils/__init__.py", line 154, in wrapped
+    asyncio.get_running_loop()
+RuntimeError: no running event loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 1319, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/jupyter_core/utils/__init__.py", line 158, in wrapped
+    return loop.run_until_complete(inner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/home/danbot/code/data_analysis/lib/python3.12/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+# retrieve LSTM ensemble predictions
+# filter for the common stations
+common_stations = list(set(station_ids) & set(lstm_result_stns))
+stations_to_process = ['08AA008', '12090500', '12102190', '12115700', '12115800',
+       '12157025', '12201960', '10CD003', '10CD004', '12447383',
+       '08HB075', '10ED009', '08HA026', '12202310', '10CD005', '12202420',
+       '12210900', '12193500', '12036650', '07BB003']
+
+# print(f'There are {len(common_stations)} monitored basins with LSTM ensemble results.')
+attr_df = attr_df[attr_df['official_id'].isin(stations_to_process)]
+
+output_folder = BASE_DIR / 'data' / 'results' /  'lstm_plots'
+result_folder = BASE_DIR / 'data' / 'results' /'fdc_estimation_results'
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+
+# plots = []
+excluded = ['12137800'] 
+dam_sites = ['12398000', '12058800', '12143700', '12323760'] 
+process_plots = True
+if process_plots:
+    for stn in common_stations:
+        if stn in dam_sites:
+            continue
+        output_fname = output_folder / f'{stn}_fdc.html'
+        if stn in excluded:
+            continue
+        # if os.path.exists(output_fname):
+        #     print(output_fname)
+        #     continue
+        layout = process_diagnostic_plot_layout(stn)
+        # save the plot to an HTML file
+        output_fname = output_folder / f'{stn}_fdc.html'
+        output_file(output_fname, title=f'{stn} FDCs')
+        save(layout)
+        print(f'    Saved plot for {stn} to {output_fname}')
+    
+------------------
+
+
+[31m---------------------------------------------------------------------------[39m
+[31mXlaRuntimeError[39m                           Traceback (most recent call last)
+    [31m[... skipping hidden 1 frame][39m
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/xla_bridge.py:896[39m, in [36m_init_backend[39m[34m(platform)[39m
+[32m    895[39m logger.debug([33m"[39m[33mInitializing backend [39m[33m'[39m[38;5;132;01m%s[39;00m[33m'[39m[33m"[39m, platform)
+[32m--> [39m[32m896[39m backend = [43mregistration[49m[43m.[49m[43mfactory[49m[43m([49m[43m)[49m
+[32m    897[39m [38;5;66;03m# TODO(skye): consider raising more descriptive errors directly from backend[39;00m
+[32m    898[39m [38;5;66;03m# factories instead of returning None.[39;00m
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/xla_bridge.py:549[39m, in [36mmake_pjrt_c_api_client[39m[34m(plugin_name, options)[39m
+[32m    548[39m [38;5;28;01mif[39;00m distributed.global_state.client [38;5;129;01mis[39;00m [38;5;28;01mNone[39;00m:
+[32m--> [39m[32m549[39m   [38;5;28;01mreturn[39;00m [43mxla_client[49m[43m.[49m[43mmake_c_api_client[49m[43m([49m[43mplugin_name[49m[43m,[49m[43m [49m[43mupdated_options[49m[43m,[49m[43m [49m[38;5;28;43;01mNone[39;49;00m[43m)[49m
+[32m    551[39m distribute_options = {
+[32m    552[39m     [33m'[39m[33mnode_id[39m[33m'[39m: distributed.global_state.process_id,
+[32m    553[39m     [33m'[39m[33mnum_nodes[39m[33m'[39m: distributed.global_state.num_processes,
+[32m    554[39m }
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jaxlib/xla_client.py:156[39m, in [36mmake_c_api_client[39m[34m(plugin_name, options, distributed_client, transfer_server_factory)[39m
+[32m    155[39m   options = {}
+[32m--> [39m[32m156[39m [38;5;28;01mreturn[39;00m [43m_xla[49m[43m.[49m[43mget_c_api_client[49m[43m([49m
+[32m    157[39m [43m    [49m[43mplugin_name[49m[43m,[49m
+[32m    158[39m [43m    [49m[43moptions[49m[43m,[49m
+[32m    159[39m [43m    [49m[43mdistributed_client[49m[43m,[49m
+[32m    160[39m [43m    [49m[43mtransfer_server_factory[49m[43m,[49m
+[32m    161[39m [43m[49m[43m)[49m
+
+[31mXlaRuntimeError[39m: INVALID_ARGUMENT: Unexpected option name passed to PJRT_Client_Create: use_tfrt_gpu_client
+
+During handling of the above exception, another exception occurred:
+
+[31mRuntimeError[39m                              Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[31][39m[32m, line 31[39m
+[32m     27[39m     [38;5;28;01mcontinue[39;00m
+[32m     28[39m [38;5;66;03m# if os.path.exists(output_fname):[39;00m
+[32m     29[39m [38;5;66;03m#     print(output_fname)[39;00m
+[32m     30[39m [38;5;66;03m#     continue[39;00m
+[32m---> [39m[32m31[39m layout = [43mprocess_diagnostic_plot_layout[49m[43m([49m[43mstn[49m[43m)[49m
+[32m     32[39m [38;5;66;03m# save the plot to an HTML file[39;00m
+[32m     33[39m output_fname = output_folder / [33mf[39m[33m'[39m[38;5;132;01m{[39;00mstn[38;5;132;01m}[39;00m[33m_fdc.html[39m[33m'[39m
+
+[36mCell[39m[36m [39m[32mIn[30][39m[32m, line 13[39m, in [36mprocess_diagnostic_plot_layout[39m[34m(stn)[39m
+[32m     10[39m     [38;5;28;01mreturn[39;00m Div(text=[33mf[39m[33m'[39m[33m<h2>Insufficient records found for [39m[38;5;132;01m{[39;00mstn[38;5;132;01m}[39;00m[33m. Skipping.</h2>[39m[33m'[39m, width=[32m800[39m)
+[32m     12[39m og_df = og_df[og_df.index.isin(lstm_ensemble_df.index)]
+[32m---> [39m[32m13[39m mdf, odf, pmf_dfs = [43mprocess_FDCs[49m[43m([49m[43mlstm_ensemble_df[49m[43m,[49m[43m [49m[43mstn[49m[43m,[49m[43m [49m[43mog_df[49m[43m,[49m[43m [49m[43mresult_folder[49m[43m)[49m
+[32m     15[39m dates = [38;5;28mlist[39m(pmf_dfs.keys())
+[32m     16[39m pdf_plots, fdc_plots, metric_tables, other_tables = [], [], [], []
+
+[36mCell[39m[36m [39m[32mIn[27][39m[32m, line 35[39m, in [36mprocess_FDCs[39m[34m(df, stn, og_df, result_folder)[39m
+[32m     32[39m other_metrics[[33mf[39m[33m'[39m[33mKNN_4_NN[39m[33m'[39m] = knn_results[nn4[[32m0[39m]][[33m'[39m[33meval[39m[33m'[39m]
+[32m     33[39m other_metrics[[33mf[39m[33m'[39m[33mKNN_8_NN[39m[33m'[39m] = knn_results[nn8[[32m0[39m]][[33m'[39m[33meval[39m[33m'[39m]
+[32m---> [39m[32m35[39m kde = [43mKDEEstimator[49m[43m([49m[43mbaseline_log_edges[49m[43m)[49m
+[32m     36[39m eval_object = EvaluationMetrics(log_x=baseline_log_grid, log_w=log_w)
+[32m     37[39m [38;5;28mprint[39m([33mf[39m[33m'[39m[33m    Processing FDCs for [39m[38;5;132;01m{[39;00mstn[38;5;132;01m}[39;00m[33m'[39m)
+
+[36mFile [39m[32m~/code/distribution_estimation/docs/notebooks/utils/kde_estimator.py:110[39m, in [36mKDEEstimator.__init__[39m[34m(self, log_edges)[39m
+[32m    109[39m [38;5;28;01mdef[39;00m[38;5;250m [39m[34m__init__[39m([38;5;28mself[39m, log_edges):
+[32m--> [39m[32m110[39m     [38;5;28mself[39m.log_edges = [43mjnp[49m[43m.[49m[43masarray[49m[43m([49m[43mlog_edges[49m[43m,[49m[43m [49m[43mdtype[49m[43m=[49m[43mjnp[49m[43m.[49m[43mfloat32[49m[43m)[49m
+[32m    111[39m     [38;5;66;03m# get the midpoints in log space[39;00m
+[32m    112[39m     [38;5;28mself[39m.log_x = [32m0.5[39m * (log_edges[:-[32m1[39m] + log_edges[[32m1[39m:])
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/numpy/array_constructors.py:384[39m, in [36masarray[39m[34m(a, dtype, order, copy, device)[39m
+[32m    382[39m [38;5;28;01mif[39;00m dtype [38;5;129;01mis[39;00m [38;5;129;01mnot[39;00m [38;5;28;01mNone[39;00m:
+[32m    383[39m   dtype = dtypes.check_and_canonicalize_user_dtype(dtype, [33m"[39m[33masarray[39m[33m"[39m)
+[32m--> [39m[32m384[39m [38;5;28;01mreturn[39;00m [43marray[49m[43m([49m[43ma[49m[43m,[49m[43m [49m[43mdtype[49m[43m=[49m[43mdtype[49m[43m,[49m[43m [49m[43mcopy[49m[43m=[49m[38;5;28;43mbool[39;49m[43m([49m[43mcopy[49m[43m)[49m[43m,[49m[43m [49m[43morder[49m[43m=[49m[43morder[49m[43m,[49m[43m [49m[43mdevice[49m[43m=[49m[43mdevice[49m[43m)[49m
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/numpy/array_constructors.py:270[39m, in [36marray[39m[34m(object, dtype, copy, order, ndmin, device)[39m
+[32m    268[39m [38;5;28;01melse[39;00m:
+[32m    269[39m   [38;5;28;01mraise[39;00m [38;5;167;01mTypeError[39;00m([33mf[39m[33m"[39m[33mUnexpected input type for array: [39m[38;5;132;01m{[39;00m[38;5;28mtype[39m([38;5;28mobject[39m)[38;5;132;01m}[39;00m[33m"[39m)
+[32m--> [39m[32m270[39m out_array: Array = [43mlax[49m[43m.[49m[43m_convert_element_type[49m[43m([49m
+[32m    271[39m [43m    [49m[43mout[49m[43m,[49m[43m [49m[43mdtype[49m[43m,[49m[43m [49m[43mweak_type[49m[43m=[49m[43mweak_type[49m[43m,[49m[43m [49m[43msharding[49m[43m=[49m[43msharding[49m[43m)[49m
+[32m    272[39m [38;5;28;01mif[39;00m ndmin > np.ndim(out_array):
+[32m    273[39m   out_array = lax.expand_dims(out_array, [38;5;28mrange[39m(ndmin - np.ndim(out_array)))
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/lax/lax.py:1743[39m, in [36m_convert_element_type[39m[34m(operand, new_dtype, weak_type, sharding, warn_on_complex_to_real_cast)[39m
+[32m   1741[39m   [38;5;28;01mreturn[39;00m operand
+[32m   1742[39m [38;5;28;01melse[39;00m:
+[32m-> [39m[32m1743[39m   [38;5;28;01mreturn[39;00m [43mconvert_element_type_p[49m[43m.[49m[43mbind[49m[43m([49m
+[32m   1744[39m [43m      [49m[43moperand[49m[43m,[49m[43m [49m[43mnew_dtype[49m[43m=[49m[43mnew_dtype[49m[43m,[49m[43m [49m[43mweak_type[49m[43m=[49m[38;5;28;43mbool[39;49m[43m([49m[43mweak_type[49m[43m)[49m[43m,[49m
+[32m   1745[39m [43m      [49m[43msharding[49m[43m=[49m[43msharding[49m[43m)[49m
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/core.py:634[39m, in [36mPrimitive.bind[39m[34m(self, *args, **params)[39m
+[32m    632[39m [38;5;28;01mdef[39;00m[38;5;250m [39m[34mbind[39m([38;5;28mself[39m, *args, **params):
+[32m    633[39m   args = args [38;5;28;01mif[39;00m [38;5;28mself[39m.skip_canonicalization [38;5;28;01melse[39;00m [38;5;28mmap[39m(canonicalize_value, args)
+[32m--> [39m[32m634[39m   [38;5;28;01mreturn[39;00m [38;5;28;43mself[39;49m[43m.[49m[43m_true_bind[49m[43m([49m[43m*[49m[43margs[49m[43m,[49m[43m [49m[43m*[49m[43m*[49m[43mparams[49m[43m)[49m
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/core.py:650[39m, in [36mPrimitive._true_bind[39m[34m(self, *args, **params)[39m
+[32m    648[39m trace_ctx.set_trace(eval_trace)
+[32m    649[39m [38;5;28;01mtry[39;00m:
+[32m--> [39m[32m650[39m   [38;5;28;01mreturn[39;00m [38;5;28;43mself[39;49m[43m.[49m[43mbind_with_trace[49m[43m([49m[43mprev_trace[49m[43m,[49m[43m [49m[43margs[49m[43m,[49m[43m [49m[43mparams[49m[43m)[49m
+[32m    651[39m [38;5;28;01mfinally[39;00m:
+[32m    652[39m   trace_ctx.set_trace(prev_trace)
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/lax/lax.py:4988[39m, in [36m_convert_element_type_bind_with_trace[39m[34m(trace, args, params)[39m
+[32m   4986[39m [38;5;28;01mdef[39;00m[38;5;250m [39m[34m_convert_element_type_bind_with_trace[39m(trace, args, params):
+[32m   4987[39m   sharding = params[[33m'[39m[33msharding[39m[33m'[39m]
+[32m-> [39m[32m4988[39m   operand = [43mcore[49m[43m.[49m[43mPrimitive[49m[43m.[49m[43mbind_with_trace[49m[43m([49m[43mconvert_element_type_p[49m[43m,[49m[43m [49m[43mtrace[49m[43m,[49m[43m [49m[43margs[49m[43m,[49m[43m [49m[43mparams[49m[43m)[49m
+[32m   4989[39m   [38;5;28;01mif[39;00m sharding [38;5;129;01mis[39;00m [38;5;129;01mnot[39;00m [38;5;28;01mNone[39;00m [38;5;129;01mand[39;00m sharding._is_concrete:
+[32m   4990[39m     [38;5;28;01mwith[39;00m core.set_current_trace(trace):
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/core.py:662[39m, in [36mPrimitive.bind_with_trace[39m[34m(self, trace, args, params)[39m
+[32m    660[39m     [38;5;28;01mwith[39;00m set_current_trace(trace):
+[32m    661[39m       [38;5;28;01mreturn[39;00m [38;5;28mself[39m.to_lojax(*args, **params)  [38;5;66;03m# type: ignore[39;00m
+[32m--> [39m[32m662[39m   [38;5;28;01mreturn[39;00m [43mtrace[49m[43m.[49m[43mprocess_primitive[49m[43m([49m[38;5;28;43mself[39;49m[43m,[49m[43m [49m[43margs[49m[43m,[49m[43m [49m[43mparams[49m[43m)[49m
+[32m    663[39m trace.process_primitive([38;5;28mself[39m, args, params)  [38;5;66;03m# may raise lojax error[39;00m
+[32m    664[39m [38;5;28;01mraise[39;00m [38;5;167;01mException[39;00m([33mf[39m[33m"[39m[33mcouldn[39m[33m'[39m[33mt apply typeof to args: [39m[38;5;132;01m{[39;00margs[38;5;132;01m}[39;00m[33m"[39m)
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/core.py:1189[39m, in [36mEvalTrace.process_primitive[39m[34m(self, primitive, args, params)[39m
+[32m   1187[39m args = [38;5;28mmap[39m(full_lower, args)
+[32m   1188[39m check_eval_args(args)
+[32m-> [39m[32m1189[39m [38;5;28;01mreturn[39;00m [43mprimitive[49m[43m.[49m[43mimpl[49m[43m([49m[43m*[49m[43margs[49m[43m,[49m[43m [49m[43m*[49m[43m*[49m[43mparams[49m[43m)[49m
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/dispatch.py:90[39m, in [36mapply_primitive[39m[34m(prim, *args, **params)[39m
+[32m     88[39m prev = lib.jax_jit.swap_thread_local_state_disable_jit([38;5;28;01mFalse[39;00m)
+[32m     89[39m [38;5;28;01mtry[39;00m:
+[32m---> [39m[32m90[39m   outs = [43mfun[49m[43m([49m[43m*[49m[43margs[49m[43m)[49m
+[32m     91[39m [38;5;28;01mfinally[39;00m:
+[32m     92[39m   lib.jax_jit.swap_thread_local_state_disable_jit(prev)
+
+    [31m[... skipping hidden 13 frame][39m
+
+[36mFile [39m[32m~/code/data_analysis/lib/python3.12/site-packages/jax/_src/xla_bridge.py:828[39m, in [36mbackends[39m[34m()[39m
+[32m    826[39m       [38;5;28;01melse[39;00m:
+[32m    827[39m         err_msg += [33m"[39m[33m (you may need to uninstall the failing plugin package, or set JAX_PLATFORMS=cpu to skip this backend.)[39m[33m"[39m
+[32m--> [39m[32m828[39m       [38;5;28;01mraise[39;00m [38;5;167;01mRuntimeError[39;00m(err_msg)
+[32m    830[39m [38;5;28;01massert[39;00m _default_backend [38;5;129;01mis[39;00m [38;5;129;01mnot[39;00m [38;5;28;01mNone[39;00m
+[32m    831[39m [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m config.jax_platforms.value:
+
+[31mRuntimeError[39m: Unable to initialize backend 'cuda': INVALID_ARGUMENT: Unexpected option name passed to PJRT_Client_Create: use_tfrt_gpu_client (you may need to uninstall the failing plugin package, or set JAX_PLATFORMS=cpu to skip this backend.)
+

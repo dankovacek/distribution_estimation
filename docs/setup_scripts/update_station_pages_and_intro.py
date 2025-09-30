@@ -45,7 +45,7 @@ def update_station_pages(site_url_prefix: str = ""):
 
     plots_folder = BASE_DIR / '..' / 'notebooks' / 'data' / 'results' / 'lstm_plots'
     plots_files = os.listdir(plots_folder)
-    plot_stns = [f.split("_")[0] for f in plots_files if f.endswith(".html")]
+    plot_stns = sorted([f.split("_")[0] for f in plots_files if f.endswith(".html")])
 
     station_data = {}
     for official_id in plot_stns:
@@ -176,20 +176,3 @@ def generate_search_css():
     print(f"Generated search CSS at {css_path}")
 
 
-# def update_summary_page_markdown(similarity_summary_table, revision_notes_table, plot_src, site_url_prefix=''):
-#     # This function is a placeholder for any additional summary page updates
-#         # HTML template
-#     template_path = BASE_DIR / ".." / "templates" / "summary_template.md.j2"
-#     with open(template_path, "r") as f:
-#         md_template = Template(f.read())
-
-#     rendered_md = md_template.render(
-#         change_summary_table=similarity_summary_table,
-#         revision_notes_table=revision_notes_table,
-#         iframe_src=plot_src,
-#     )
-
-#     # Save markdown
-#     md_path = BASE_DIR / ".." / 'revision_summary.md'
-#     with open(md_path, "w", encoding="utf-8") as f:
-#         f.write(rendered_md)

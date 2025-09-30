@@ -23,24 +23,31 @@ tiles = xyz.OpenStreetMap.Mapnik
 def render_html_from_plot(p, html_path):
     # Generate the components
     script, div = components(p)
-
-    # Minimal Bokeh-only HTML
     plot_template = Template(
         """
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
         {{ resources }}
         {{ script }}
-        <style> body { margin: 0; } </style>
-    </head>
-    <body>
         {{ div | safe }}
-    </body>
-    </html>
-    """
+        """
     )
+
+    # plot_template = Template(
+        # """
+    # <!DOCTYPE html>
+    # <html lang="en">
+    # <head>
+    #     <meta charset="UTF-8">
+    #     {{ resources }}
+    #     {{ script }}
+    #     <style> body { margin: 0; } </style>
+    # </head>
+    # <body>
+    #     {{ div | safe }}
+    # </body>
+    # </html>
+    # """
+    # )
+    
     rendered_plot_html = plot_template.render(
         script=script, div=div, resources=CDN.render()
     )

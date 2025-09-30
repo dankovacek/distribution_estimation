@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 def load_markdown_file(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         return f.read()
@@ -24,17 +27,17 @@ def generate_data_dictionary(catchment_data, source_descriptions):
     return lines
 
 
-def generate_js_search(station_data):
-    lines = ["", "<script>", "// Station data for search", "const stations = ["]
-    for d in station_data.values():
-        src = d["source_code"]
-        oid = d["official_id"]
-        folder = f'{oid}/{d["official_id"]}.html'
-        lines.append(
-            f'  {{id: "{oid}", source: "{src}", name: "{d["name"]}", folder: "stations/{folder}"}},'
-        )
-    lines.append("];</script>")
-    return lines
+# def generate_js_search(station_data):
+#     lines = ["", "<script>", "// Station data for search", "const stations = ["]
+#     for d in station_data.values():
+#         src = d["source_code"]
+#         oid = d["official_id"]
+#         folder = f'{oid}/{d["official_id"]}.html'
+#         lines.append(
+#             f'  {{id: "{oid}", source: "{src}", name: "{d["name"]}", folder: "stations/{folder}"}},'
+#         )
+#     lines.append("];</script>")
+#     return lines
 
 
 def generate_references():
@@ -44,6 +47,27 @@ def generate_references():
         "2. Thornton, P. E., et al. Daymet: daily surface weather data on a 1-km grid for North America, version 3. ORNL DAAC, Oak Ridge, Tennessee, USA. USDA-NASS, 2019. 2017 Census of Agriculture, Summary and State Data, Geographic Area Series, Part 51, AC-17-A 51 (2016)."
     ]
 
+
+def generate_station_data_json(station_data, output_path="docs/_static/station_data.json"):
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    stations_list = []
+    for d in station_data.values():
+        stations_list.append(
+            {
+                "id": d["official_id"],
+                "name": d["name"],
+                "source": d["source_code"],
+                "folder": f'stations/{d["official_id"]}/{d["official_id"]}.html',
+            }
+        )
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(stations_list, f, indent=2)
+
+    print(f"Generated station data JSON at {output_path}")
 
 def create_intro(
     intro_template_path, output_path, station_data,
@@ -63,7 +87,7 @@ def create_intro(
     total_stations = len(station_data)
     # content.extend(generate_dataset_overview(total_stations, unique_sources))
     content.extend(generate_data_dictionary(station_data, source_descriptions))
-    content.extend(generate_js_search(station_data))
+    generate_station_data_json(station_data)
     content.extend(generate_references())
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(content))

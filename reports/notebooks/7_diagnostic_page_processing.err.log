@@ -92,7 +92,7 @@ if process_plots:
 [32m    160[39m [43m    [49m[43mtransfer_server_factory[49m[43m,[49m
 [32m    161[39m [43m[49m[43m)[49m
 
-[31mXlaRuntimeError[39m: INVALID_ARGUMENT: Unexpected option name passed to PJRT_Client_Create: use_tfrt_gpu_client
+[31mXlaRuntimeError[39m: INVALID_ARGUMENT: Unexpected option name passed to PJRT_Client_Create: abort_collectives_on_failure
 
 During handling of the above exception, another exception occurred:
 
@@ -193,5 +193,5 @@ During handling of the above exception, another exception occurred:
 [32m    830[39m [38;5;28;01massert[39;00m _default_backend [38;5;129;01mis[39;00m [38;5;129;01mnot[39;00m [38;5;28;01mNone[39;00m
 [32m    831[39m [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m config.jax_platforms.value:
 
-[31mRuntimeError[39m: Unable to initialize backend 'cuda': INVALID_ARGUMENT: Unexpected option name passed to PJRT_Client_Create: use_tfrt_gpu_client (you may need to uninstall the failing plugin package, or set JAX_PLATFORMS=cpu to skip this backend.)
+[31mRuntimeError[39m: Unable to initialize backend 'cuda': INVALID_ARGUMENT: Unexpected option name passed to PJRT_Client_Create: abort_collectives_on_failure (you may need to uninstall the failing plugin package, or set JAX_PLATFORMS=cpu to skip this backend.)
 

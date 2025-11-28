@@ -21,3 +21,7 @@ To publish to Github Pages:
 ```
 
 For more information, see the [jupyter book documentation](https://jupyterbook.org/en/stable/start/publish.html).
+
+## License
+
+This code is licensed under the CC BY 4.0 license. See the LICENSE file for details.

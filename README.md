@@ -1,10 +1,14 @@
-# Edit and Publish
+# Flow Distribution Estimation in Ungauged Basins
 
-This notebook is maintained at [https://github.com/dankovacek/distribution_estimation](https://github.com/dankovacek/distribution_estimation).
+Code and notebooks for comparing (log-normal) parametric, k-nearest neighbour, and neural-network methods for daily streamflow distribution estimation (e.g., flow duration curves) in ungauged basins.
 
 The book can be viewed on the web at [https://dankovacek.github.io/distribution_estimation](https://dankovacek.github.io/distribution_estimation)
 
-To build the book:
+
+## Edit and Publish
+
+
+To build the book locally:
 
 ```
 >jupyter-book build distribution_estimation/

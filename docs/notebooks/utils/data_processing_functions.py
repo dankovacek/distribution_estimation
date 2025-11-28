@@ -118,21 +118,19 @@ def load_results(args):
     fpath = Path(result_folder) / f"{stn}_fdc_results.json"
     
     with open(fpath) as f:
-        data = json.load(f)       
+        data = json.load(f)
         result_list = [pd.DataFrame(
             {'Official_ID': stn, 'Label': label,
-             'KLD': d['eval'].get('kld'), 
-             'EMD': d['eval'].get('emd'), 
+             'PB': d['eval'].get('pct_vol_bias'), # 
+             'MAPE': d['eval'].get('mean_abs_pct_error'), 
+             'NAE': d['eval'].get('norm_abs_error'), 
              'RMSE': d['eval'].get('rmse'),
-             'MB': d['eval'].get('mean_error'), 
-             'RB': d['eval'].get('pct_vol_bias'), # 
-             'MARE': d['eval'].get('mean_abs_rel_error'), 
              'NSE': d['eval'].get('nse'), 
              'KGE': d['eval'].get('kge'),
              'VE': d['eval'].get('ve'), 
-             'VB_PMF': d['eval'].get('vb_fdc'),
-             'VB_FDC': d['eval'].get('vb_fdc'), 
-             'MEAN_FRAC_DIFF': d['eval'].get('mean_frac_diff'), 
+             'KLD': d['eval'].get('kld'), 
+             'EMD': d['eval'].get('emd'), 
+             'PB_50': d['eval'].get('pb_50'), 
         }, index=[0]) for label, d in data.items()]
         df = pd.concat(result_list)
         df.reset_index(drop=True, inplace=True)

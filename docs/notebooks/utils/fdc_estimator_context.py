@@ -8,6 +8,7 @@ import xarray as xr
 from scipy.spatial import cKDTree
 from sklearn.preprocessing import StandardScaler
 from shapely.geometry import Point
+from collections import OrderedDict
 
 from numba import jit
 import jax.numpy as jnp
@@ -27,27 +28,54 @@ class FDCEstimationContext:
         for k, v in kwargs.items():
             setattr(self, k, v)
 
+        self.baseline_distribution_folder = os.path.join(self.baseline_distribution_folder, f'{self.bitrate:02d}_bits')
+        
+        self._load_baseline_distributions()
         self._load_catchment_data()
         self._load_and_filter_hysets_data()
-        # self.LN_param_dict = self._load_predicted_ln_params()
         self.LN_param_dict = self.predicted_param_dict
         self._set_tree_idx_mappers()
         self._build_network_trees()
         self._set_attribute_indexers()
-        self.overlap_dict = self._compute_concurrent_overlap_dict()
-        self._load_baseline_distributions()
-        # self._load_laplace_prior_params()
+        self.prepare_fdc_cache()
 
     
-    # def _load_laplace_prior_params(self):
-    #     predicted_params = pd.read_csv('data/results/parameter_prediction_results/OOS_parameter_predictions.csv', index_col=0)
-    #     self.laplace_param_dict = {
-    #         'mean': predicted_params['log_uar_mean_mean_predicted'].to_dict(),
-    #         'sd': predicted_params['log_uar_std_mean_predicted'].to_dict(),
-    #         'median': predicted_params['log_uar_median_mean_predicted'].to_dict(),
-    #         'mad': predicted_params['log_uar_mad_mean_predicted'].to_dict(),
-    #     }
+    def _cache_get(self, stn):
+        v = self._fdc_cache.pop(stn, None)
+        if v is not None:
+            self._fdc_cache[stn] = v
+        return v  # v is (col_array, zero_flag, da_km2) or similar
 
+    def _cache_put(self, stn, val):
+        if stn in self._fdc_cache:
+            self._fdc_cache.pop(stn)
+        self._fdc_cache[stn] = val
+        while len(self._fdc_cache) > self._fdc_cache_cap:
+            self._fdc_cache.popitem(last=False)
+
+    
+    def _estimate_cache_capacity(self, target_ram_gb=8.0):
+        """
+        Choose how many stations to cache based on available RAM.
+        target_ram_gb: how much RAM to dedicate to the column cache (adjust).
+        """
+        # Discover lengths once (after you’ve set self.ctx.ds)
+        n_time = int(self.ds.sizes["time"])
+        # We store float32 columns (4 bytes per value).
+        bytes_per_col = n_time * 4
+
+        # Convert target to bytes and keep a small overhead factor
+        target_bytes = int(target_ram_gb * (1024**3))
+        overhead = 1.15  # cushion for Python/DF overhead
+        cap = max(64, target_bytes // int(bytes_per_col * overhead))
+        return cap
+
+    def prepare_fdc_cache(self, target_ram_gb=32.0):
+        # call this once after loading ds
+        self._time_index = self.ds["time"].to_index()
+        self._fdc_cache_cap = self._estimate_cache_capacity(target_ram_gb)
+        self._fdc_cache = OrderedDict()
+        
     
     def _load_baseline_distributions(self):
         """Load the baseline distributions for the stations."""
@@ -57,14 +85,14 @@ class FDCEstimationContext:
         
         # Load the baseline distributions
         obs_pmf_fpath = self.baseline_distribution_folder / f'pmf_obs.csv'
-        self.baseline_obs_pmf_df = pd.read_csv(obs_pmf_fpath, index_col='lin_x')
+        self.baseline_obs_pmf_df = pd.read_csv(obs_pmf_fpath, index_col='log_x_uar')
         kde_pmf_fpath = self.baseline_distribution_folder / f'pmf_kde.csv'
-        self.baseline_kde_pmf_df = pd.read_csv(kde_pmf_fpath, index_col='lin_x')
+        self.baseline_kde_pmf_df = pd.read_csv(kde_pmf_fpath, index_col='log_x_uar')
         
-        obs_pdf_fpath = self.baseline_distribution_folder / f'pdf_obs.csv'
-        self.baseline_obs_pdf_df = pd.read_csv(obs_pdf_fpath, index_col='lin_x')
-        kde_pdf_fpath = self.baseline_distribution_folder / f'pdf_kde.csv'
-        self.baseline_kde_pdf_df = pd.read_csv(kde_pdf_fpath, index_col='lin_x')
+        # obs_pdf_fpath = self.baseline_distribution_folder / f'pdf_obs.csv'
+        # self.baseline_obs_pdf_df = pd.read_csv(obs_pdf_fpath, index_col='log_x_uar')
+        # kde_pdf_fpath = self.baseline_distribution_folder / f'pdf_kde.csv'
+        # self.baseline_kde_pdf_df = pd.read_csv(kde_pdf_fpath, index_col='log_x_uar')
         
         
     def _load_and_filter_hysets_data(self):
@@ -76,18 +104,18 @@ class FDCEstimationContext:
         
         hs_df = hs_df[hs_df['Official_ID'].isin(self.official_ids)]
         self.hs_df = hs_df
-        self.official_ids = hs_df['Official_ID'].values
+        # self.official_ids = hs_df['Official_ID'].values
 
         # load the updated HYSETS data
         updated_filename = 'HYSETS_2023_update_QC_stations.nc'
-        ds = xr.open_dataset(HYSETS_DIR / updated_filename)
+        ds = xr.open_dataset(HYSETS_DIR / updated_filename)  
 
         # Get valid IDs as a NumPy array
         selected_ids = hs_df['Watershed_ID'].values
 
         # Get boolean index where watershedID in selected_set
         # safely access watershedID as a variable first
-        ws_ids = ds['watershedID'].data  # or .values if you prefer
+        ws_ids = ds['watershedID'].data  
         mask = np.isin(ws_ids, selected_ids)
 
         # Apply mask to data
@@ -112,7 +140,8 @@ class FDCEstimationContext:
     
         # filter for the common stations between BCUB region and LSTM-compatible (i.e. 1980-)
         if self.include_pre_1980_data == True:
-            self.official_ids = self.all_station_ids
+            meta_cols = ['log_x', 'lin_x', 'left_log_edges', 'right_log_edges']
+            self.official_ids = [c for c in self.baseline_obs_pmf_df.columns if c not in meta_cols]
             print(f'    Using all stations in the catchment data with a baseline PMF (validated): {len(self.official_ids)}')
         else:
             self.official_ids = self.daymet_concurrent_stations
@@ -171,73 +200,73 @@ class FDCEstimationContext:
         return rdf.to_dict(orient='index')
     
  
-    def _compute_concurrent_overlap_dict(self, variable='discharge'):
-        """
-        Compute the concurrent overlap of monitored watersheds in the dataset.
-        Threshold years represent the minimum number of days of overlap 
-        (ignoring continuity) for a watershed to be considered concurrent.
-        """
-        overlap_dict_file = os.path.join('data', 'record_overlap_dict.json')
-        if os.path.exists(overlap_dict_file):
-            with open(overlap_dict_file, 'r') as f:
-                overlap_dict = json.load(f)
-            print(f'    ...overlap dict loaded from {overlap_dict_file}')
-            return overlap_dict
+    # def _compute_concurrent_overlap_dict(self, variable='discharge'):
+    #     """
+    #     Compute the concurrent overlap of monitored watersheds in the dataset.
+    #     Threshold years represent the minimum number of days of overlap 
+    #     (ignoring continuity) for a watershed to be considered concurrent.
+    #     """
+    #     overlap_dict_file = os.path.join('data', 'record_overlap_dict.json')
+    #     if os.path.exists(overlap_dict_file):
+    #         with open(overlap_dict_file, 'r') as f:
+    #             overlap_dict = json.load(f)
+    #         print(f'    ...overlap dict loaded from {overlap_dict_file}')
+    #         return overlap_dict
         
-        watershed_ids = self.ds['watershed'].values
-        data = self.ds[variable].load().values  # (N, T)
-        dates = pd.to_datetime(self.ds['time'].values) # shape (T, )
-        N, T = data.shape
+    #     watershed_ids = self.ds['watershed'].values
+    #     data = self.ds[variable].load().values  # (N, T)
+    #     dates = pd.to_datetime(self.ds['time'].values) # shape (T, )
+    #     N, T = data.shape
 
-        # Extract year/month info 
-        years = np.array([d.year for d in dates])
-        months = np.array([d.month for d in dates])
-        unique_years = np.unique(years)
-        year_to_index = {year: i for i, year in enumerate(unique_years)}
-        Y = len(unique_years)
+    #     # Extract year/month info 
+    #     years = np.array([d.year for d in dates])
+    #     months = np.array([d.month for d in dates])
+    #     unique_years = np.unique(years)
+    #     year_to_index = {year: i for i, year in enumerate(unique_years)}
+    #     Y = len(unique_years)
 
-        # Count valid obs per (year, site, month) 
-        monthly_counts = np.zeros((Y, N, 12), dtype=np.uint16)
-        valid_mask = ~np.isnan(data)  # shape (N, T)
+    #     # Count valid obs per (year, site, month) 
+    #     monthly_counts = np.zeros((Y, N, 12), dtype=np.uint16)
+    #     valid_mask = ~np.isnan(data)  # shape (N, T)
 
-        for t in range(T):
-            y_idx = year_to_index[years[t]]
-            m_idx = months[t] - 1  # month index in [0, 11]
-            monthly_counts[y_idx, :, m_idx] += valid_mask[:, t]
+    #     for t in range(T):
+    #         y_idx = year_to_index[years[t]]
+    #         m_idx = months[t] - 1  # month index in [0, 11]
+    #         monthly_counts[y_idx, :, m_idx] += valid_mask[:, t]
 
-        # Create monthly validity mask
-        monthly_valid = monthly_counts >= self.minimum_days_per_month  # shape: (Y, N, 12)
-        valid_years = np.all(monthly_valid, axis=-1)  # shape: (Y, N)
-        complete_years = np.sum(valid_years, axis=0)  # shape: (N,)
+    #     # Create monthly validity mask
+    #     monthly_valid = monthly_counts >= self.minimum_days_per_month  # shape: (Y, N, 12)
+    #     valid_years = np.all(monthly_valid, axis=-1)  # shape: (Y, N)
+    #     complete_years = np.sum(valid_years, axis=0)  # shape: (N,)
 
-        # Compute joint validity per pair
-        joint_valid = np.logical_and(
-            monthly_valid[:, :, None, :],  # shape: (Y, i, 1, M)
-            monthly_valid[:, None, :, :]   # shape: (Y, 1, j, M)
-        )  # shape: (Y, i, j, M)
+    #     # Compute joint validity per pair
+    #     joint_valid = np.logical_and(
+    #         monthly_valid[:, :, None, :],  # shape: (Y, i, 1, M)
+    #         monthly_valid[:, None, :, :]   # shape: (Y, 1, j, M)
+    #     )  # shape: (Y, i, j, M)
 
-        joint_year_valid = np.all(joint_valid, axis=-1)               # shape: (Y, i, j)
-        concurrent_years_matrix = np.sum(joint_year_valid, axis=0)    # shape: (i, j)
+    #     joint_year_valid = np.all(joint_valid, axis=-1)               # shape: (Y, i, j)
+    #     concurrent_years_matrix = np.sum(joint_year_valid, axis=0)    # shape: (i, j)
         
-        # loop over minimum concurrent proportions
-        overlap_dict = defaultdict(dict)
-        for prop in [0, 25, 50, 75, 100]:
-            # Mask where concurrent years ≥ required proportion of complete years for i
-            thresholds = (complete_years * prop / 100.0).astype(int)  # shape: (N,)
-            valid_mask = concurrent_years_matrix >= thresholds[:, None]  # broadcast shape: (N, N)
-            np.fill_diagonal(valid_mask, False)
+    #     # loop over minimum concurrent proportions
+    #     overlap_dict = defaultdict(dict)
+    #     for prop in [0, 25, 50, 75, 100]:
+    #         # Mask where concurrent years ≥ required proportion of complete years for i
+    #         thresholds = (complete_years * prop / 100.0).astype(int)  # shape: (N,)
+    #         valid_mask = concurrent_years_matrix >= thresholds[:, None]  # broadcast shape: (N, N)
+    #         np.fill_diagonal(valid_mask, False)
 
-            # Build overlap_dict
-            odict = {
-                int(watershed_ids[i]): list(map(int, watershed_ids[valid_mask[i]]))
-                for i in range(N)
-            }
-            overlap_dict[str(prop)] = odict
+    #         # Build overlap_dict
+    #         odict = {
+    #             int(watershed_ids[i]): list(map(int, watershed_ids[valid_mask[i]]))
+    #             for i in range(N)
+    #         }
+    #         overlap_dict[str(prop)] = odict
 
-        with open(overlap_dict_file, 'w') as f:
-            json.dump(overlap_dict, f)
-        print(f'    ...saved overlap dict to {overlap_dict_file}')
-        return overlap_dict
+    #     with open(overlap_dict_file, 'w') as f:
+    #         json.dump(overlap_dict, f)
+    #     print(f'    ...saved overlap dict to {overlap_dict_file}')
+    #     return overlap_dict
         
         
     # def _generate_12_month_windows(self, index):

@@ -12,8 +12,12 @@ docs/notebooks/data/tvd_prediction_results/*
 docs/notebooks/data/kld_prediction_results/*
 docs/notebooks/data/geospatial_layers/
 docs/notebooks/data/catchment_polygons
+docs/notebooks/data/BCUB_catchment_mean_met_forcings_20250320/
+docs/notebooks/MCDE_test.ipynb
 docs/notebooks/data/results/*
 docs/notebooks/data/temp/*
+docs/notebooks/utils/mcde.py
+docs/notebooks/data/baseline_distributions/
 docs/notebooks/ss/
 .ipynb_checkpoints/
 docs/_build

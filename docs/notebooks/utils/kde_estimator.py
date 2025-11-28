@@ -4,6 +4,8 @@ import os
 import jax
 import jax.numpy as jnp
 import numpy as np
+from KDEpy import FFTKDE  # Fastest 1D algorithm
+
 
 # ---------- Kernel Functions ----------
 
@@ -83,12 +85,18 @@ def kde_kernel(log_data, bw_values, log_grid):
 def kde_full(uar_data, da, log_x, log_w):
     # Not JITed: Calculate bandwidths (uses np.unique)
     bw_values = adaptive_bandwidths(uar_data, da)
+    
     log_data = jnp.log(uar_data)[:, None]
     
     # Use the JITed kernel function
     pdf = kde_kernel(log_data, bw_values, log_x)
+    
     pdf /= jnp.trapezoid(pdf, x=log_x)
     pmf = pdf * log_w
+    # assert all pmf values are finite
+    assert jnp.all(jnp.isfinite(pmf)), "KDE PMF contains non-finite values"
+    # assert all pmf values are non-negative
+    assert jnp.all(pmf >= 0), "KDE PMF contains negative values"
     pmf /= jnp.sum(pmf)
     return pmf, pdf
 
@@ -121,6 +129,10 @@ class KDEEstimator:
     def compute(self, uar_data, da):
         uar_data = jnp.asarray(uar_data, dtype=jnp.float32)
         da = float(da)
+        # assert all uar_data values are finite numbers
+        assert jnp.all(jnp.isfinite(uar_data)), "Input UAR data contains non-finite values"
+        # assert all uar_data values are positive
+        assert jnp.all(uar_data > 0), "Input UAR data contains non-positive values"
         pmf, pdf = kde_full(uar_data, da, self.log_x, self.log_w)
         return pmf, pdf
     

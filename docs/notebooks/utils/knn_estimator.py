@@ -82,29 +82,45 @@ class kNNEstimator:
         return distance
     
 
-    def _process_neighbor(args):
-        """
-        Process a single neighbor to retrieve its data and compute the number of complete years.
-        This function is designed to be used with multiprocessing.
-        """
-        nbr_id, dist, retrieve_fn, find_complete_fn = args
+    # def _process_neighbor(args):
+    #     """
+    #     Process a single neighbor to retrieve its data and compute the number of complete years.
+    #     This function is designed to be used with multiprocessing.
+    #     """
+    #     nbr_id, dist, retrieve_fn, find_complete_fn = args
 
-        try:
-            df = retrieve_fn(nbr_id)
-            if not isinstance(df, pd.DataFrame) or df.empty:
-                return None
+    #     try:
+    #         df = retrieve_fn(nbr_id)
+    #         if not isinstance(df, pd.DataFrame) or df.empty:
+    #             return None
 
-            proxy_df = df[[f'{nbr_id}_uar']]
-            complete_years = list(find_complete_fn(proxy_df))
-            n_years = len(complete_years)
-            return (nbr_id, dist, n_years, proxy_df)
-        except Exception as e:
-            print(f"Failed to process {nbr_id}: {e}")
-            return None
+    #         proxy_df = df[[f'{nbr_id}_uar']]
+    #         complete_years = list(find_complete_fn(proxy_df))
+    #         n_years = len(complete_years)
+    #         return (nbr_id, dist, n_years, proxy_df)
+    #     except Exception as e:
+    #         print(f"Failed to process {nbr_id}: {e}")
+    #         return None
         
     
+    def _prewarm_neighbor_cache(self, station_ids, k=10):
+        """Primes the cache for the first k neighbors to reduce I/O latency later."""
+        for stn in station_ids[:k]:
+            _ = self.data.retrieve_and_preprocess_timeseries_discharge(stn)
+
+
     def _retrieve_nearest_nbr_data(self, tree_type):
-        MAX_CHECK = 700
+        """
+        Iterate through the nearest neighbours until enough good neighbours are found.
+        Filter each donor by complete years based on the context settings.
+        Use clipped UAR values for the proxy data to avoid introducing bias from 
+        low-flow values the donor catchment that cannot be validated.
+        Clipping means the proxy data values below the "minimum measurable UAR" threshold
+        are replaced with a constant value that is one bin to the left of the smallest
+        positive bin in the target catchment's FDC support.  This sets a (relative) upper bound
+        on the error that can be introduced from low-flow values in the donor catchment.
+        """
+        MAX_CHECK = 250
         REQUIRED_GOOD = 10
         # Get the index of the target station
         
@@ -114,18 +130,50 @@ class kNNEstimator:
         distances = [d for i, d in zip(nbr_idxs, dists) if self.ctx.idx_to_id[i] != self.target_stn]
 
         good_nbrs = []
-        sorted_nbrs = sorted(zip(nbr_ids, distances), key=lambda x: x[1])        
-
+        sorted_nbrs = sorted(zip(nbr_ids, distances), key=lambda x: x[1])
+        # Pre-warm the cache on the first few neighbors to reduce I/O latency
+        self._prewarm_neighbor_cache(nbr_ids)
+        t0 = time()
         for (nbr_id, dist) in sorted_nbrs:
-            df = self.data.retrieve_timeseries_discharge(nbr_id)
+            df, _ = self.data.retrieve_and_preprocess_timeseries_discharge(nbr_id)
+            self.cal_df, self.hyd_df = self.data.filter_complete_hydrological_years(df[['discharge', f'{nbr_id}_uar_clipped']], self.ctx.da_dict[nbr_id])
+
+            self.cal_df.rename(columns={'uar': f'{nbr_id}_uar'}, inplace=True)
+            self.hyd_df.rename(columns={'uar': f'{nbr_id}_uar'}, inplace=True)
+            
             if not isinstance(df, pd.DataFrame) or df.empty:
                 continue  # Skip bad or empty DataFrames
-            proxy_df = df[[f'{nbr_id}_uar']]
-            complete_years = self.data.complete_year_dict[nbr_id]
+                
+            if self.ctx.year_type == 'hydrological':
+                complete_years = self.data.complete_year_dict[nbr_id]['hyd_years']
+                proxy_df = self.hyd_df.copy()
+            elif self.ctx.year_type == 'calendar':
+                complete_years = self.data.complete_year_dict[nbr_id]['cal_years']
+                proxy_df = self.cal_df.copy()
+            else:
+                raise Exception('year type not recognized, must be one of hydrological or calendar.')
             n_years = len(complete_years)
-            good_nbrs.append((nbr_id, dist, n_years, proxy_df))
-            if len(good_nbrs) == REQUIRED_GOOD:
-                break
+            proxy_df['uar'] = proxy_df[f'{nbr_id}_uar_clipped']
+            donor_da = self.ctx.da_dict[nbr_id]
+            min_log_uar_donor = np.log(1000.0 * self.data.min_measurable_uar / donor_da)  # L/s/km^2
+            digitized = self.data.digitize_uar_series(proxy_df, min_log_uar_donor)
+            unique_vals = np.unique(digitized['uar_bin'])
+            n_unique_vals = len(unique_vals)
+            # print(min_log_uar_donor, self.data.min_measurable_log_uar)
+            # max bin must be greater than the target zero bin index to ensure variability
+            # max_bin_idx = digitized['uar_bin'].max()
+            if n_years >= self.ctx.min_record_length and n_unique_vals > 1:
+                proxy_df.drop(columns=[f'{nbr_id}_uar'], inplace=True)
+                proxy_df.rename(columns={f'{nbr_id}_uar_clipped': f'{nbr_id}_uar'}, inplace=True)
+                good_nbrs.append((nbr_id, dist, n_years, proxy_df[[f'{nbr_id}_uar']]))
+                # print(f'   ...added {nbr_id} as good neighbor for {self.target_stn}: distance={dist}, n_years={n_years}, n_unique_vals={n_unique_vals}.')
+                if len(good_nbrs) == REQUIRED_GOOD:
+                    break
+
+        t1 = time()
+        print(f'    ...found {len(good_nbrs)} good neighbors for {self.target_stn} using {tree_type} in {t1 - t0:.1f}s.')
+        if len(good_nbrs) < REQUIRED_GOOD:
+            raise Exception(f'Not enough good neighbors found for {self.target_stn} using {tree_type}. Found {len(good_nbrs)}, required {REQUIRED_GOOD}.')
 
         # Concatenate the timeseries
         nbr_df = pd.concat([r[3] for r in good_nbrs], axis=1)
@@ -149,7 +197,7 @@ class kNNEstimator:
         """
         Generate nearest neighbours for spatial and attribute selected k-nearest neighbours for both concurrent and asynchronous records.
         """
-        print(f'    ...initializing nearest neighbours with minimum concurrent record.')
+        print(f'    ...initializing nearest neighbours with minimum concurrent record for {self.data.target_stn}.')
         self.nbr_dfs = defaultdict(lambda: defaultdict(dict))
         
         for tree_type in ['spatial_dist', 'attribute_dist']:
@@ -172,82 +220,93 @@ class kNNEstimator:
         else:
             inv_weights = 1 / (jnp.abs(distances) ** m)
             return inv_weights / jnp.sum(inv_weights)
+           
     
-      
-    def _compute_empirical_pmf(self, log_edges, data):
-        """Compute the empirical PMF set of observations."""
-        log_runoff = np.log(data)
-        pdf, _ = np.histogram(log_runoff, bins=log_edges, density=True)
-        # Convert to PMF
-        w = np.diff(log_edges)
-        pmf = pdf * w
-        pmf /= np.sum(pmf)
-        assert np.isclose(pmf.sum(), 1.0), f'Empirical PMF does not sum to 1, sum={pmf.sum():.4f}'
-        return pmf, pdf
-    
-    
-    def _compute_frequency_ensemble_mean(self, pdfs, weights):
+    def _compute_ensemble_density_mixture(self, distribution, weights):
         """
-        This function computes the weighted ensemble distribution estimates.
+        This function computes the weighted ensemble density mixture estimates.
         """
         # Normalize distance weights
         if weights is not None:
             weights /= jnp.sum(weights).astype(jnp.float32)
             weights = jnp.array(weights)  # Ensure 1D array
-            pdf_est = jnp.asarray(pdfs.to_numpy() @ weights)
+            pmf_est = jnp.asarray(distribution.to_numpy() @ weights)
         else:
-            pdf_est = jnp.asarray(pdfs.mean(axis=1).to_numpy())
+            pmf_est = jnp.asarray(distribution.mean(axis=1).to_numpy())
 
-
-        # Check integral before normalization
-        pdf_check = jnp.trapezoid(pdf_est, x=self.data.log_x)
-        normalized_pdf = pdf_est / pdf_check
-        assert jnp.isclose(jnp.trapezoid(normalized_pdf, x=self.data.log_x), 1), f'ensemble pdf does not integrate to 1: {pdf_check:.4f}'
-
-        # Compute PMF
-        pmf_est = normalized_pdf * self.data.log_w
+        # Renormalize
         pmf_est /= jnp.sum(pmf_est)
 
-        return pmf_est, pdf_est
+        return pmf_est
     
     
-    def _compute_ensemble_distributions(self, wm, nbr_df, nbr_data, distance_type):
+    def _compute_ensemble_distributions(self, wm, nbr_df, nbr_data, distance_type, epsilon=1e-2):
         """
-        For asynchronous comparisons, we estimate pdfs for ensemble members, then compute the mean in the time domain
-        to represent the FDC simulation.  We do not do temporal averaging in this case.
+        Compute the donor ensemble density mixture estimates based on k-nearest neighbors.
+        The donor PMFs were pre-computed, with the important note that the probability mass
+        associated with uar values below the minimum measurable UAR threshold of the target catchment
+        are all assigned to the 0-index bin.  
         """
-        knn_df_all = nbr_df.iloc[:, :self.k_nearest].copy()
+        knn_df_all = nbr_df.iloc[:, :self.k_nearest].copy() # units are linear UAR (L/s/km^2)
         knn_data_all = nbr_data.iloc[:, :self.k_nearest].copy()
         proxy_ids = [c.split('_')[0] for c in knn_df_all.columns.tolist()]
         # load the kde PMFs to serve as the proxies to ensure complete support coverage
-        # if self.baseline_pmf_type == 'kde':
-        #     frequency_ensemble_pdfs = self.ctx.baseline_kde_pmf_df[proxy_ids].copy()
-        # else:
-        frequency_ensemble_pdfs = self.ctx.baseline_obs_pmf_df[proxy_ids].copy()
+        if self.ctx.regularization_type == 'kde':
+            density_mixture_pmf = self.ctx.baseline_kde_pmf_df[proxy_ids].copy()
+        else:
+            density_mixture_pmf = self.ctx.baseline_obs_pmf_df[proxy_ids].copy()
 
-        labels, pdfs, pmfs = [], [], []
+        labels, pmfs = [], []
         all_distances = knn_data_all['distance'].values
         all_ids = knn_data_all['official_id'].values
 
         for k in range(1, self.k_nearest + 1):
             distances = all_distances[:k]
             nbr_ids = all_ids[:k]
-            knn_pdfs = frequency_ensemble_pdfs.iloc[:, :k].copy()
+            knn_pmfs = density_mixture_pmf.iloc[:, :k].copy()
 
             label = f'{self.target_stn}_{k}_NN_{distance_type}_ID{wm}_freqEnsemble'
             weights = self._compute_weights(wm, k, distances)
-            pmf_est, pdf_est = self._compute_frequency_ensemble_mean(knn_pdfs, weights)
+            pmf_est = self._compute_ensemble_density_mixture(knn_pmfs, weights)
+            unique_vals = np.unique(pmf_est)
             assert pmf_est is not None, f'pmf_est is None for {label}'
+
+            # adjust the PMF based on the minimum observable threshold of the target catchment
+            pmf_adjusted = np.zeros_like(pmf_est)
+            i0 = self.data.zero_bin_index # zero flow index on log_edges_extended
+
+            # get the cdf value at the zero-equivalent flow bin (0-->threshold)
+            low_probability_mass = pmf_est[:i0].sum()
+            if self.data.zero_bin_index == 0: 
+                # the minimum measurable threshold is below the support, N_n are zero flows.
+                # all zero flows go to the first bin and there is no lower bin mass to consider
+                pmf_adjusted = pmf_est
+            else:                
+                # compute the low probability mass from the KDE below the zero bin index
+                low_probability_mass = pmf_est[:i0].sum()
+                pmf_adjusted[0] = low_probability_mass
+                pmf_adjusted[i0:] = pmf_est[i0:]
+            
+            # positive bin probabilities (threshold --> max)
+            pmf_adjusted /= pmf_adjusted.sum()  # normalize raw PMF
         
             # compute the mean number of observations (non-nan values) per row
             mean_obs_per_timestep = knn_df_all.iloc[:, :k].notna().sum(axis=1).mean()
             mean_obs_per_proxy = knn_df_all.iloc[:, :k].notna().sum(axis=0).mean()
 
             # _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(pmf_est)
-            _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf_est)
-            eval = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_obs_pmf)
-            bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, pmf_est)
-    
+            pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf_adjusted)
+            # if distance_type == 'spatial_dist':
+            #     print('prior adjusted pmf')
+            #     print(list(pmf_prior_adjusted))
+            #     print('pmf adjusted')
+            #     print(list(pmf_adjusted))
+            #     print('self.data.baseline_pmf')
+            #     print(list(self.data.baseline_pmf))
+            #     print(f'io= {i0}, low_prob_mass={low_probability_mass}')
+            eval = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_pmf, min_measurable_log_uar=self.data.min_measurable_log_uar, epsilon=epsilon)
+            bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, pmf_adjusted, min_measurable_log_uar=self.data.min_measurable_log_uar, epsilon=epsilon)
+
             # compute the frequency-based ensemble pdf estimate
             self.knn_simulation_data[label] = {
                 'k': k, 'n_obs': mean_obs_per_proxy,
@@ -256,19 +315,14 @@ class kNNEstimator:
                 'eval': eval,
                 'bias': bias,
                 }
-            
-            pdfs.append(np.asarray(pdf_est))
-            pmfs.append(np.asarray(pmf_est))
+            pmfs.append(np.asarray(pmf_adjusted))
             labels.append(label)
 
         # create a dataframe of labels(columns) for each pdf
-        knn_pdfs = pd.DataFrame(pdfs, index=labels).T
         knn_pmfs = pd.DataFrame(pmfs, index=labels).T
         # Filter out already existing columns to avoid duplication
-        new_pdf_cols = knn_pdfs.columns.difference(self.knn_pdfs.columns)
         new_pmf_cols = knn_pmfs.columns.difference(self.knn_pmfs.columns)
         # Concat only new columns
-        self.knn_pdfs = pd.concat([self.knn_pdfs, knn_pdfs[new_pdf_cols]], axis=1)
         self.knn_pmfs = pd.concat([self.knn_pmfs, knn_pmfs[new_pmf_cols]], axis=1)
 
 
@@ -282,9 +336,9 @@ class kNNEstimator:
         proxy_ids = [c.split('_')[0] for c in knn_df_all.columns.tolist()]
         # load the kde PMFs to serve as the proxies to ensure complete support coverage
         # if self.baseline_pmf_type == 'kde':
-        #     frequency_ensemble_pdfs = self.ctx.baseline_kde_pmf_df[proxy_ids].copy()
+        #     density_mixture_pdfs = self.ctx.baseline_kde_pmf_df[proxy_ids].copy()
         # else:
-        frequency_ensemble_pdfs = self.ctx.baseline_obs_pmf_df[proxy_ids].copy()
+        density_mixture_pdfs = self.ctx.baseline_obs_pmf_df[proxy_ids].copy()
 
         labels, pdfs, pmfs = [], [], []
         all_distances = knn_data_all['distance'].values
@@ -293,19 +347,19 @@ class kNNEstimator:
         for k in range(1, self.k_nearest + 1):
             distances = all_distances[:k]
             nbr_ids = all_ids[:k]
-            knn_pdfs = frequency_ensemble_pdfs.iloc[:, :k].copy()
+            knn_pdfs = density_mixture_pdfs.iloc[:, :k].copy()
 
             label = f'{self.target_stn}_{k}_NN_{distance_type}_ID{wm}_freqEnsemble'
             weights = self._compute_weights(wm, k, distances)
-            pmf_est, pdf_est = self._compute_frequency_ensemble_mean(knn_pdfs, weights)
+            # pmf_est, pdf_est = self._compute_density_mixture_mean(knn_pdfs, weights)
+            pmf_est = self._compute_ensemble_density_mixture(knn_pdfs, weights)
             assert pmf_est is not None, f'pmf_est is None for {label}'
         
             # compute the mean number of observations (non-nan values) per row
-            mean_obs_per_timestep = knn_df_all.iloc[:, :k].notna().sum(axis=1).mean()
-            mean_obs_per_proxy = knn_df_all.iloc[:, :k].notna().sum(axis=0).mean()
+            # mean_obs_per_timestep = knn_df_all.iloc[:, :k].notna().sum(axis=1).mean()
+            # mean_obs_per_proxy = knn_df_all.iloc[:, :k].notna().sum(axis=0).mean()
 
-            # _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(pmf_est)
-            _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf_est)
+            pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf_est)
 
             sample_evals = []
             for bootstrap_pmf in bootstrap_P.T:
@@ -339,29 +393,14 @@ class kNNEstimator:
         # # Concat only new columns
         # self.knn_pdfs = pd.concat([self.knn_pdfs, knn_pdfs[new_pdf_cols]], axis=1)
         # self.knn_pmfs = pd.concat([self.knn_pmfs, knn_pmfs[new_pmf_cols]], axis=1)
-    
-    
-    def _delta_spike_pmf_pdf(self, single_val, log_grid):
-        """
-        Return a spike PMF and compatible PDF centered at the only value in the input.
-        The spike is placed at the nearest log_grid point to log(single_val).
-        """
-        log_val = jnp.log(single_val)
-        spike_idx = jnp.argmin(jnp.abs(log_grid - log_val))
-        
-        pmf = jnp.zeros_like(log_grid)
-        pmf = pmf.at[spike_idx].set(1.0)
-
-        pdf = pmf / self.data.log_w 
-
-        return pmf, pdf
-   
+      
 
     def _weighted_row_mean_ignore_nan(self, df: pd.DataFrame, weights: np.ndarray):
         """
         Computes the weighted mean for each row, accounting for NaNs and ensuring that
         weights are re-normalized based on valid values only. Returns a Series aligned
         with df.index, as well as ensemble stats.
+        The inputs come from knn_df, and the units should be UAR [L/s/km^2].
         """
         # drop rows with all NaNs
         df = df.dropna(how='all')
@@ -394,34 +433,32 @@ class kNNEstimator:
             effective_k, mean_valid_per_row
             ):
 
-        # Clip to prevent zero runoff issues
-        assert np.min(temporal_ensemble_mean.values) > 0, f'min value in temporal_ensemble_mean is {np.min(temporal_ensemble_mean.values)} for {label}'
+        # Check for zero runoff 
+        # zero values are ok, units should be linear UAR, 
+        # it will be addressed in the pmf estimation step
+        # assert np.min(temporal_ensemble_mean.values) > 0, f'min value in temporal_ensemble_mean is {np.min(temporal_ensemble_mean.values)} for {label}'
+        # zero_bin_index = self.data.zero_bin_index
+        # min_measurable_log_uar = self.data.log_x_extended[zero_bin_index]
 
         # Estimate PDF/PMF using KDE or 
-        # add small amount of random noise if there is no variance
-        if len(jnp.unique(temporal_ensemble_mean.values)) == 1:
-            print('    only one unique value in temporal ensemble mean, adding noise to avoid 0 variance.')
-            # est_pmf, est_pdf = self._delta_spike_pmf_pdf(
-            #     temporal_ensemble_mean.values[0], self.data.log_x
-            # )
-            raise Exception(f'    ....only one unique value in temporal ensemble mean {label}, cannot proceed.')
+        if len(np.unique(temporal_ensemble_mean.values)) == 1:
+            raise Exception(f'    ....only one unique value in temporal ensemble mean {label}, cannot proceed. {temporal_ensemble_mean}')
         else:
-            # est_pmf, est_pdf = self.data.kde_estimator.compute(
-            #     temporal_ensemble_mean.values, self.data.target_da
-            # )
-            assert np.all(temporal_ensemble_mean.values > 0), f'non-positive values in temporal ensemble mean for {label}'
-            est_pmf, est_pdf = self._compute_empirical_pmf(self.data.log_edges, temporal_ensemble_mean.values)
+            # since we are inputting the temporal mean, this is now a model, so the minimum uar threshold 
+            # and drainage area correspond to the target station to specify the support that cannot be 
+            # validated given the assumption of the minimum measurable flow in the target catchment.
+            est_pmf = self.data.build_pmf_from_timeseries(temporal_ensemble_mean.values, self.data.min_measurable_log_uar, self.data.target_da)
+
+            assert len(np.unique(est_pmf)) > 1, f'estimated pmf has only one unique value for {k}-NN {label}'
 
         assert est_pmf is not None, f'pmf is None for {label}'
 
         # _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_laplace_prior(est_pmf)
-        _, pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(est_pmf)
-
-        estimation_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_obs_pmf)
-        bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, est_pmf)
+        pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(est_pmf)
+        estimation_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_pmf, min_measurable_log_uar=self.data.min_measurable_log_uar)
+        bias = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, est_pmf, min_measurable_log_uar=self.data.min_measurable_log_uar)
 
         # Store simulation outputs and metadata
-        self.knn_pdfs[label] = est_pdf
         self.knn_pmfs[label] = est_pmf
         self.knn_simulation_data[label] = {
             'nbrs': nbrs_used,
@@ -460,17 +497,12 @@ class kNNEstimator:
             t0 = time()
             self._compute_temporal_ensemble_distributions(distance_type, wm, nbr_df, nbr_data)
             t1 = time()
-            # compute the distribution average ensemble pdfs
+            # compute the ensemble average density pdfs
             self._compute_ensemble_distributions(wm, nbr_df, nbr_data, distance_type)
             t2 = time()
-            print(f'    ...{distance_type} ID{wm} took {t1 - t0:.2f}s for temporal ensemble, {t2 - t1:.2f}s for frequency ensemble.')
+            print(f'    ...{distance_type} ID{wm} took {t1 - t0:.2f}s for temporal ensemble, {t2 - t1:.2f}s for density ensemble.')
 
-        # Validation
-        sim_labels = list(self.knn_simulation_data.keys())
-        pdf_labels = list(self.knn_pdfs.columns)
-        assert set(sim_labels) == set(pdf_labels)
-        
-    
+
     def run_estimators(self):              
         self._initialize_nearest_neighbour_data()
         # set the baseline pdf by
@@ -492,14 +524,14 @@ class kNNEstimator:
     
     
     def _format_results(self):
-        pmf_labels, pdf_labels, sim_labels = list(self.knn_pmfs.columns), list(self.knn_pdfs.columns), list(self.knn_simulation_data.keys())
+        pmf_labels, sim_labels = list(self.knn_pmfs.columns), list(self.knn_simulation_data.keys())
         # assert label sets are the same
-        assert set(pmf_labels) == set(pdf_labels), f'pmf_labels {pmf_labels} != pdf_labels {pdf_labels}'
+        # assert set(pmf_labels) == set(pdf_labels), f'pmf_labels {pmf_labels} != pdf_labels {pdf_labels}'
         assert set(pmf_labels) == set(sim_labels), f'pmf_labels {pmf_labels} != sim_labels {sim_labels}'
         results = self.knn_simulation_data
         for label in pmf_labels:
             # add the pmf and pdf in a json serializable format
             results[label]['pmf'] = self.knn_pmfs[label].tolist()
-            results[label]['pdf'] = self.knn_pdfs[label].tolist()
+            # results[label]['pdf'] = self.knn_pdfs[label].tolist()
             results[label] = self._make_json_serializable(results[label])
         return results

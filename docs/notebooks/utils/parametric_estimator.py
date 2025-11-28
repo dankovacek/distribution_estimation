@@ -18,23 +18,39 @@ class ParametricFDCEstimator:
 
     
     def _compute_lognorm_pmf(self, mu, sigma):
-        mu = max(mu, 1e-4)  # ensure mu is non-negative
-        pdf = norm.pdf(self.data.log_x, loc=mu, scale=sigma)
-        pdf /= jnp.trapezoid(pdf, x=self.data.log_x)
-        pmf = pdf * self.data.log_w
-        pmf /= pmf.sum()
-        return pmf, pdf
+
+        mu = max(mu, self.data.zero_equiv_log_uar_actual)  # ensure mu is at least the zero-flow threshold
+        # create a function for the CDF
+        F = lambda y: norm(loc=mu, scale=sigma).cdf(y)
+                
+        # initialize a pmf array of zeros
+        pmf = np.zeros(len(self.data.log_edges_extended) - 1, dtype=float)
+
+        i0 = self.data.zero_bin_index # zero flow index on log_edges_extended
+        # get the cdf value at the zero-equivalent flow bin (0-->threshold)
+        pmf[0] = max(F(self.data.pos_edges[0]) - F(self.data.log_edges_extended[0]), 0.0)
+
+        # positive bin probabilities (threshold --> max)
+        pmf[i0+1:] = F(self.data.pos_edges[1:]) - F(self.data.pos_edges[:-1])
+        pmf /= pmf.sum()  # normalize raw PMF
+        return pmf
     
 
     def _compute_GEV_pmf(self, xi, mu, sigma):
         # assert values are within the valid range for GEV
         xi = max(xi, -0.5 + 1e-12)  # clip xi to avoid numerical issues
         sigma = max(sigma, 1e-12)  # ensure sigma is positive
-        pdf = genextreme.pdf(self.data.log_x, xi, loc=mu, scale=sigma)
-        pdf /= jnp.trapezoid(pdf, x=self.data.log_x)
-        pmf = pdf * self.data.log_w
+        # pdf = genextreme.pdf(self.data.log_x, xi, loc=mu, scale=sigma)
+        cdf_base = np.zeros_like(self.data.log_edges_extended)
+        # assign probability for the zero-equivalent bin
+        # equal to the cdf value at the threshold
+        cdf_base[0] = genextreme.cdf(self.zero_flow_log_uar, xi, loc=mu, scale=sigma)
+        cdf_base[self.zero_flow_idx:] = genextreme.cdf(self.data.log_edges_extended[self.zero_flow_idx:], loc=mu, scale=sigma)
+        # pdf /= jnp.trapezoid(pdf, x=self.data.log_edges_extended)
+        # pmf = pdf * self.data.log_w
+        pmf = np.diff(cdf_base)
         pmf /= pmf.sum()  # normalize raw PMF
-        return pmf, pdf
+        return pmf
 
 
     def _estimate_from_mle(self):
@@ -68,6 +84,7 @@ class ParametricFDCEstimator:
 
 
     def run_estimators(self):
+
         results = {}
         fns = [
             self._estimate_from_mle, 
@@ -86,19 +103,23 @@ class ParametricFDCEstimator:
             labels += ['RandomDraw']
         for fn, label in zip(fns, labels):
             
-            pmf, pdf = fn()
-            # _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_laplace_prior(pmf)
-            _, prior_adjusted_pmf = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf)
+            pmf = fn()
+            
             if 'Moments' in label:
                 # assert no nan values in the pmf
                 assert not np.any(np.isnan(pmf)), f'PMF contains NaN values for {label}: {pmf[:10]}'
 
-            results[label] = {'prior_adjusted_pmf': prior_adjusted_pmf.tolist(), 'pmf': pmf.tolist()}
-            estimation_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(prior_adjusted_pmf, self.data.baseline_obs_pmf)
+            # add a small amount of uncertainty to avoid zero probabilities
+            pmf_prior_adjusted = self.data._compute_adjusted_distribution_with_mixed_uniform(pmf)
+
+            results[label] = {'prior_adjusted_pmf': pmf_prior_adjusted.tolist(), 'pmf': pmf.tolist()}
+            # set the minimum measurable uar to the left edge of the zero-equivalent bin
+            # so that it reflects the discrete binning used in the PMF
+            estimation_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf_prior_adjusted, self.data.baseline_pmf, min_measurable_log_uar=self.data.min_measurable_log_uar)
             results[label]['eval'] = estimation_metrics
 
             # compute the bias
-            final_bias_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(prior_adjusted_pmf, pmf)
+            final_bias_metrics = self.data.eval_metrics._evaluate_fdc_metrics_from_pmf(pmf, pmf_prior_adjusted, min_measurable_log_uar=self.data.min_measurable_log_uar)
             results[label]['bias'] = final_bias_metrics
                 
         # compute the bias from the eps

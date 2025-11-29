@@ -4,6 +4,9 @@ Code and notebooks for comparing (log-normal) parametric, k-nearest neighbour, a
 
 The book can be viewed on the web at [https://dankovacek.github.io/distribution_estimation](https://dankovacek.github.io/distribution_estimation)
 
+Release version for the associated paper:
+[![DOI](https://zenodo.org/badge/900988443.svg)](https://doi.org/10.5281/zenodo.17756085)
+
 
 ## Edit and Publish
 
